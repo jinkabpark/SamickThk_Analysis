@@ -1,0 +1,182 @@
+5월 2일(목) 회의록
+
+1. 장소 : 삼성반도체
+2. 일시 : 5월 2일(목) 
+3. 참석자 
+   1) 삼성전자 : 석승현총괄(010-3669-5236)
+   2) 삼익THK : 이재호담당(010-7439-1101)
+   3) 유비샘 : 박진갑, 최원석, 김진선교수
+4. 업무내용
+   1) 현재 시스템 문제점 공유
+   2) 해결방안을 제안하기로 함
+5. 제안서 작성을 위한 내용파악
+시스템명 : LIMS(Laboratory Information Management System) 
+  - 실험실 관리시스템 
+  - 실험 및 분석 업무를 진행하는 정보관리 시스템
+  - https://brilliantsystems.tistory.com/10
+시스템 이용자 : 분석실 담당자, 실험 의뢰자
+
+1. 확인 필요한사항
+   1) PIO 통신 (E84 Protocol) 목적 이중 안전장치인가 ?
+      - 센서Type : 적외선, RF, WiFi중 어떤 것을 사용하는지 ?
+   2) Bottle 이력관리 필요한가 ? (ex:생성일,사용횟수, 투입용액)
+   3) Bottle arcade 발번원칙(규칙)
+   4) Bottle 최초 생성후 투입과정 (폐기수량만큼 보충)
+   5) Bottle 내구연한
+   6) 용액별 시험항목 리스트
+   7) SCADA 실시간성, Batch (시간주기)
+   8) MR에 bottle barcode(tag) 읽는 기능있는지 확인 필요
+   9) 운전모드 : 자동운전, 수동운전 2개 모드 지원
+   10) MR 통신주체
+      시료반출입설비, 분석기, 버퍼설비, 폐기모사벤치 --> Controller PC로 통일
+   11)  분석실 자율반송_작업소개_240227  
+      - 반출입기에서 의뢰 비밀번호 입력 ?
+   12) 최대 시료 제출수량은 ? 8개를 넘길수 있나 ?
+   13) 반송중 target system 상태 변경되면(ex:shutdown) ?
+   14) 기존 DB 종류
+   15) WEB으로 개발할지 CS로 개발할지 여부
+       - 실험 의뢰자 사용하는 시스템은 ?
+       - 모니터링 시스템은 실시간성(Event처리)으로 처리할지, Batch(polling)처리할지 여부
+
+2. 설계시 고려사항
+   1) 동일기종에서 5개 실행파일간 데이터 전달방법
+      (1) 공유 메모리
+      (2) 소켓 통신
+      (3) 메시지 큐 : Microsoft Message Queue(MSMQ), RabbitMQ, Apache Kafka 
+      (4) 명명된 파이프 : 명명된 파이프는 같은 컴퓨터 내의 프로세스 간에 통신할 수 있도록 하는 방법 중 하나입니다. 
+          Windows에서는 Named Pipes를 사용하여 실행 파일 간에 데이터를 전송할 수 있습니다   
+   2) 이기종 실행파일간 데이터 전달방법 (Controller PC에서 Monitoring PC)
+      (1) REST API 
+          - 장점:프로토콜 및 데이터 포맷이 플랫폼 독립적이므로 다양한 환경에서 쉽게 구현
+          - 단점: HTTP 프로토콜 기반으로, 성능 오버헤드가 클 수 있습니다.
+      (2) gRPC : Google이 개발한 gRPC는 HTTP/2를 기반으로 하는 고성능, 오픈 소스 RPC(Remote Procedure Call) 프레임워크
+      (3) 웹소켓 (WebSockets)
+          - 장점: 실시간 데이터 교환에 적합하며, 연결 오버헤드가 낮습니다.
+          - 단점: 구현 및 보안 처리가 복잡할 수 있습니다.
+      (4) 소켓 프로그래밍
+          - 장점: 높은 성능과 유연성을 제공
+          - 단점: 구현이 복잡하고, 네트워크 및 프로토콜에 대한 이해가 필요
+      (5) 메시지 브로커 : 메시지 브로커를 사용하면 두 컴퓨터 간의 메시지 기반 통신을 구현
+          - RabbitMQ, Apache Kafka 
+      (6) Apache Kafka와 Mosquitto 비교
+   3) 사용할 DB
+   4) LIMS 자체에서도 동작 + AIMS 연동 가능
+   5) 분석기 최대 효율 내도록 설계
+   6) 실험 종료후 실험 의뢰자 신속한 의사결정 지원
+      -폐기. 세정. 재검
+   7) NAS에 일일 DB backup
+   8) DispatchingRule 
+      (1) Bottle 처리우선순위 원칙
+      (2) Bottle 반출입기 우선
+      (3) 분석설비 우선
+      (4) 재작업
+      (5) 선입선출 순으로 추출
+
+3. HW 구성
+   1) LIMS system
+      (1) DB 서버
+      (2) LIMS Controller
+      (3) 모니터링 PC
+      (4) 운영 PC
+   2-1) 시료반출입설비(Bottle 반출입기)
+      (1) 통신방식 : PLC
+      (2) 공병 Handling 
+          - 공병최대보관수량 : 96개
+      (3) 시료 Handling
+          - 시료최대보관수량 : 72개 (24 * 3)
+          - 시료유형 : 산, 염기, 유기
+      (4) 데이터항목 : User 의뢰번호, 투입시료종류, 수량
+          --> Bottle barcode ID 기본관리 단위
+   2-2) MR
+   2-3) 분석설비(전처리데모)
+      (1) 통신방식 : PC
+   2-4) 버퍼설비(Bottle Stocker)
+      (1) 통신방식 : PLC
+      (2) 데이터항목 : User 의뢰번호, 투입시료종류, 수량
+          --> Bottle barcode ID 대치 가능      
+   2-5) 폐기모사벤치
+      (1) 통신방식 : PLC
+
+4. 개발범위
+   1) AIMS controller & Simulator 개발
+   2) DB 서버
+   3) LIMS Controller
+      (1) Bottle 입고,출하 controller
+      (2) MR controller
+      (3) Stocker controller
+      (4) 세정 controller
+      (5) Dispatching
+   4) 모니터링 PC UI
+   5) 운영 PC UI
+
+------------------(1)----------------------------------  
+PIO 통신방식 (AS-IS)
+
+Eqp --> Host(Robot) : Load request
+Eqp <-- Host(Robot) : Transfer Request
+Eqp --> Host(Robot) : Ready
+Eqp <-- Host(Robot) : Busy
+Eqp <-- Host(Robot) : Busy Off
+Eqp --> Host(Robot) : Load complete
+----------------------------
+Controller 중심통신방식 (TO-BE) 시나리오
+
+1. Bottle 반출입기에서 Bottle Stocker 이동
+2. Bottle Stocker에서 분석설비 이동
+3. 분석설비에서 Bottle Stocker 이동
+4. Bottle Stocker에서 폐기모사벤치 이동
+
+Bottle 반출입기에서 Bottle Stocker 이동예제
+====================================
+                                    MR Robot  Host(Controller)   Bottle 반출입설비     Host(Controller)   Bottle Stocker  Host(Controller)    Host Scheduler(Dispatcher)         
+                                              MR Robot                             Bottle 반출입설비                      Bottle Stocker
+                      
+1-1 Unload Request                                                  ----------------------->
+1-2 Unload Request                                                                          ------------------------------------------------------>
+    Fm Bottle 반출입설비
+    OR DB
+
+2. 반송가능여부 확인 : 3가지 상태 확인
+   - MR Robot 상태 : Idle(OK)
+   - Fm 상태 : unload request
+   - To 상태 : load request  
+
+3-1 Transfer Request                                                                        <------------------------------------------------------
+    Fm Scheduler   
+3-2 Transfer Request                                               <-----------------------
+3-3 Ready                                                          ----------------------->
+3-4 Ready                                                                                   ------------------------------------------------------>
+    Fm Bottle 반출입설비
+
+4-1 반송지시전달                                        <------------------------------------------------------------------------------------------------
+    To Bottle 반출입설비 Unload Port
+4-2 반송지시                               <------------
+    To Bottle 반출입설비 Unload Port
+        
+5-1 Busy                                ------------>
+5-2 Busy 상태보고                          ------------------------------------------------------------------------------------------------------------->
+
+
+                                    MR Robot  Host(Controller)   Bottle 반출입설비     Host(Controller)   Bottle Stocker  Host(Controller)    Host Scheduler(Dispatcher)         
+                                              MR Robot                             Bottle 반출입설비                      Bottle Stocker
+    
+6.  Unloading
+
+7-1 Unloading Completed                                                ----------------------->
+7-2 Unloading Completed 상태보고                                                                  ------------------------------------------------------>
+
+8-1 반송지시전달                                        <------------------------------------------------------------------------------------------------
+    Fm Bottle 반출입설비 Unload Port
+    To Bottle Stocker Load Port
+8-2 반송지시                               <------------
+    Fm Bottle 반출입설비 Unload Port
+    To Bottle Stocker Load Port
+
+9.  Loading
+
+10-1 Loading Completed                                                                                         --------------->
+10-2 Loading Completed 상태보고                                                                                                   ----------------------------->
+
+11-1 Unload Request                                                 ----------------------->
+11-2 Unload Request                                                                         ------------------------------------------------------>
+    Fm Bottle 반출입설비
