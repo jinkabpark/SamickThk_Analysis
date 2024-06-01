@@ -25,17 +25,23 @@
 CREATE DATABASE SamickTHK_Analysis
 
 -- ========================================================================================
---  구분 : Master
+--  1. 구분 : Master
 -- ========================================================================================
 EXEC spTableGroupCreate 'SamickTHK_Analysis', 'Master',       'D:\SamickTHK_DB\Maria\Master',    '10MB',  '10MB'
 EXEC spTableGroupCreate 'SamickTHK_Analysis', 'MasterIdx',    'D:\SamickTHK_DB\Maria\MasterIdx', '10MB',  '10MB'
 
 -- ========================================================================================
---  구분 : Process
+--  2. 구분 : Process
 -- ========================================================================================
 EXEC spTableGroupCreate 'SamickTHK_Analysis', 'Process',      'D:\SamickTHK_DB\Maria\Process',   '100MB', '10MB'
 EXEC spTableGroupCreate 'SamickTHK_Analysis', 'ProcessIdx',   'D:\SamickTHK_DB\Maria\ProcessIdx','100MB', '10MB'
 
+-- ========================================================================================
+--  3. 구분 : History
+-- ========================================================================================
+EXEC spTableGroupCreate 'SamickTHK_Analysis', 'History',      'D:\SamickTHK_DB\Maria\History',   '100MB', '10MB'
+EXEC spTableGroupCreate 'SamickTHK_Analysis', 'HistoryIdx',   'D:\SamickTHK_DB\Maria\HistoryIdx','100MB', '10MB'
+	
 -- ========================================================================================
 --  구분 : FileGroup생성 SP
 -- ========================================================================================
