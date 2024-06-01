@@ -84,8 +84,9 @@
 
 
 5. 장비반송 사전예약, 다른 Process에서 해당장비 반송을 못하도록 하기 위함
+   Dispatcher에서 To Position 정해지면 To Position을 Reserve한다.
    1) Token : DispatchReserve
-   2) 관련 controller : 분석기, Stocker, 폐기설비
+   2) 관련 controller : Dispatcher
                       UI에서 수동변경
    3) Body
       { 
