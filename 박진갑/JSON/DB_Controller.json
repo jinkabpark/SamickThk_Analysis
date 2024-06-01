@@ -1,42 +1,12 @@
-1. 출하요청
-   1) Token : UnloadRequest
-   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
-                      UI에서 수동변경
-   3) Body
-      { 
-         "EqpGroupID" : "1",
-         "EqpSeqNo" : "1",
-         "ProcessStatus" : "UnloadReq"
-      }      
-   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
-   5) Return
-      { 
-         "status_code" : 200,
-         "error_msg" : "None"
-      }      
-
-2. 출하완료
-   1) Token : UnloadComp
-   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
-                      UI에서 수동변경
-   3) Body
-      { 
-         "EqpGroupID" : "1",
-         "EqpSeqNo" : "1",
-         "ProcessStatus" : "UnloadComp"
-      }      
-   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
-   5) Return
-      { 
-         "status_code" : 200,
-         "error_msg" : "None"
-      } 
-
-3. 입고요청
+1. 입고요청
    1) Token : LoadRequest
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
    3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or  
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
@@ -49,11 +19,15 @@
          "error_msg" : "None"
       }      
 
-4. 입고완료
+2. 입고완료
    1) Token : LoadComp
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
    3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or 
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
@@ -66,7 +40,89 @@
          "error_msg" : "None"
       }  
 
-5. 장비상태변경
+3. 출하요청
+   1) Token : UnloadRequest
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "UnloadReq"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      }      
+
+4. 출하완료
+   1) Token : UnloadComp
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "UnloadComp"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      } 
+
+
+5. 장비반송 사전예약, 다른 Process에서 해당장비 반송을 못하도록 하기 위함
+   1) Token : DispatchReserve
+   2) 관련 controller : 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "Reserve"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태)를 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      } 
+
+6. Process상태변경
+   LoadRequest, LoadComp, UnloadRequest, UnloadComp 통합하는 것도 가능
+   1) Token : ChangeProcessStatus
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경     
+   3-2) Body 
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+         "EqpStatus" : "Run" 
+      }    
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      } 
+      
+7. 장비상태변경
    1) Token : ChangeEqpStatus
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경     
@@ -75,14 +131,7 @@
          "EqpGroupID" : "2",
          "EqpSeqNo" : "1",
          "EqpStatus" : "Run" 
-      } 
-      - ProcessStatus,EqpStatus 모두 변경하는 경우
-      { 
-         "EqpGroupID" : "2",
-         "EqpSeqNo" : "1",
-         "EqpStatus" : "Run",
-         "ProcessStatus" : "UnloadReq"
-      }   
+      }    
    4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
    5) Return
       { 
@@ -90,7 +139,7 @@
          "error_msg" : "None"
       }      
       
-6. 장비상태요청
+8. 장비상태요청
    1) Token : ReqEqpsStatus
    2) 관련 controller : Dispatch,
                       UI
@@ -118,7 +167,7 @@
          "error_msg" : "None"
       } 
       
-7. 분석기장비상태요청
+9. 분석기장비상태요청
    1) Token : ReqAnalysisEqpStatus
    2) 관련 controller : Dispatch,
                       UI
@@ -136,6 +185,6 @@
          "error_msg" : "None"
       } 
       
-8. Bottle정보변겅
+10. Bottle정보변겅
 
-9. Bottle 정보요청
+11. Bottle 정보요청
