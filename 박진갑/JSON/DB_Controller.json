@@ -1,0 +1,107 @@
+1. 장비상태변경
+   1) Token : ChangeEqpStatus
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경     
+   3-2) Body 
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+         "EqpStatus" : "Run" 
+      } 
+      - ProcessStatus,EqpStatus 모두 변경하는 경우
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+         "EqpStatus" : "Run",
+         "ProcessStatus" : "UnloadReq"
+      }   
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      }      
+
+2. 출하요청
+   1) Token : UnloadRequest
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "UnloadReq"
+      }      
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      }      
+
+3. 출하완료
+   1) Token : UnloadComp
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "UnloadComp"
+      }      
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return
+      { 
+         "status_code" : 200,
+         "error_msg" : "None"
+      } 
+      
+4. 장비상태요청
+   1) Token : ReqEqpsStatus
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         None
+      }      
+   4) Function : tMstEqp table의 모든 EqpStatus(장비상태) 요청
+   5) Return
+      { 
+         "status_code" : 200,
+         "total_cnt_of_eqp" : 5,
+         "eqp_status" : [
+            { "No_1" : {
+                 "EqpGroupID" : "1", "EqpSeqNo" : "1", "ProcessStatus":"UnloadReq", "EqpStatus" : "Idle"}
+            },
+            { "No_2" : {
+                 "EqpGroupID" : "2", "EqpSeqNo" : "1", "ProcessStatus":"Idle","EqpStatus" : "Run"}
+            },
+            ...
+            { "No_5" : {
+                 "EqpGroupID" : "5", "EqpSeqNo" : "1", "ProcessStatus":"LoadComp","EqpStatus" : "Idle"}
+            }
+         ],
+         "error_msg" : "None"
+      } 
+      
+5. 분석기장비상태요청
+   1) Token : ReqAnalysisEqpStatus
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+      }      
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 요청
+   5) Return
+      { 
+         "status_code" : 200,
+         "eqp_status" : "Run",
+         "process_status" : "UnloadReq",
+         "error_msg" : "None"
+      } 
+      
+6. Bottle정보변겅
+
+7. Bottle 정보요청
