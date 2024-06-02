@@ -26,11 +26,13 @@
    3) Body
       { 
          "EqpGroupID" : "1",
-         "EqpSeqNo" : "1"
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602"
       } Or 
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
          "ProcessStatus" : "LoadComp"
       }      
    4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
@@ -47,11 +49,13 @@
    3) Body
       { 
          "EqpGroupID" : "1",
-         "EqpSeqNo" : "1"
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602"
       } Or 
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
          "ProcessStatus" : "UnloadReq"
       }      
    4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
@@ -68,11 +72,13 @@
    3) Body
       { 
          "EqpGroupID" : "1",
-         "EqpSeqNo" : "1"
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602"
       } Or 
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
          "ProcessStatus" : "UnloadComp"
       }      
    4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
@@ -114,6 +120,7 @@
       { 
          "EqpGroupID" : "2",
          "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
          "EqpStatus" : "Run" 
       }    
    4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
