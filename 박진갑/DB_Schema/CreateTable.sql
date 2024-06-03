@@ -1,27 +1,76 @@
 -- ============================================================================ 
--- Table Space 명   : MASTER
+-- Table Space 명   : Master
 -- 내 용            : Master관련 table을 관리하는 table space
 --
 -- 관련 MASTER Table
 --
 --           No.   Table 명                   Size
 --          ----  -----------------         --------
---            1     tMstEqpGroup               1 K
---            2     tMstEqp                    1 K
---            3     tMstOperation              1 K
---            4     tMstBottle                 1 K
+--            1     tMstUser                  1 K
+--            2     tMstEqpGroup               1 K
+--            3     tMstEqp                    1 K
+--            4     tMstOperation              1 K
+--            5     tMstBottle                 1 K
+--            6     tMstRoute                  1 K
+--            7     tMstScript4Manipulator     1 K
+--            8     tMstScript4UR              1 K
+--            9     tMstScript4CoOperRobot     1 K
 
 -- ============================================================================ 
--- Table Space 명   : Master
+-- Table Space 명   : Process
 -- 내 용            : 공정관련 table을 관리하는 table space
 --
 -- 관련 Master Table
 --           No.    Table 명             Size   
 --          ----  --------------------  ------------
---            1     tMstEqpGroup
+--            1     tProcBottle
+--            2     tProcBotCurrOper
+--            3     tChgEqpStatus
+--            4     tDailyEqpStatus
+
+-- ============================================================================ 
+-- Table Space 명   : History
+-- 내 용            : 공정관련 table을 관리하는 table space
+--
+-- 관련 Master Table
+--           No.    Table 명             Size   
+--          ----  --------------------  ------------
+--            1     tProcBotHistOper
 
 -- ========================================================================================
 --   Table No             : 1
+--   Table 명              : tMstUser
+--   내  용                : 사용자를 관리하는 Table
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : UserID
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-03 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstUser;;
+
+CREATE TABLE tMstUser; (
+   UserID                 NVARCHAR(30) NOT NULL,    -- 사용자ID (사번)
+   UserName               NVARCHAR(10),             -- 사용자ID (사번)
+   Password               NVARCHAR(16),             -- Password, 패스워드 속성
+   ClassID                TINYINT,                  -- 사용자 권한 등급 (1:MONITORING, 3:OP, 5:MASTER, 9:DEV) 
+   UpdateTime             DATETIME
+) ON [Master];
+
+ALTER TABLE tMstUser 
+      ADD CONSTRAINT tMstUser_PK PRIMARY KEY (UserID) ON [MasterIdx];
+      
+INSERT INTO tMstUser VALUES ('9999999', 'Developer',    'DEVELOPER',    9,  NULL);
+
+-- ========================================================================================
+--   Table No             : 2
 --   Table 명              : tMstEqpGroup
 --   내  용                : LIMS 설비군을 관리하는 Table
 --   성  격                : Master
@@ -47,6 +96,7 @@ CREATE TABLE tMstEqpGroup (
 ALTER TABLE tMstEqpGroup 
       ADD CONSTRAINT tMstEqpGroup_PK PRIMARY KEY (EqpGroupID) ON [MasterIdx];
       
+INSERT INTO tMstEqpGroup VALUES ('0', N'Dummy');        -- Bottle 잡지않고 이동하는 경우 사
 INSERT INTO tMstEqpGroup VALUES ('1', N'반출입기');
 INSERT INTO tMstEqpGroup VALUES ('2', N'분석기');
 INSERT INTO tMstEqpGroup VALUES ('3', N'Stocker');      -- Stocker #1호기
@@ -56,7 +106,7 @@ INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 
 
 -- ========================================================================================
---   Table No             : 2
+--   Table No             : 3
 --   Table 명             : tMstEqp 
 --   내  용               : LIMS 설비군을 관리하는 Table
 --                         현재는 설비군별 장비가 1대지만, 향후 장비추가를 대비해서 EqpSeqNo 추가
@@ -100,7 +150,7 @@ INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', "Idle");
 
 
 -- ========================================================================================
---   Table No             : 3
+--   Table No             : 4
 --   Table 명             : tMstOperation
 --   내  용               : LIMS Opertaion을 관리하는 Master Table
 --                          - 공정번호 구성 = EqpGroupID + OperGroupID + OperID
@@ -147,7 +197,7 @@ INSERT INTO tMstOperation VALUES ('5', '1', N'이동형협업로봇 이동중');
 
 
 -- ========================================================================================
---   Table No             : 4
+--   Table No             : 5
 --   Table 명             : tMstBottle
 --   내  용                : Bottle Master정보을 관리하는 Table
 --
@@ -175,7 +225,7 @@ ALTER TABLE tMstBottle
       ADD CONSTRAINT tMstBottle_PK PRIMARY KEY (BottleID) ON [MasterIdx];
 
 -- ========================================================================================
---   Table No             : 5
+--   Table No             : 6
 --   Table 명             : tMstRoute
 --   내  용                : LIMS Route을 관리하는 Table
 --                         분석실에서 현재 1개 Route로 처리가능함
@@ -218,6 +268,123 @@ INSERT INTO tMstRoute VALUES ('1', '1', '3', '2', '1');     -- UnloadRequest eve
 INSERT INTO tMstRoute VALUES ('1', '3', '1', '2', '1');
 INSERT INTO tMstRoute VALUES ('1', '2', '1', '3', '1');     -- 분석후 Stocker 이동
 INSERT INTO tMstRoute VALUES ('1', '2', '1', '5', '1');     -- 분석후 폐기/모사 이동
+
+-- ========================================================================================
+--   Table No             : 7
+--   Table 명              : tMstScript4Manipulator
+--   내  용                : Manipulator Script 관리하는 Table
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : FmEqpGroupID, ToEqpGroupID, ScriptSeqNo
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-03 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstScript4Manipulator;
+
+CREATE TABLE tMstScript4Manipulator; (
+   FmEqpGroupID           CHAR(1) NOT NULL,         -- 이동시작설비
+   ToEqpGroupID           CHAR(1) NOT NULL,         -- 이동종료설비   
+   ScriptSeqNo            INT,                      -- Script Sequence No
+   X_Coordinate           FLOAT,                    -- X 좌표
+   Y_Coordinate           FLOAT,                    -- Y 좌표
+   Orientation            FLOAT                     -- 방향
+) ON [Master];
+
+ALTER TABLE tMstScript4Manipulator 
+      ADD CONSTRAINT tMstScript4Manipulator_PK PRIMARY KEY (FmEqpGroupID, ToEqpGroupID, ScriptSeqNo) ON [MasterIdx];
+      
+INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 1, 1.0, 2.0, 1.57);      -- MIR 로봇을 지정된 위치로 이동
+INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 2, 1.1, 2.1, 1.57);      -- 물체를 집는 위치로 이동
+INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 3, 2.0, 3.0, 1.57);      -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 4, 0.0, 0.0, 0.0);       -- 홈 포지션으로 복귀
+
+
+-- ========================================================================================
+--   Table No             : 8
+--   Table 명              : tMstScript4UR
+--   내  용                : tMstScript4UR Script 관리하는 Table
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : EqpGroupID, ProcessStatus, ScriptSeqNo
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-03 : 최초 생성
+--
+-- ========================================================================================
+
+DROP TABLE tMstScript4UR;
+
+CREATE TABLE tMstScript4UR; (
+   EqpGroupID             CHAR(1) NOT NULL,         -- 이동시작설비
+   ProcessStatus          NVARCHAR(10) NOT NULL,    -- Loading, Unloading
+   ScriptSeqNo            INT,                      -- Script Sequence No
+   ScriptBody             NVARCHAR(256)             -- Script 내용
+) ON [Master];
+
+ALTER TABLE tMstScript4UR 
+      ADD CONSTRAINT tMstScript4UR_PK PRIMARY KEY (EqpGroupID, ProcessStatus, ScriptSeqNo) ON [MasterIdx];
+      
+INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  1,  '0, -1.5708, 0, -1.5708, 0, 0');                    -- 로봇 초기화 및 홈 포지션으로 이동
+INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  2,  '1.5708, -1.5708, 1.5708, -1.5708, 1.5708, 0');     -- 첫 번째 위치로 이동 
+INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  3,  '-1.5708, -1.5708, -1.5708, -1.5708, -1.5708, 0');  -- 두 번째 위치로 이동
+INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  4,  '0, -1.5708, 0, -1.5708, 0, 0');                    -- 홈 포지션으로 복귀
+
+-- ========================================================================================
+--   Table No             : 9
+--   Table 명              : tMstScript4CoOperRobot
+--   내  용                : Manipulator Script 관리하는 Table
+--                           tMstScript4Manipulator, tMstScript4UR table 통합
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : FmEqpGroupID, ToEqpGroupID, ScriptSeqNo
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-03 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstScript4CoOperRobot;
+
+CREATE TABLE tMstScript4CoOperRobot; (
+   FmEqpGroupID           CHAR(1) NOT NULL,         -- 이동시작설비
+   ToEqpGroupID           CHAR(1) NOT NULL,         -- 이동종료설비   
+   ScriptSeqNo            INT,                      -- Script Sequence No
+   TgtObject              NVARCHAR(10),             -- Object (UR, MIR, Gripper, Vision), 즉 Table명
+   X_Coordinate_MIR       FLOAT,                    -- X 좌표
+   Y_Coordinate_MIR       FLOAT,                    -- Y 좌표
+   Orientation_MIR        FLOAT,                    -- 방향   
+   ScriptBody_UR          NVARCHAR(256)             -- Script 내용   
+}  ON [Master];
+   
+ALTER TABLE tMstScript4CoOperRobot 
+      ADD CONSTRAINT tMstScript4CoOperRobot_PK PRIMARY KEY (FmEqpGroupID, ToEqpGroupID, ScriptSeqNo) ON [MasterIdx];
+      
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", 1.0, 2.0, 1.57, null);      -- MIR 로봇을 지정된 위치로 이동
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 2, "MIR", 1.1, 2.1, 1.57, null);      -- 물체를 집는 위치로 이동
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 3, "MIR", 2.0, 3.0, 1.57, null);      -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 4, "MIR", 0.0, 0.0, 0.0, null);       -- 홈 포지션으로 복귀
+
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 5, "UR", null, null, null, '0, -1.5708, 0, -1.5708, 0, 0');                     -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 6, "UR", null, null, null, '1.5708, -1.5708, 1.5708, -1.5708, 1.5708, 0');      -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 7, "UR", null, null, null, '-1.5708, -1.5708, -1.5708, -1.5708, -1.5708, 0');   -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", null, null, null, '0, -1.5708, 0, -1.5708, 0, 0');                     -- 로봇을 다른 위치로 이동 (물체 운반)
+
 
 
 -- ========================================================================================
