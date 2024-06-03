@@ -1,0 +1,29 @@
+# OpenDDS Windows 설치방법
+
+# 수정이력 :
+        1. 2024-06-03, v0.1, 최초작성, 김구정
+
+
+[목차]
+1. OpenDDS 윈도우즈 설치방법
+2. OpenDDS 윈도우즈 개발샘플 실행방법
+
+
+1. OpenDDS 윈도우즈 설치방법
+    1> OpenDDS 윈도우버전 zip 파일 다운로드  ( https://opendds.org/ )
+    2> Perl for Windows 설치 ( https://strawberryperl.com/ )
+    3> 압축풀고 해당경로 복사
+    4> VisualStudio(2019) Develloper Command 열기
+    5> 해당 경로로 이동
+    6> configure 혹은 configure --java ( java suppert 필요시 : Java SDK 1.5 or greater for Java JNI binding support 설치 )
+    7> 탐색기로 해당경로에 'DDS_TAOv2.sln' 파일 생성 확인
+    8> VisualStudio(2019) Develloper Command> devenv DDS_TAOv2.sln
+    9> build 솔루션
+
+
+2. OpenDDS 윈도우즈 개발샘플 실행방법
+    1> PowerShell Open 
+    2> cd ~\OpenDDS-3.28.1_for_windows\OpenDDS-3.28.1\DevGuideExamples\DCPS\Messenger
+    3> .\publisher.exe -DCPSConfigFile rtps.ini
+    4> .\subscriber.exe -DCPSConfigFile rtps.ini
+
