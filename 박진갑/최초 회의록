@@ -121,11 +121,13 @@
    4) 모니터링 PC UI
    5) 운영 PC UI
 5. 개발환경
-   1) 개발Tool : Visual Studio 2019
-   2) DB : maria
+   1) 개발Tool : Window 11, Visual Studio 2019 
+   2) DB : maria 
+      - Window 11 Or Window NT or Linux중 택일
+      - 삼성의 경우 subscription fee 확인필요
    3) DDS : OpenDDS, Humble(고객 나윤종차장 추천)
       - MQTT 보류
-   4) 개발언어 : c#
+   4) 개발언어 : c# WPF
 
 
 ------------------(1)----------------------------------  
