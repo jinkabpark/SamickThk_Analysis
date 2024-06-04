@@ -357,6 +357,8 @@ INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  4,  '0, -1.5708, 0, -1.5708,
 --   관련 Table            : 
 --   이 력
 --          1.2024-06-03 : 최초 생성
+--          2.2024-06-04 : BodyOfJsonType field 추가
+--                         X_Coordinate_MIR, Y_Coordinate_MIR, Orientation_MIR, ScriptBody_UR field 삭제
 --
 -- ========================================================================================
 DROP TABLE tMstScript4CoOperRobot;
@@ -366,24 +368,28 @@ CREATE TABLE tMstScript4CoOperRobot; (
    ToEqpGroupID           CHAR(1) NOT NULL,         -- 이동종료설비   
    ScriptSeqNo            INT,                      -- Script Sequence No
    TgtObject              NVARCHAR(10),             -- Object (UR, MIR, Gripper, Vision), 즉 Table명
-   X_Coordinate_MIR       FLOAT,                    -- X 좌표
-   Y_Coordinate_MIR       FLOAT,                    -- Y 좌표
-   Orientation_MIR        FLOAT,                    -- 방향   
-   ScriptBody_UR          NVARCHAR(256)             -- Script 내용   
+   BodyOfJsonType         TEXT,                     -- 장치별 JSON Type Script Body
+   Description            TEXT                      -- Script에 대한 내용기술   
+   --X_Coordinate_MIR       FLOAT,                    -- X 좌표
+   --Y_Coordinate_MIR       FLOAT,                    -- Y 좌표
+   --Orientation_MIR        FLOAT,                    -- 방향   
+   --ScriptBody_UR          NVARCHAR(256)             -- Script 내용   
 }  ON [Master];
    
 ALTER TABLE tMstScript4CoOperRobot 
       ADD CONSTRAINT tMstScript4CoOperRobot_PK PRIMARY KEY (FmEqpGroupID, ToEqpGroupID, ScriptSeqNo) ON [MasterIdx];
-      
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", 1.0, 2.0, 1.57, null);      -- MIR 로봇을 지정된 위치로 이동
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 2, "MIR", 1.1, 2.1, 1.57, null);      -- 물체를 집는 위치로 이동
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 3, "MIR", 2.0, 3.0, 1.57, null);      -- 로봇을 다른 위치로 이동 (물체 운반)
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 4, "MIR", 0.0, 0.0, 0.0, null);       -- 홈 포지션으로 복귀
 
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 5, "UR", null, null, null, '0, -1.5708, 0, -1.5708, 0, 0');                     -- 로봇을 다른 위치로 이동 (물체 운반)
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 6, "UR", null, null, null, '1.5708, -1.5708, 1.5708, -1.5708, 1.5708, 0');      -- 로봇을 다른 위치로 이동 (물체 운반)
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 7, "UR", null, null, null, '-1.5708, -1.5708, -1.5708, -1.5708, -1.5708, 0');   -- 로봇을 다른 위치로 이동 (물체 운반)
-INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", null, null, null, '0, -1.5708, 0, -1.5708, 0, 0');                     -- 로봇을 다른 위치로 이동 (물체 운반)
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
+
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 2, "MIR", '{"X":"1.1", "Y":"2.1", "Orientation":"1.57"}', "물체를 집는 위치로 이동");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 3, "MIR", '{"X":"2.0", "Y":"3.0", "Orientation":"1.57"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 4, "MIR", '{"X":"0.0", "Y":"0.0", "Orientation":"0.0"}', "홈 포지션으로 복귀");
+
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 5, "UR", '{"Body":"0, -1.5708, 0, -1.5708, 0, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 6, "UR", '{"Body":"1.5708, -1.5708, 1.5708, -1.5708, 1.5708, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 7, "UR", '{"Body":"-1.5708, -1.5708, -1.5708, -1.5708, -1.5708, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.5708, 0, -1.5708, 0, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
 
 
 
