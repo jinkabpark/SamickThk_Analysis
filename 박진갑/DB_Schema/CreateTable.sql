@@ -111,6 +111,8 @@ INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 --   내  용               : LIMS 설비군을 관리하는 Table
 --                         현재는 설비군별 장비가 1대지만, 향후 장비추가를 대비해서 EqpSeqNo 추가
 --                         Bottle 반출입기, 스토커 Full인 경우 상태를 'Trouble' 변경
+--                        ProcessStatus 현설비는 UnloadReq, Next설비는 LoadReq
+--                        Dispatcher는 Next설비의 ProcessStatus Reserve상태로 변경
 --   성  격               : Master
 --   보존기간              : 영구
 --   Record 발생건수(1일) :
@@ -184,10 +186,10 @@ ALTER TABLE tMstOperation
 ALTER TABLE tMstOperation 
       ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 
-INSERT INTO tMstOperation VALUES ('1', '1', N'Bottle 반출요청');
-INSERT INTO tMstOperation VALUES ('1', '2', N'Bottle 반출');
-INSERT INTO tMstOperation VALUES ('1', '3', N'Bottle Loader 투입요청');   -- UnloadRequest event
-INSERT INTO tMstOperation VALUES ('1', '4', N'Bottle 출하대기');
+INSERT INTO tMstOperation VALUES ('1', '1', N'Bottle 반출요청');     -- 작업자가 시료채취를 위해 반출요청
+INSERT INTO tMstOperation VALUES ('1', '2', N'Bottle 반출');              -- 시료채취
+INSERT INTO tMstOperation VALUES ('1', '3', N'Bottle Loader 투입요청');   -- 작업자가 시료채취후 투입 
+INSERT INTO tMstOperation VALUES ('1', '4', N'Bottle 출하대기');    -- UnloadRequest event
 INSERT INTO tMstOperation VALUES ('1', '5', N'Bottle 보관');        -- 세정후 재사용을 위하여 Bottle 반출입기에 보관
 
 INSERT INTO tMstOperation VALUES ('2', '1', N'분석 작업중');
@@ -217,8 +219,9 @@ INSERT INTO tMstOperation VALUES ('5', '1', N'이동형협업로봇 이동중');
 DROP TABLE tMstBottle;
 
 CREATE TABLE tMstBottle (
-   BottleID               CHAR(1) NOT NULL,         -- 설비군ID
-   Creation               DATETIME                  -- 생성일
+   BottleID               CHAR(10) NOT NULL,         -- Bottle ID
+   Creation               DATETIME,                  -- 생성일
+   Termination               DATETIME                  -- 폐기일
 ) ON [Master];
 
 ALTER TABLE tMstBottle
@@ -231,7 +234,7 @@ ALTER TABLE tMstBottle
 --                         분석실에서 현재 1개 Route로 처리가능함
 --                         분석기에서 판정후 Stocker Or 폐기/모사 이동할수 있음
 --                         주의) Dispatcher는 분석의뢰자가 Bottle 반출입기 투입후 Stocker에서 투입할 Bottle 없고 
---                              분석기 상태가 Idle일때는 Stocker대기 없이 Bottle 반출입기에서 분석기로 바로 이동
+--                              분석기 상태가 Idle일때는 Stocker에 분석대기중인 Bottle없을때, Bottle 반출입기에서 분석기로 바로 이동
 --   성  격               : Master
 --   보존기간              : 영구
 --   Record 발생건수(1일)   :
@@ -380,7 +383,6 @@ ALTER TABLE tMstScript4CoOperRobot
       ADD CONSTRAINT tMstScript4CoOperRobot_PK PRIMARY KEY (FmEqpGroupID, ToEqpGroupID, ScriptSeqNo) ON [MasterIdx];
 
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
-
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 1, "MIR", '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 2, "MIR", '{"X":"1.1", "Y":"2.1", "Orientation":"1.57"}', "물체를 집는 위치로 이동");
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 3, "MIR", '{"X":"2.0", "Y":"3.0", "Orientation":"1.57"}', "로봇을 다른 위치로 이동 (물체 운반)");
