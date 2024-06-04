@@ -398,7 +398,7 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 --   Table 명             : tProcBottle
 --   내  용                : LIMS Bottle을 관리하는 Table
 --                         tMstBottle에서는 Bottle정보가 변경되지 않는 것을 관리하고
---                         tProcBottle에서는 공정진행하면서 정보가 변경되는 것을 별도 Table 관리
+--                         tProcBottle에서는 공정진행하면서 정보가 변경되는 것을 별도 Table(tProcBotCurrOper)에서 관리
 --
 --   성  격               : Process
 --   보존기간              : 영구 (순환사용)
@@ -416,12 +416,16 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 DROP TABLE tProcBottle;
 
 CREATE TABLE tProcBottle (
-   BottleID               CHAR(1) NOT NULL,         -- 설비군ID
+   BottleID               CHAR(1) NOT NULL,         -- Bottle ID
+   EqpGroupID             CHAR(1) NOT NULL,         -- 현재 설비군 ID 
+   NextEqpGroupID         CHAR(1) NOT NULL,         -- 차기 설비군 ID 
+   
    ExperimentRequestName  NVARCHAR(10),             -- 실험의뢰자
    CurrLiquid             NVARCHAR(10),             -- 용액종료 (산, 염기, 유기)
    RequestDate            DATETIME,                 -- 요청일시
    DispatchingPriority    TINYINT,                  -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
    Position               CHAR(4),                  -- Bottle 반출입기, Stocker에서 위치정보
+                                                    -- '0000'인 경우 반출 또는 이동중인 Bottle
    PrevLiquid             NVARCHAR(10),             -- 이전 작업에서 용액종료 (산, 염기, 유기)
 ) ON [Process];
 
@@ -453,7 +457,7 @@ ALTER TABLE tProcBottle
 DROP TABLE tProcBotCurrOper;
 
 CREATE TABLE tProcBotCurrOper (
-   BottleID               CHAR(1) NOT NULL,         -- 설비군ID
+   BottleID               CHAR(1) NOT NULL,         -- Bottle ID
    EqpGroupID             CHAR(1) NOT NULL,         -- 설비군 ID 
    --OperGroupID          CHAR(1) NOT NULL,         -- Operation Group 
    OperID                 CHAR(1) NOT NULL,         -- 작업 ID  
