@@ -44,6 +44,7 @@
    19) LIMS에서 Bottle Position 관리 필요한가
        - Bottle 반출입기, Stocker
    20) Bottle barcode 발번원칙 및 내용(규칙, 자리수)
+   21) MOMA <--> RCV간 통신사양
 
 2. 설계시 고려사항
    1) 동일기종에서 5개 실행파일간 데이터 전달방법
