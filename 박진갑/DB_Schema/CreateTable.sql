@@ -133,7 +133,8 @@ CREATE TABLE tMstEqp (
    EqpSeqNo               CHAR(1) NOT NULL,         -- 호기 (1부터 시작)
    EqpName                NVARCHAR(30),             -- 설비명 
    EqpStatus              NVARCHAR(10),             -- 장비상태 (PowerOn, PowerOff, Run, Idle, Trouble, Maintenance)
-   ProcessStatus          NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, UnlLoadReq, UnlLoadComp, Idle, Pause, Reserve)
+   ProcessStatus          NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Idle, Pause, Reserve)
+   EventTime              DATETIME,                 -- Event Time
    EqpTimeWriteLog        INT default 0             -- 장비 내부 LOG 저장 시간
 ) ON [Master];
 
@@ -144,11 +145,11 @@ ALTER TABLE tMstEqp
 ALTER TABLE tMstEqp 
       ADD CONSTRAINT tMstEqp_CHK CHECK (EqpStatus in ("PowerOn", "PowerOff", "Run", "Idle", "Trouble", "Maintenance")) ON [MasterIdx];
       
-INSERT INTO tMstEqp VALUES ('1', '1', N'반출입기', "Idle");
-INSERT INTO tMstEqp VALUES ('2', '1', N'분석기', "Idle");
-INSERT INTO tMstEqp VALUES ('3', '1', N'Stocker', "Idle");      -- Stocker #1호기
-INSERT INTO tMstEqp VALUES ('4', '1', N'폐기설비', "Idle");
-INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', "Idle");
+INSERT INTO tMstEqp VALUES ('1', '1', N'반출입기', "Idle", "LoadReq", null);
+INSERT INTO tMstEqp VALUES ('2', '1', N'분석기', "Idle", "LoadReq", null);
+INSERT INTO tMstEqp VALUES ('3', '1', N'Stocker', "Idle", "LoadReq", null);      -- Stocker #1호기
+INSERT INTO tMstEqp VALUES ('4', '1', N'폐기설비', "Idle", "LoadReq", null);
+INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', "Idle", "LoadReq", null);
 
 
 -- ========================================================================================
@@ -266,8 +267,8 @@ ALTER TABLE tMstRoute
 INSERT INTO tMstRoute VALUES ('1', '0', '0', '1', '1');
 INSERT INTO tMstRoute VALUES ('1', '1', '1', '1', '2');
 INSERT INTO tMstRoute VALUES ('1', '1', '2', '1', '3');
-INSERT INTO tMstRoute VALUES ('1', '1', '3', '3', '1');     -- UnloadRequest event
-INSERT INTO tMstRoute VALUES ('1', '1', '3', '2', '1');     -- UnloadRequest event
+INSERT INTO tMstRoute VALUES ('1', '1', '3', '3', '1');     -- UnloadRequest event (Stocker 이동)
+INSERT INTO tMstRoute VALUES ('1', '1', '3', '2', '1');     -- UnloadRequest event (분석기로 이동)
 INSERT INTO tMstRoute VALUES ('1', '3', '1', '2', '1');
 INSERT INTO tMstRoute VALUES ('1', '2', '1', '3', '1');     -- 분석후 Stocker 이동
 INSERT INTO tMstRoute VALUES ('1', '2', '1', '5', '1');     -- 분석후 폐기/모사 이동
