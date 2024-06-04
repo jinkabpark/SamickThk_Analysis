@@ -6,7 +6,7 @@
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1"
-      } Or  
+      } Or
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
@@ -16,7 +16,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Process",    // 반출입기, Dispatcher, 분석기
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
          "error_msg" : "None"
       }      
 
@@ -106,7 +106,7 @@
       { 
          "EqpGroupID" : "1",
          "EqpSeqNo" : "1",
-         "ProcessStatus" : "Reserve"
+         "ProcessStatus" : "Reserve"       -- Next Eqp 상태를 Reserver 변경함
       }      
    4) Function : tMstEqp table의 ProcessStatus(진행상태)를 변경
    5) Return
