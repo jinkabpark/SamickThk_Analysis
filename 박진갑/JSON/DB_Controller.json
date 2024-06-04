@@ -16,7 +16,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",    // 반출입기, Dispatcher, 분석기
+         "sender_controller" : "DB_Process",    // 반출입기, Dispatcher, 분석기
          "error_msg" : "None"
       }      
 
@@ -40,7 +40,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       }  
 
@@ -64,7 +64,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       }      
 
@@ -88,7 +88,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       } 
 
@@ -112,7 +112,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       } 
 
@@ -132,7 +132,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       } 
       
@@ -150,7 +150,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "error_msg" : "None"
       }      
       
@@ -166,7 +166,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "total_cnt_of_eqp" : 5,
          "eqp_status" : [
             { "No_1" : {
@@ -196,7 +196,7 @@
    5) Return
       { 
          "status_code" : 200,
-         "sender_controller" : "DB_Controller",
+         "sender_controller" : "DB_Process",
          "eqp_status" : "Run",
          "process_status" : "UnloadReq",
          "error_msg" : "None"
