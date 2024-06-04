@@ -20,31 +20,32 @@
    1) PIO 통신 (E84 Protocol) 목적 이중 안전장치인가 ?
       - 센서Type : 적외선, RF, WiFi중 어떤 것을 사용하는지 ?
    2) Bottle 이력관리 필요한가 ? (ex:생성일,사용횟수, 투입용액)
-   3) Bottle arcade 발번원칙(규칙, 자리수)
+   3) Bottle arcade 발번원칙(규칙, 자리수)  - 박D
    4) Bottle 최초 생성후 투입과정 (폐기수량만큼 보충)
    5) Bottle 내구연한
-   6) 용액별 시험항목 리스트
-   7) SCADA 실시간성, Batch (시간주기)
-   8) MR에 bottle barcode(tag) 읽는 기능있는지 확인 필요
+   6) 용액별 시험항목 리스트  - 박D
+   7) SCADA 실시간성, Batch (시간주기)  - 박D
+   8) MR에 bottle barcode(tag) 읽는 기능있는지 확인 필요 - UR Arm에 Vision에서 QR, barcode reader 있음
    9) 운전모드 : 자동운전, 수동운전 2개 모드 지원
    10) MR 통신주체
       시료반출입설비, 분석기, 버퍼설비, 폐기모사벤치 --> Controller PC로 통일
-   11)  분석실 자율반송_작업소개_240227  
+   11)  분석실 자율반송_작업소개_240227 
+      - 기존자료 이상함
       - 반출입기에서 의뢰 비밀번호 입력 ?
    12) 최대 시료 제출수량은 ? 8개를 넘길수 있나 ?
    13) 반송중 target system 상태 변경되면(ex:shutdown) ?
-   14) 기존 DB 종류
+   14) 기존 DB 종류 - maria 
    15) WEB으로 개발할지 CS로 개발할지 여부
        - 실험 의뢰자 사용하는 시스템은 ?
        - 모니터링 시스템은 실시간성(Event처리)으로 처리할지, Batch(polling)처리할지 여부
    16) 분석기에서 분석결과리포트
-   17) 기존 SCADA 화면
-   18) 재공재고 불일치하는 경우 (Bottle 반출입기, Stocker)
+   17) 기존 SCADA 화면, DB schema
+   18) 재공재고 불일치하는 경우 (Bottle 반출입기:96개, Stocker:96개)
        - 사람이 수동으로 반출후 입고하면서 재공재고 일치시킨다
    19) LIMS에서 Bottle Position 관리 필요한가
-       - Bottle 반출입기, Stocker
+       - Bottle 반출입기, Stocker memory map 확인필요
    20) Bottle barcode 발번원칙 및 내용(규칙, 자리수)
-   21) MOMA <--> RCV간 통신사양
+   21) MOMA <--> RCS간 통신사양  - 박D
 
 2. 설계시 고려사항
    1) 동일기종에서 5개 실행파일간 데이터 전달방법
@@ -67,8 +68,10 @@
       (5) 메시지 브로커 : 메시지 브로커를 사용하면 두 컴퓨터 간의 메시지 기반 통신을 구현
           - RabbitMQ, Apache Kafka 
       (6) Apache Kafka와 Mosquitto 비교
-   3) 사용할 DB
+   3) 사용할 DB : maria
    4) LIMS 자체에서도 동작 + AIMS 연동 가능
+      - AIMS, 분석기 SECS 통신사양서
+      - Bottle 반출입기, Stocker PLC memory map
    5) 분석기 최대 효율 내도록 설계
    6) 실험 종료후 실험 의뢰자 신속한 의사결정 지원
       -폐기. 세정. 재검
@@ -107,15 +110,23 @@
 
 4. 개발범위
    1) AIMS controller & Simulator 개발
-   2) DB 서버
+   2) DB 서버 
+      - DB Manager
    3) LIMS Controller
       (1) Bottle 입고,출하 controller
-      (2) MR controller
+      (2) MR controller (RCS)
       (3) Stocker controller
       (4) 세정 controller
       (5) Dispatching
    4) 모니터링 PC UI
    5) 운영 PC UI
+5. 개발환경
+   1) 개발Tool : Visual Studio 2019
+   2) DB : maria
+   3) DDS : OpenDDS, Humble(고객 나윤종차장 추천)
+      - MQTT 보류
+   4) 개발언어 : c#
+
 
 ------------------(1)----------------------------------  
 PIO 통신방식 (AS-IS)
