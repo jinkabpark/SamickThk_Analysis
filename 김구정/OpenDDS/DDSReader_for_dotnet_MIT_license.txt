@@ -1,0 +1,13 @@
+# DDSReader for dotnet MIT license
+
+# 수정이력
+    1. 2024-06-05, v0.1, 최초작성, 김구정
+
+
+[목차]
+1. DDSReader 정보
+
+
+1. DDSReader 정보
+    1> git : https://github.com/andburn/dds-reader
+    2> 테스트 안해봄
