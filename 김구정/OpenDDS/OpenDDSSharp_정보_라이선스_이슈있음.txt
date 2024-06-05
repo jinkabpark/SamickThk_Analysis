@@ -1,0 +1,19 @@
+# OpenDDS 정보
+
+# 수정이력
+    1. 2024-06-05, v0.1, 최초작성, 김구정
+
+
+
+[목차]
+1. OpenDDSSharp 정보
+    1> API Document site : https://www.openddsharp.com/api/index.html
+
+2. 누겟 관련 정보
+    1> OpenDDSSharp 설치 : .net6.0 추천
+    2> OpenDDSSharp 라이선스 : GNU GPL v3.0
+        .1> 상업용으로 소스공개를 해야 할 것 같습니다.
+
+
+
+
