@@ -1,0 +1,469 @@
+============================================================================ 
+file name   : DB_Manager.json
+author      : JK Park
+desc   
+   1.    2024-06-01 최초생성
+
+
+관련 Token List
+
+1.  입고요청(LoadReq)           LoadRequest
+2.  입고완료(착공-LoadComp)       LoadComp
+3.  출하요청(UnloadReq)         UnloadRequest
+4.  출하완료(완공-UnloadComp)     UnloadComp
+5.  장비반송 사전예약               ReserveEqpPort4Dispatch
+6.  Process상태변경              ChangeProcessStatus
+7.  장비상태변경                   ChangeEqpStatus
+8.  특정장비(분석기)상태요청        ReqAnalysisEqpStatus
+9.  모든 장비상태요청              ReqAllEqpStatus
+10. Bottle정보 수동변겅           ChangeBottleStatus
+11. 반출입기에서 공 Bottle 수량요청   GetCountEmptyBottleAtInOutBottle
+12. 설비내 Bottle 정보요청         ReqBottleInfoFmEqp
+13. 모든 Bottle 정보요청          ReqAllBottlesInfo
+14. 작업대기중인 Bottle 정보요청     InputWaitingBottleInfoFmEqp
+15. Bottle 공정이력정보 요청        Req4BottleProcessHistory
+//16. 공 Bottle 반출지시           OutEmptyBottle
+
+Normal Sequence Flow
+1-1 Bottle반출입기(신규)   공 Bottle 반출수신           UI Or LIMS에서 요청
+1-2 Bottle반출입기        출하완료(완공-UnloadComp)     분석실 외부공간쪽 반출입기 Unload Port 공 Bottle 반출 (반출입기 작업자공간쪽 Port에서, OperID=1)
+1-3 작업자                                         시료채취
+1-4 작업자               입고완료(착공-LoadComp)       분석실 외부공간쪽 반출입기 Load Port 실 Bottle 최초투입(OperID=3)
+1-5 Bottle반출입기        출하요청(UnloadReq)         분석실 내부공간쪽 반출입기 Unload Port 실 Bottle 최초출하준비 (반출입기 실험실공간쪽 Unload Port에서, OperID=4)
+1-6 Bottle반출입기        출하완료(완공-UnloadComp)
+1-7 Bottle반출입기        입고완료(착공-LoadComp)       분석실 내부공간쪽 반출입기 Load Port에 세정후 재사용을 위하여 공 Bottle 투입(OperID=5, /w BottleID)
+1-8 Bottle반출입기        입고요청(LoadReq)           분석실 내부공간쪽 반출입기 Load Port에서
+
+2-1 Stocker            입고완료(착공-LoadComp)       Stocker 위치정보보고
+2-2 Stocker(신규)       출하지시수신                  Dispatcher가 우선순위에 따라 Stocker내 Bottle에 대한 출하요청
+2-3 Stocker            출하요청(UnloadReq)         Unload Port에 도착
+2-4 Stocker            출하완료(완공-UnloadComp)
+2-5 Stocker            입고요청(LoadReq)
+
+3-1 분석기               입고완료(착공-LoadComp)       
+3-2 분석기               장비상태변경(분석시작)            Idle --> Run
+3-3 분석기                                         분석작업       
+3-4 분석기               장비상태변경(분석종료)            Run --> Idle
+3-5 분석기               출하요청(UnloadReq)           
+3-6 분석기               출하완료(완공-UnloadComp)
+3-7 분석기               입고요청(LoadReq)
+
+4-1 이동형협업로봇(신규)      GripBottle                Gripper가 Bottle 잡은경우, UI화면에 동작표시
+4-1 이동형협업로봇(신규)      MovingBottle              이동중
+4-1 이동형협업로봇(신규)      ReleaseBottle             Gripper가 Bottle 내려놓은 경우
+
+============================================================================ 
+
+1. 입고요청(LoadReq)
+   1) Token : LoadRequest
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "LoadReq"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : UpdateEqpProcessStatus
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "error_msg" : "None"
+      }      
+
+2. 입고완료(착공-LoadComp)
+   1) Token : LoadComp
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "OperID" : "3",
+         "BottleID" : "Bot20240602"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
+         "ProcessStatus" : "LoadComp"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : ProcessLoadUnloadCompletion
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      }  
+
+3. 출하요청(UnloadReq)
+   1) Token : UnloadRequest
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
+         "ProcessStatus" : "UnloadReq"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : UpdateEqpProcessStatus
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      }      
+
+4. 출하완료(착공-UnloadComp)
+   1) Token : UnloadComp
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "OperID" : "1",
+         "BottleID" : "Bot20240602"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
+         "ProcessStatus" : "UnloadComp"
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : ProcessLoadUnloadCompletion
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      } 
+
+
+5. 장비반송 사전예약, 다른 Process에서 해당장비 반송을 못하도록 하기 위함
+   Dispatcher에서 To Position 정해지면 To Position을 Reserve한다.
+   1) Token : ReserveEqpPort4Dispatch
+   2) 관련 controller : Dispatcher
+                      UI에서 수동변경
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } Or 
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "ProcessStatus" : "Reserve"       -- Next Eqp 상태를 Reserver 변경함
+      }      
+   4) Function : tMstEqp table의 ProcessStatus(진행상태)를 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : UpdateEqpProcessStatus
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      } 
+
+6. Process상태변경
+   LoadRequest, LoadComp, UnloadRequest, UnloadComp 통합하는 것도 가능
+   1) Token : ChangeProcessStatus
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경     
+   3-2) Body 
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+         "BottleID" : "Bot20240602",
+         "EqpStatus" : "Run" 
+      }    
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : 
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      } 
+      
+7. 장비상태변경
+   1) Token : ChangeEqpStatus
+   2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
+                      UI에서 수동변경     
+   3-2) Body 
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+         "EqpStatus" : "Run" 
+      }    
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 변경
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : UpdateEqpStatus
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "error_msg" : "None"
+      }      
+      
+8. 특정장비(분석기)상태요청
+   1) Token : ReqAnalysisEqpStatus
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         "EqpGroupID" : "2",
+         "EqpSeqNo" : "1",
+      }      
+   4) Function : tMstEqp table의 EqpStatus(장비상태) 요청
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrieveEquipmentStatus
+   7) Return
+      { 
+         "status_code" : 200,					-- 요청에 대한 응답이 정상일때, 비정일때는 200 이외 수치
+         "sender_controller" : "DB_Manager",	-- 고정
+         "eqp_status" : "Run",
+         "process_status" : "UnloadReq",
+         "error_msg" : "None"
+      } 
+9. 장비상태요청
+   1) Token : ReqAllEqpStatus
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         None
+      }      
+   4) Function : tMstEqp table의 모든 EqpStatus(장비상태) 요청
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrieveAllEquipmentStatuses
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "total_cnt_of_eqp" : 5,
+         "eqp_status" : [
+            { "No_1" : {
+                 "EqpGroupID" : "1", "EqpSeqNo" : "1", "ProcessStatus":"UnloadReq", "EqpStatus" : "Idle"}
+            },
+            { "No_2" : {
+                 "EqpGroupID" : "2", "EqpSeqNo" : "1", "ProcessStatus":"Idle","EqpStatus" : "Run"}
+            },
+            ...
+            { "No_5" : {
+                 "EqpGroupID" : "5", "EqpSeqNo" : "1", "ProcessStatus":"LoadComp","EqpStatus" : "Idle"}
+            }
+         ],
+         "error_msg" : "None"
+      } 
+      
+
+10. Bottle정보 수동변겅
+   1) Token : ChangeBottleStatus
+   2) 관련 controller : UI
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "OperID" : "1"
+         "NextEqpGroupID" : "1",
+         "NextOperID" : "1"
+      } 
+   4) Function : UI화면에서 수동으로 tProcBottle table 공정정보를 변경할때 사용
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : UpdateBottleStatus
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기     
+         "error_msg" : "None"
+      }  
+      
+11. 반출입기에서 공 Bottle 수량요청   
+    반출입기에서 출하할 공 Bottle 있는지 확인한다
+   1) Token : GetCountEmptyBottleAtInOutBottle
+   2) 관련 controller : UI
+   3) Body
+      {
+         "CurrEqpGroupID" : "1",
+         "CurrEqpSeqNo" : "1"		  
+      } 
+   4) Function : tProcBottle table의 CurrEqpGroupID=1, CurrOperID=1인 Bottle 수량을 구한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrieveEmptyBottleCount
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "total_cnt_of_empty_bottle" : 10,      // record 수량
+         "error_msg" : "None"
+      } 
+      
+12. 설비내 Bottle 정보요청
+    UI화면에서 반출입기 설비에 추출가능한 빈병정보를 확인한다.
+   1) Token : ReqBottleInfoFmEqp
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1"
+      } 
+   4) Function : tProcBottle table의 BottleID, EqpStatus, ProcessStatus... 가져온다
+   5) Return Message 길이 : 1K 이상, 길이 제한에 따른 호출 불가할 경우 Controller에 sp 직접 호출필요
+   6) 관련 Stored Procedure : FetchBottleStatusFmEquipment
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "total_cnt_of_eqp" : 70,
+         "eqp_status" : [
+            { "No_1" : {
+                 "BottleID" : "Bot_001", "ExperimentRequestName" : "홍길동", "CurrLiquid":"Acid", "RequestDate" : "2024-06-05", "DispatchingPriority":1, "Position":"0110", "EventTime" : "2024-06-05"}
+            },
+            { "No_2" : {
+                 "BottleID" : "Bot_002", "ExperimentRequestName" : "심봉사", "ProcessStatus":"Base","RequestDate" : "2024-06-06", "DispatchingPriority":9, "Position":"0001", "EventTime" : "2024-06-05"}
+            },
+            ...
+            { "No_70" : {
+                 "BottleID" : "Bot_070", "ExperimentRequestName" : "이몽룡", "ProcessStatus":"Organic","RequestDate" : "2024-06-07", "DispatchingPriority":5, "Position":"0105", "EventTime" : "2024-06-05"}
+            }
+         ],      
+         "error_msg" : "None"
+      } 
+      
+13. 모든 Bottle 정보요청
+   1) Token : ReqAllBottlesInfo
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         None
+      } 
+   4) Function : tProcBottle table의 BottleID, EqpStatus, ProcessStatus... 가져온다
+   5) Return Message 길이 : 1K 이상, 길이 제한에 따른 호출 불가할 경우 Controller에 sp 직접 호출필요
+   6) 관련 Stored Procedure : RetrieveAllBottleStatuses
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "total_cnt_of_eqp" : 300,
+         "eqp_status" : [
+            { "No_1" : {
+                 "EqpGroupID" : "1", "EqpSeqNo" : "1", "BottleID" : "Bot_001", "ExperimentRequestName" : "홍길동", "CurrLiquid":"Acid", "RequestDate" : "2024-06-05", "DispatchingPriority":1, "Position":"0110", "EventTime" : "2024-06-05"}
+            },
+            { "No_2" : {
+                 "EqpGroupID" : "2", "EqpSeqNo" : "1", "BottleID" : "Bot_002", "ExperimentRequestName" : "심봉사", "ProcessStatus":"Base","RequestDate" : "2024-06-06", "DispatchingPriority":9, "Position":"0001", "EventTime" : "2024-06-05"}
+            },
+            ...
+            { "No_300" : {
+                 "EqpGroupID" : "3", "EqpSeqNo" : "1", "BottleID" : "Bot_090", "ExperimentRequestName" : "이몽룡", "ProcessStatus":"Organic","RequestDate" : "2024-06-07", "DispatchingPriority":5, "Position":"0105", "EventTime" : "2024-06-05"}
+            }
+         ],      
+         "error_msg" : "None"
+      } 
+      
+14. 작업대기중인 Bottle 정보요청. 분석기에서 의미 있음
+    UI화면 분석기 설비 모니터링 화면에 분석기 투입대기중인 수량과 관련정보 표시(즉, 반출입기 Or Stocker에서 Next 공정이 분석기인 경우) 
+   1) Token : InputWaitingBottleInfoFmEqp
+   2) 관련 controller : UI
+   3) Body
+      { 
+         "NextEqpGroupID" : "2",
+         "NextOperID" : "1"
+      } 
+   4) Function : tProcBottle table의 NextEqpGroupID의 BottleID, EqpStatus, ProcessStatus... 가져온다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrievePendingBottles
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "total_cnt_of_eqp" : 5,
+         "eqp_status" : [
+            { "No_1" : {
+                 "BottleID" : "Bot_001", "ExperimentRequestName" : "홍길동", "CurrLiquid":"Acid", "RequestDate" : "2024-06-05", "DispatchingPriority":1, "Position":"0110", "EventTime" : "2024-06-05"}
+            },
+            { "No_2" : {
+                 "BottleID" : "Bot_002", "ExperimentRequestName" : "심봉사", "ProcessStatus":"Base","RequestDate" : "2024-06-06", "DispatchingPriority":9, "Position":"0001", "EventTime" : "2024-06-05"}
+            },
+            ...
+            { "No_5" : {
+                 "BottleID" : "Bot_090", "ExperimentRequestName" : "이몽룡", "ProcessStatus":"Organic","RequestDate" : "2024-06-07", "DispatchingPriority":5, "Position":"0105", "EventTime" : "2024-06-05"}
+            }
+         ],      
+         "error_msg" : "None"
+      } 
+
+
+15. Bottle 공정이력정보 요청        
+   1) Token : Req4BottleProcessHistory
+   2) 관련 controller : UI
+   3) Body
+      {
+         "BottleID" : "Bot_001"
+      } 
+   4) Function : tProcBottle table의 CurrEqpGroupID=1, CurrOperID=1인 Bottle 수량을 구한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : FetchBottleProcessHistory
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기
+         "total_cnt_of_process" : 5,            // record 수량
+         "process_of_bottle" : [
+            { "No_1" : {
+                 "EqpGroupID" : "1", "OperID" : "2", "StartTime" : "2024-06-05", "EndTime" : "2024-06-05", "DispatchingPriority":1, "Position":"0110"}
+            },
+            { "No_2" : {
+                 "EqpGroupID" : "2", "OperID" : "1", "StartTime" : "2024-06-06", "EndTime" : "2024-06-05", "DispatchingPriority":9, "Position":"0001"}
+            },
+            ...
+            { "No_5" : {
+                 "EqpGroupID" : "5", "OperID" : "1", "StartTime" : "2024-06-07", "EndTime" : "2024-06-05", "DispatchingPriority":5, "Position":"0105"}
+            }
+         ],          "error_msg" : "None"
+      } 
+
+16. 공 Bottle 반출지시 ?
+   1) Token : OutEmptyBottle
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         "EqpGroupID" : "1",
+         "EqpSeqNo" : "1",
+         "OperID" : "1"
+      } 
+   4) Function : 공정진행(완공)에 따라 tProcBottle table Bottle 정보를 Next 공정으로 변경한다.
+                 tProcBotOper 공정진행정보 record 추가 생성한다.
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : 
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 반출입기, Dispatcher, 분석기     
+         "error_msg" : "None"
+      } 
+
+

@@ -1,0 +1,62 @@
+============================================
+1: 백업 스크립트 작성 (backup_mariadb.bat)
+============================================
+@echo off
+setlocal
+
+:: 변수 설정
+set "DB_USER=your_db_user"
+set "DB_PASSWORD=your_db_password"
+set "DB_NAME=your_db_name"
+set "BASE_BACKUP_DIR=\\path\to\your\nas\backup\directory"
+set "YEAR=%DATE:~10,4%"
+set "MONTH=%DATE:~4,2%"
+set "DATE=%YEAR%%MONTH%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%"
+set "BACKUP_DIR=%BASE_BACKUP_DIR%\%YEAR%\%MONTH%"
+set "BACKUP_FILE=%BACKUP_DIR%\%DB_NAME%-%DATE%.sql"
+
+:: 백업 디렉토리가 존재하지 않으면 생성
+if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
+
+:: 데이터베이스 백업
+mysqldump -u %DB_USER% -p%DB_PASSWORD% %DB_NAME% > "%BACKUP_FILE%"
+
+:: 백업 성공 메시지 출력
+if %ERRORLEVEL% equ 0 (
+    echo Backup successful: %BACKUP_FILE%
+) else (
+    echo Backup failed
+)
+
+endlocal
+
+
+============================================
+2: 작업 스케줄러(Task Scheduler) 설정
+============================================
+작업 스케줄러 열기:
+
+시작 메뉴를 열고 "작업 스케줄러"를 검색하여 엽니다.
+작업 생성:
+
+오른쪽 패널에서 "기본 작업 만들기..."를 클릭합니다.
+작업 이름을 입력하고 "다음"을 클릭합니다.
+트리거 설정:
+
+"매일"을 선택하고 "다음"을 클릭합니다.
+실행 시간을 설정하고 "다음"을 클릭합니다.
+작업 설정:
+
+"프로그램 시작"을 선택하고 "다음"을 클릭합니다.
+"프로그램/스크립트"에 backup_mariadb.bat 파일의 경로를 입력합니다.
+"다음"을 클릭하고 설정을 완료합니다.
+
+
+============================================
+3: 네트워크 드라이브 연결
+============================================
+파일 탐색기를 열고 "이 PC"를 클릭합니다.
+상단 메뉴에서 "네트워크 드라이브 연결"을 클릭합니다.
+드라이브 문자를 선택하고 NAS 경로를 입력합니다 (예: \\nas-server\backup).
+"다른 자격 증명으로 연결"을 선택하고 NAS 접근 권한이 있는 사용자명과 비밀번호를 입력합니다.
+
