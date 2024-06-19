@@ -1,9 +1,17 @@
+Equipment에 port 추가
+Script 처리방식 변경
+이슈
+   착공(작업시작), 완공(작업종료)에 대한 재정의 필요
+   
+   
 ============================================================================ 
 file name   : CreateTable.sql
 author      : JK Park
 desc   
    1.    2024-06-01 최초생성
-
+   2.    2024-06-16 의사결정*) 수동모드에서 이동형 협업로봇 동작을 UI에서 MOMA로 직접 전달할지, 
+                            Dispatcher 통해 전달힐지는 의사결정 필요.
+   
 -- ============================================================================ 
 -- Table Space 명   : Master
 -- 내 용            : Master관련 table을 관리하는 table space
@@ -21,7 +29,9 @@ desc
 --            7     tMstScript4Manipulator     1 K
 --            8     tMstScript4UR              1 K
 --            9     tMstScript4CoOperRobot     1 K
-
+--           10     tMstScriptID4CoOperRobot   1 K
+--           11     tMstScriptBody4CoOperRobot 1 K
+--           12     tMstToken                  1 K
 -- ============================================================================ 
 -- Table Space 명   : Process
 -- 내 용            : 공정관련 table을 관리하는 table space
@@ -104,8 +114,8 @@ ALTER TABLE tMstEqpGroup
       
 INSERT INTO tMstEqpGroup VALUES ('0', N'Dummy');        -- Bottle 잡지않고 이동하는 경우 사
 INSERT INTO tMstEqpGroup VALUES ('1', N'반출입기');
-INSERT INTO tMstEqpGroup VALUES ('2', N'분석기');
-INSERT INTO tMstEqpGroup VALUES ('3', N'Stocker');      -- Stocker #1호기
+INSERT INTO tMstEqpGroup VALUES ('2', N'Stocker');      -- Stocker #1호기
+INSERT INTO tMstEqpGroup VALUES ('3', N'분석기');
 INSERT INTO tMstEqpGroup VALUES ('4', N'폐기설비');
 INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 
@@ -115,10 +125,15 @@ INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 --   Table No             : 3
 --   Table 명             : tMstEqp 
 --   내  용               : LIMS 설비군을 관리하는 Table
---                         현재는 설비군별 장비가 1대지만, 향후 장비추가를 대비해서 EqpSeqNo 추가
---                         Bottle 반출입기, 스토커 Full인 경우 상태를 'Trouble' 변경
---                        ProcessStatus 현설비는 UnloadReq, Next설비는 LoadReq
---                        Dispatcher는 Next설비의 ProcessStatus Reserve상태로 변경
+--                         1) Bottle 반출입기의 경우 실험실내 2개 Port 있고, 실험실 외부에 2개 Port 있음
+--                            실험실 외부에서 발생하는 LoadReq, LoadComp event는 무시한다.
+--                            실험실 외부 Event는 이동형 협업로봇 동작과는 무관. 작업자 관계만 있음.
+--                         2) 현재는 설비군별 장비가 1대지만, 향후 장비추가를 대비해서 EqpSeqNo 추가
+--                         3) Bottle 반출입기, 스토커 Full인 경우 상태를 'Trouble' 변경
+--                         4) 반송(Dispatch)를 위한 설비상태는 현설비 UnloadPort에서 UnloadReq, 
+--                            Route상 Next설비는 LoadReq이면 반송을 하기 전에
+--                            Dispatcher는 Next설비의 LoadPort의 상태를 Reserve상태로 변경하여
+--                            Port를 예약(선점)한다.
 --   성  격               : Master
 --   보존기간              : 영구
 --   Record 발생건수(1일) :
@@ -130,6 +145,19 @@ INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 --   관련 Table           : 
 --   이 력
 --          1. 2024-06-01 : 최초 생성
+--          2. 2024-06-16 : ProcessStatus 삭제하고 (각 Port별 상태에 대한 개별관리 필요)
+--                          LoadPort_1, LoadPort_2, UnloadPort_1, UnloadPort_2 신규생성
+--                          Bottle 반출입기, Stocker, 분석기, MOMA 작업단위는 의뢰단위(수량이 다를수 있음)
+--                          Bottle 반출입기의 경우
+--                             실험실 내부 Port : LoadPort_1, UnloadPort_1
+--                             실험실 외부 Port : LoadPort_2, UnloadPort_2 정의함
+--                          분석기는 Port 없이 MOMA에서 직접 Spot에 bottle 투입, 반출 함
+--                          stocker는 Port 없이 MOMA에서 직접 Port(세로)-slot(가로)에 bottle 투입, 반출 함
+--          3. 2024-06-19 : 분석기 수량을 3대로 변경함.
+--                          EqpStatus value에 Waiting추가. 설비에서 작업이 끝나고 작업자 판정을 기다리는 상태.
+--                             작업자 판정이 끝나고 모든 bottle 추출하면 장비상태를 idle 변경함
+--                             Run --> Waiting --> Idle 순환
+--                          CapacityOfHole field 추가
 --
 -- ========================================================================================
 DROP TABLE tMstEqp;
@@ -138,8 +166,13 @@ CREATE TABLE tMstEqp (
    EqpGroupID             CHAR(1) NOT NULL,         -- 설비군ID
    EqpSeqNo               CHAR(1) NOT NULL,         -- 호기 (1부터 시작)
    EqpName                NVARCHAR(30),             -- 설비명 
-   EqpStatus              NVARCHAR(10),             -- 장비상태 (PowerOn, PowerOff, Run, Idle, Trouble, Maintenance)
-   ProcessStatus          NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Idle, Pause, Reserve)
+   CapacityOfHole         TINYINT,                  -- 설비별 hole(병을 처리할수 있는) 케파
+   EqpStatus              NVARCHAR(10),             -- 장비상태 (PowerOn, PowerOff, Run, Waiting, Idle, Pause, Trouble, Maintenance)
+   //ProcessStatus          NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+   LoadPort_1             NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, Reserve)
+   LoadPort_2             NVARCHAR(12),             -- 진행 상태(LoadReq, LoadComp, Reserve)
+   UnloadPort_1           NVARCHAR(12),             -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
+   UnloadPort_2           NVARCHAR(12),             -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
    EventTime              DATETIME,                 -- Event Time
    EqpTimeWriteLog        INT default 0             -- 장비 내부 LOG 저장 시간
 ) ON [Master];
@@ -149,13 +182,15 @@ ALTER TABLE tMstEqp
 ALTER TABLE tMstEqp 
       ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 ALTER TABLE tMstEqp 
-      ADD CONSTRAINT tMstEqp_CHK CHECK (EqpStatus in ("PowerOn", "PowerOff", "Run", "Idle", "Trouble", "Maintenance")) ON [MasterIdx];
+      ADD CONSTRAINT tMstEqp_CHK CHECK (EqpStatus in ("PowerOn", "PowerOff", "Run", "Waiting", "Idle", "Trouble", "Maintenance")) ON [MasterIdx];
       
-INSERT INTO tMstEqp VALUES ('1', '1', N'반출입기', "Idle", "LoadReq", null);
-INSERT INTO tMstEqp VALUES ('2', '1', N'분석기', "Idle", "LoadReq", null);
-INSERT INTO tMstEqp VALUES ('3', '1', N'Stocker', "Idle", "LoadReq", null);      -- Stocker #1호기
-INSERT INTO tMstEqp VALUES ('4', '1', N'폐기설비', "Idle", "LoadReq", null);
-INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', "Idle", "LoadComp", null);
+INSERT INTO tMstEqp VALUES ('1', '1', N'반출입기', 90, "Idle", "LoadReq", null, null, null, null);
+INSERT INTO tMstEqp VALUES ('2', '1', N'Stocker', 96, "Idle", "LoadReq", null, null, null, null);      -- Stocker #1호기
+INSERT INTO tMstEqp VALUES ('3', '1', N'분석기 1호기', 12, "Idle", "LoadReq", null, null, null, null);
+INSERT INTO tMstEqp VALUES ('3', '2', N'분석기 2호기', 12, "Idle", "LoadReq", null, null, null, null);
+INSERT INTO tMstEqp VALUES ('3', '3', N'분석기 3호기', 12, "Idle", "LoadReq", null, null, null, null);
+INSERT INTO tMstEqp VALUES ('4', '1', N'폐기설비', 1, "Idle", "LoadReq", null, null, null, null);
+INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', 12, "Idle", "LoadComp", null, null, null, null);
 
 
 -- ========================================================================================
@@ -303,6 +338,8 @@ INSERT INTO tMstRouteOper VALUES ('1', '2', '1', '5', '1');     -- 분석후 폐
 --   관련 Table            : 
 --   이 력
 --          1.2024-06-03 : 최초 생성
+--          2.2024-06-16 : 사용 안함
+--                         tMstScriptID4CoOperRobot, tMstScriptBody4CoOperRobot 2개 table로 통합
 --
 -- ========================================================================================
 DROP TABLE tMstScript4Manipulator;
@@ -340,6 +377,8 @@ INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 4, 0.0, 0.0, 0.0);       --
 --   관련 Table            : 
 --   이 력
 --          1.2024-06-03 : 최초 생성
+--          2.2024-06-16 : 사용 안함
+--                         tMstScriptID4CoOperRobot, tMstScriptBody4CoOperRobot 2개 table로 통합
 --
 -- ========================================================================================
 
@@ -363,7 +402,7 @@ INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  4,  '0, -1.5708, 0, -1.5708,
 -- ========================================================================================
 --   Table No             : 9
 --   Table 명              : tMstScript4CoOperRobot
---   내  용                : Manipulator Script 관리하는 Table
+--   내  용                : 협업로봇에서 사용하는 모든 Device(Manipulator, UR...)의 Script 관리하는 Table
 --                           tMstScript4Manipulator, tMstScript4UR table 통합
 --   성  격                : Master
 --   보존기간                : 영구
@@ -378,6 +417,9 @@ INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  4,  '0, -1.5708, 0, -1.5708,
 --          1.2024-06-03 : 최초 생성
 --          2.2024-06-04 : BodyOfJsonType field 추가
 --                         X_Coordinate_MIR, Y_Coordinate_MIR, Orientation_MIR, ScriptBody_UR field 삭제
+--          3.2024-06-16 : 사용 안함
+--                         tMstScript4CoOperRobot table 삭제하고  tMstScriptID4CoOperRobot, tMstScriptBody4CoOperRobot 
+--                         2개 table 분리
 --
 -- ========================================================================================
 DROP TABLE tMstScript4CoOperRobot;
@@ -410,7 +452,132 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 7, "UR", '{"Body":"-1.5708,
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.5708, 0, -1.5708, 0, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
 
 
+-- ========================================================================================
+--   Table No             : 10
+--   Table 명              : tMstScriptID4CoOperRobot
+--   내  용                : EqpGroupID별로 이동형 협업로봇의 동작(Loading,Unloading시) 동일할수 있지만 확장성 고려하여 별도관리
+--                          협업로봇에서 사용하는 모든 Device(UR, Manipulator, Gripper, Vision..)의 Script ID 관리하는 Table
+--                          자동운전할때 사용. 
+--                          Loading, Unloading할때 구동 Device(UR, Manipulator, Gripper, Vision..) 전체동작을 ID로 관리
+--                          Script Body는 각각 Device에서 관리한다.
+--                          Dispatcher는 Loading, Unloading시 Script ID를 설비에 전달(명령)한다.
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-16 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstScriptID4CoOperRobot;
 
+CREATE TABLE tMstScriptID4CoOperRobot; (
+   EqpGroupID             CHAR(1) NOT NULL,         -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   ProcessStatus          NVARCHAR(10) NOT NULL,    -- Loading, Unloading
+   ObjectOfCoOperRobot    NVARCHAR(10) NOT NULL,    -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
+   ScriptID               INT NOT NULL,             -- Script ID No
+   Activation             CHAR(1),                  -- 1:활성화, 0:비활성화
+   ScriptDescription      NVARCHAR(256)             -- Script 내용
+}  ON [Master];
+   
+ALTER TABLE tMstScriptID4CoOperRobot 
+      ADD CONSTRAINT tMstScriptID4CoOperRobot_PK PRIMARY KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID) ON [MasterIdx];
+
+ALTER TABLE tMstScriptID4CoOperRobot 
+      ADD CONSTRAINT tMstScriptID4CoOperRobot_CHK CHECK (Activation in ('0', '1')) ON [MasterIdx];
+	  
+INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 1, '1', 'UR Loading시 동작정의');                    -- 
+INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 2, '0', 'UR Loading시 동작 예비 1');                    -- 
+
+-- ========================================================================================
+--   Table No             : 11
+--   Table 명              : tMstScriptBody4CoOperRobot
+--   내  용                : EqpGroupID별로 이동형 협업로봇의 동작(Loading,Unloading시) 동일할수 있지만 확장성 고려하여 별도관리
+--                          협업로봇에서 사용하는 모든 Device(UR, Manipulator, Gripper, Vision..)의 Script ID 관리하는 Table
+--                          수동운전할때 사용. 
+--                          Loading, Unloading할때 구동 Device(UR, Manipulator, Gripper, Vision..) 세부동작에 대한 관리
+--                          UI, Dispatcher는 Loading, Unloading시 Script 각각 동작을 설비에 전달(명령)한다.
+--                          의사결정*) UI에서 직접 MOMA에 전달할지, Dispatcher 통해 전달힐지는 의사결정 필요.
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-16 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstScriptBody4CoOperRobot;
+
+CREATE TABLE tMstScriptBody4CoOperRobot; (
+   EqpGroupID             CHAR(1) NOT NULL,         -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   ProcessStatus          NVARCHAR(10) NOT NULL,    -- Loading, Unloading
+   ObjectOfCoOperRobot    NVARCHAR(10) NOT NULL,    -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
+   ScriptID               INT NOT NULL,             -- Script ID No
+   ScriptSeqNoOfBody      INT NOT NULL,             -- Script Body의 Sequence No
+   ScriptBody             NVARCHAR(256),            -- Script 구분동작
+   ScriptDescription      NVARCHAR(256)             -- Script 내용
+}  ON [Master];
+   
+ALTER TABLE tMstScriptBody4CoOperRobot 
+      ADD CONSTRAINT tMstScriptBody4CoOperRobot_PK PRIMARY KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
+
+ALTER TABLE tMstScriptID4CoOperRobot 
+      ADD CONSTRAINT tMstScriptBody4CoOperRobot_FK FOREIGN KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) 
+	  REFERENCES tMstEqpGroup(EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
+
+
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 1, '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 2, '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 3, '{"X":"1.1", "Y":"2.1", "Orientation":"1.57"}', "물체를 집는 위치로 이동");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 4, '{"X":"2.0", "Y":"3.0", "Orientation":"1.57"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 5, '{"X":"0.0", "Y":"0.0", "Orientation":"0.0"}', "홈 포지션으로 복귀");
+
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 1, '{"Body":"0, -1.5708, 0, -1.5708, 0, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 2, '{"Body":"1.5708, -1.5708, 1.5708, -1.5708, 1.5708, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 3, '{"Body":"-1.5708, -1.5708, -1.5708, -1.5708, -1.5708, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 4, '{"Body":"0, -1.5708, 0, -1.5708, 0, 0"}', "로봇을 다른 위치로 이동 (물체 운반)");
+
+-- ========================================================================================
+--   Table No             : 12
+--   Table 명              : tMstToken
+--   내  용                : token 호출 Event를 UI화면에 실시간 표시. 
+--                          모든 token event를 표시할수도 있고 선택된 token event를 표시도 가능하도록 UI 구성
+--   성  격                : Master
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody
+--   관련 Table            : 
+--   이 력
+--          1.2024-06-16 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstToken;
+
+CREATE TABLE tMstToken; (
+   TokenName              NVARCHAR(50) NOT NULL,    -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   SelectedFlag           CHAR(1) default NULL,     -- Loading, Unloading
+   TokenDescription      NVARCHAR(256)              -- Token 내용
+}  ON [Master];
+   
+ALTER TABLE tMstToken 
+      ADD CONSTRAINT tMstToken_PK PRIMARY KEY (TokenName) ON [MasterIdx];
+
+
+	  
 -- ========================================================================================
 --   Table No             : 1
 --   Table 명             : tProcBottle
@@ -420,6 +587,21 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 --
 --                         착공일때(LoadComp수신) CurrEqpGroupID, CurrEqpSeqNo Set한다.
 --                         완공일때(UnloadComp수신) tMstRoute table에서 Next정보를 얻고, NextEqpGroupID Set한다.
+--
+--                         1. Position(Bottle 반출입기) : Zone(1자리) + Tower(1자리) + Layer(1자리) + Slot(1자리)
+--                            1) Zone -> 실병Zone:'1', 빈병Zone:'2', Bottle 투입Zone:'0'
+--                            2) Tower
+--                               (1) 실병Zone, 빈병Zone -> 싫험실내 기준 가까운쪽:'1',  싫험실내 기준 먼쪽:'3'  
+--                               (2) Bottle 투입Zone -> '0'  
+--                            3) Layer
+--                               (1) 실병Zone, 빈병Zone -> 최상단:'1',  최하단:'5'  
+--                               (2) Bottle 투입Zone -> 상단:'1',  하단:'5'  
+--                            4) Slot
+--                               (1) 실병Zone, 빈병Zone ->  1 ~ 6
+--                               (2) Bottle 투입Zone ->  1 ~ 8  
+--                         2. Position(Stocker) : Port(2자리, 세로) + slot(2자리, 가로)
+--                         3. Position(분석기) : 0001 ~ 0012까지 spot
+--
 --
 --   성  격               : Process
 --   보존기간              : 영구 (순환사용)
@@ -432,6 +614,7 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 --   관련 Table            : 
 --   이 력
 --          1. 2024-06-01 : 최초 생성
+--          2. 2024-06-19 : field 추가 (RequestTotCnt, RequestRealCnt, RequestSeqNo, MemberOfBottlePack)
 --
 -- ========================================================================================
 DROP TABLE tProcBottle;
@@ -448,12 +631,17 @@ CREATE TABLE tProcBottle (
    -- 빈병일 경우 Null (특히 반출입기)
    ExperimentRequestName  NVARCHAR(10),             -- 실험의뢰자
    CurrLiquid             NVARCHAR(10),             -- 용액종료 (Acid:산, Base:염기, Organic:유기)
-   RequestDate            DATETIME,                 -- 요청일시
-   Position               CHAR(4),                  -- Bottle 반출입기, Stocker에서 위치정보
-                                                    -- '0000'인 경우 반출 또는 이동중인 Bottle
+   RequestDate            DATETIME,                 -- 요청일시 (YYYYmmdd hhmmss), 초단위 관리 필요, 의뢰단위 구분
+   RequestTotCnt          TINYINT,                  -- 작업자 분석의뢰 bottle수량
+   RequestRealCnt         TINYINT,                  -- 실제작업할 수량. 의뢰자 또는 관리자가 임의적으로 Bottle 제거한 예외 경우 차감필요
+   RequestSeqNo           TINYINT,                  -- 일련번호. 의뢰자가 중간에 임의 제거한 경우 SeqNo 다시 부여하여야 함
+                                                    -- RequestRealCnt와 RequestSeqNo 일치할때 반송시작, 작업의뢰단위
+   MemberOfBottlePack     TINYINT default 0,        -- Pack 단위로 작업수행. Pack에 첫번째 Bottle 반송이 일어날 경우 나머지 Bottle을 set하여 reserve 한다.
+   Position               CHAR(4),                  -- Bottle 반출입기, Stocker에서 위치정보, 분석기에서 위치정보
+                                                    -- '0000'인 경우 반출 또는 이동중인 Bottle 
    StartTime              DATETIME NOT NULL,        -- 착공시간
    EndTime                DATETIME,                 -- 완공시간
-   DispatchingPriority    TINYINT,                  -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
+   DispatchingPriority    TINYINT,                  -- 작업우선순위 (1:가장 낮음, 9:Hot Run)
    EventTime              DATETIME,                 -- Event Time (장비에 입고완료시점)
    PrevLiquid             NVARCHAR(10),             -- 이전 작업에서 용액종료 (산, 염기, 유기)
 ) ON [Process];
