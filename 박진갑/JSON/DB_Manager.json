@@ -11,23 +11,77 @@ desc
 
 관련 Token List
 
-101. Bottle 반출입기에서 공병Zone에 Bottle 수량요청              ReqRealBottleCountAtInOutBotMach
-102. Bottle 반출입기에서 실병Zone에 Bottle 수량요청              ReqEmptyBottleCountAtInOutBotMach
-103. Bottle 반출입기에서 실병 착공보고                          ReportLoadingRealBottleAtInOutBotMach
-104. Bottle 반출입기에서 실병 완공(입고완료)보고                    ReportLoadCompRealBottleAtInOutBotMach
-105. 반출입기에서 적정 Empty Bottle을 추출한다                   ExtractSuitableEmptyBottleAtInOutBotMach
-106. 반출입기에서 적정 Real Bottle을 추출한다                    ExtractSuitableRealBottleAtInOutBotMach
-107. 의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Set       SetMemberOfBottlePack
-107. 의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Reset     ResetMemberOfBottlePack
+---------------------
+101. 반출입기에서 공병Zone에 투입가능한 Bottle 수량요청              			ReqLoadingableHoleCapaAtEmptyBottleZoneFmDB
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+102. 반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청  ReqLoadingableHoleCapaAtRealBottleZoneFmDB
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+103. 반출입기 설비상태를 요청한다.									ReqStatusOfInOutBotEqp
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+104. 반출입기에서 적정 빈병을 추출한다                   				ExtractSuitableEmptyBottleAtInOutBotEqp
+105. 반출입기에서 적정 Real Bottle을 추출한다                     	ExtractSuitableRealBottleAtInOutBotEqp
 
-201. Stocker에서 hole capacity(Bottle 적재수량)               GetBottleCapacityOfStocker
-202. Stocker에 bottle 적재할 충분한 공간이 있는지 확인한다           CheckLoadingableHoleCapaAtStocker
+111. 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지         	RealBottleLoadReqAtWorkingArea
+112. 반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지        	RealBottleLoadCompAtWorkingArea
+113. 반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지        	RealBottleUnloadReqAtWorkingArea
+     --> 112, 113번 한개만 사용해도 가능할 수 있음. 검토필요
+114. 반출입기에서 실병 출하완료메세지(#13 공정완료)                    	RealBottleTransferCompAtWorkingArea
+115. 반출입기 L1(입고) Port에서 빈병 입고요청메세지                  	EmptyBottleLoadReqAtWorkingArea
+116. 반출입기 L1(입고) Port에서 빈병 도착완료메세지(#11 공정시작)       	EmptyBottleLoadCompAtWorkingArea
+117. 반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지       	EmptyBottleUnloadReqAtWorkingArea
+     --> 116, 117번 한개만 사용해도 가능할 수 있음. 검토필요
+118. 반출입기에서 빈병 입고완료메세지              					EmptyBottleTransferCompAtWorkingArea
 
-301. 분석기가 작업가능여부 사전 확인한다                            CheckRunableStatusAtAnalysis
+121. 반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지            	RealBottleLoadReqAtOutArea
+122. 반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)	RealBottleLoadCompAtOutArea
+123. 반출입기에서 실병 입고완료메세지              					RealBottleTransferCompAtOutArea
+124. 반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지          	EmptyBottleLoadReqAtOutArea
+125. 반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지			EmptyBottleLoadCompAtOutArea
+126. 반출입기에서 빈병 출하완료메세지(#11 공정완료)						EmptyBottleTransferCompAtOutArea
 
-401. MOMA 작업가능여부 사전 확인한다                            CheckRunableStatusAtMOMA
-402  MOMA 장비상태를 reserve 변경                            ChangeMOMA_Status2Reserve ChangeEqpStatus2Reserve
+131. 의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Set       		SetMemberOfBottlePack
+     --> json 별도정의하지 않고 #105번 sp 내부에서만 사용
+132. 의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Reset     		ResetMemberOfBottlePack
+     --> json 별도정의하지 않고 #113번 sp 내부에서만 사용
+133. 세팅된 실험의뢰정보를 가져온다									GetLaboratoryDemandInformation
 
+---------------------
+201. Stocker에서 hole capacity(Bottle 적재수량)               	GetBottleCapacityOfStocker 
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+202. Stocker에 bottle 적재할 충분한 공간이 있는지 확인한다           	CheckLoadingableHoleCapaAtStocker Or GetAdequateNumberOfSpareHolesAtStocker
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+203. Stocker 설비상태를 요청한다.									ReqStatusOfStocker
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+211. Stocker에 입고완료메세지(#21 공정시작)							LoadCompAtStocker
+212. Stocker에 출하완료메세지(#21 공정완료)							UnoadCompAtStocker
+
+---------------------
+301. 분석기가 작업가능여부 사전 확인한다                            	CheckRunableStatusAtAnalyzer
+302. 분석기 설비상태를 요청한다.									    ReqStatusOfAnalyzer
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+311. 분석기에 투입완료메세지(#31 공정시작)								LoadCompAtAnalyzer
+312. 분석기에 출하완료메세지(#31 공정완료)								UnloadCompAtAnalyzer
+
+---------------------
+401. MOMA 작업가능여부 사전 확인한다                            		CheckRunableStatusAtMOMA
+402  MOMA 장비상태를 reserve 변경                            		ChangeMOMA_Status2Reserve or ChangeEqpStatus2Reserve
+403. MOMA 설비상태를 요청한다.									    ReqStatusOfMOMA
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+	 --> UI 호출할때 사용
+411. MOMA 이동시작메세지(#41 공정시작)								LoadCompAtMOMA
+412. MOMA 이동완료메세지(#41 공정완료)								UnloadCompAtMOMA
+
+--------------------- UI Or AIMS
+501. 실험의뢰정보를 세팅한다 										SetLaboratoryDemandInformation
+
+--------------------- 공통
 901. 입고요청(LoadReq)                                      LoadRequest
 902. 입고완료(착공-LoadComp)                                  LoadComp
 903. 출하요청(UnloadReq)                                    UnloadRequest
@@ -86,25 +140,531 @@ Normal Sequence Flow
 
 2-1 Stocker             입고완료(착공-LoadComp)                                   Stocker 위치정보보고
 2-2 Stocker(신규)         출하지시수신                                              Dispatcher가 우선순위에 따라 Stocker내 Bottle에 대한 출하요청
-2-3 Stocker             출하요청(UnloadReq)                                     Unload Port에 도착
-2-4 Stocker             출하완료(완공-UnloadComp)
-2-5 Stocker             입고요청(LoadReq)
+2-3 Stocker             출하완료(완공-UnloadComp)
 
 3-1 분석기                 입고완료(착공-LoadComp)       
 3-2 분석기                 장비상태변경(분석시작)                                Idle --> Run  Waiting 추가
 3-3 분석기                                                             분석작업       
 3-4 분석기                 장비상태변경(분석종료)                                Run --> Idle
-3-5 분석기                 출하요청(UnloadReq)           
-3-6 분석기                 출하완료(완공-UnloadComp)
-3-7 분석기                 입고요청(LoadReq)
+3-5 분석기                 출하완료(완공-UnloadComp)
 
+4-1 이동형협업로봇(신규)         LoadComp                  설비에서 MOMA에 Bottle 적재한 경우
 4-1 이동형협업로봇(신규)         GripBottle                Gripper가 Bottle 잡은경우, UI화면에 동작표시
-4-1 이동형협업로봇(신규)         MovingBottle              이동중
-4-1 이동형협업로봇(신규)         ReleaseBottle             Gripper가 Bottle 내려놓은 경우
+4-2 이동형협업로봇(신규)         MovingBottle              이동중
+4-3 이동형협업로봇(신규)         UnloadComp                Gripper가 Bottle 내려놓은 경우. 즉 MOMA에서 설비에 Bottle 옮긴경우
 
 ============================================================================ 
 
-1. 입고요청(LoadReq)
+101. Bottle 반출입기에서 공병Zone에 투입가능한 Bottle 수량요청
+   1) Token : ReqLoadingableHoleCapaAtEmptyBottleZoneFmDB
+   2) 관련 controller : AIMS Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기에서 빈병을 출하하기전에 요청수량 빈병이 있는지 확인한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "HoleTotCountInEmptyBottleZone" : 5
+         "error_msg" : "None"
+      }      
+
+102. Bottle 반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청
+   1) Token : ReqLoadingableHoleCapaAtRealBottleZoneFmDB
+   2) 관련 controller : AIMS Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기에서 실병을 입고하기전에 실병Pack 수량 입고할 충분한 hole 있는지 확인한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "HoleTotCountInRealBottleZone" : 5
+         "error_msg" : "None"
+      }      
+
+103. 반출입기 장비상태요청
+   1) Token : ReqStatusOfInOutBotEqp
+   2) 관련 controller : Dispatch,
+                      UI
+   3) Body
+      { 
+         None
+      }      
+   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrieveStatuseOfInOutBotEqp
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "eqp_status" : "Run",
+         "error_msg" : "None"
+      } 
+	  
+104. 반출입기에서 적정 빈병을 추출한다
+   1) Token : ExtractSuitableEmptyBottleAtInOutBotEqp
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기 빈병Zone에서 빈병Pack 수량 만큼 출고한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "TotCountOfEmptyBottlePack" : 5
+         "EmptyBottleInfo" : [
+            { "BottleID_1" : "ID_001"
+            },
+            { "BottleID_2" : "ID_002"
+            },
+            ...
+            { "BottleID_5" : "ID_005"
+            }
+         ],		 
+         "error_msg" : "None"
+      }   
+	  
+105. 반출입기에서 적정 Real Bottle을 추출한다
+   1) Token : ExtractSuitableRealBottleAtInOutBotEqp
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기 실병Zone에서 실병Pack 수량 만큼 출고한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "TotCountOfRealBottlePack" : 5
+         "RealBottleInfo" : [
+            { "BottleID_1" : "ID_001"
+            },
+            { "BottleID_2" : "ID_002"
+            },
+            ...
+            { "BottleID_5" : "ID_005"
+            }
+         ],		 
+         "error_msg" : "None"
+      }   	  
+	  
+111. 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
+   1) Token : RealBottleLoadReqAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : 반출입기 U1 Port에 실병없을때(비어있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }      
+
+112. 반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
+   1) Token : RealBottleLoadCompAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U1 Port에 실병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+113. 반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
+   1) Token : RealBottleUnloadReqAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U1 Port에 실병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+114. 반출입기에서 실병 출하완료메세지(#13 공정완료) 
+   1) Token : RealBottleTransferCompAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U1 Port에 있는 실병을 MOMA 이동했을때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+115. 반출입기 L1(입고) Port에서 빈병 입고요청메세지
+   1) Token : EmptyBottleLoadReqAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : 반출입기 U1 Port에 빈병없을때(비어있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }      
+
+116. 반출입기 L1(입고) Port에서 빈병 도착완료메세지(#11 공정시작)
+   1) Token : EmptyBottleLoadCompAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U1 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+117. 반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
+   1) Token : EmptyBottleUnloadReqAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U1 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }
+	  
+118. 반출입기에서 빈병 입고완료메세지
+   1) Token : EmptyBottleTransferCompAtWorkingArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001",
+		 "Position" : "2111"
+      }      
+   4) Function : 반출입기 빈병Area hole에 bottle을 투입완료했을때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+121. 반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
+   1) Token : RealBottleLoadReqAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : 반출입기 L2 Port에 실병없을때(비어있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }      
+
+122. 반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)
+   1) Token : RealBottleLoadCompAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 L2 Port에 실병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+123. 반출입기에서 실병 입고완료메세지
+   1) Token : RealBottleTransferCompAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001",
+		 "Position" : "1111"
+      }      
+   4) Function : 반출입기 실병Area hole에 bottle을 투입완료했을때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+124. 반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지
+   1) Token : EmptyBottleLoadReqAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : 반출입기 U2 Port에 빈병없을때(비어있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }      
+
+125. 반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지
+   1) Token : EmptyBottleLoadCompAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U2 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+126. 반출입기에서 빈병 출하완료메세지(#11 공정완료)
+   1) Token : EmptyBottleTransferCompAtOutArea
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : 반출입기 U2 Port에 있는 빈병을 작업자가 끄집어낼때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+133. 세팅된 실험의뢰정보를 가져온다
+   1) Token : GetLaboratoryDemandInformation
+   2) 관련 controller : 반출입기 Controller, UI
+   3) Body
+      { 
+         "UserID" : "UID_KIM_001",
+		 "ProjectNo" : "Prj_001"
+      }      
+   4) Function : 빈병을 추출하기 위하여 설비에서 작업자가 Login 할때 Event.
+                 저장된 실험의뢰자의 실험요청정보를 가져온다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectLaboratoryDemandInformation
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "BottleDemandTotCount" : 5,
+         "BottleDemands" : [
+            { "No_1" : {
+                 "BottleSeqNoOfDemand" : 1, "LiquidCharacter" : "Acid", "CollectionPosition":"합착기"}
+            },
+            { "No_2" : {
+                 "BottleSeqNoOfDemand" : 2, "LiquidCharacter" : "Base", "CollectionPosition":"Macro"}
+            },
+            ...
+            { "No_5" : {
+                 "BottleSeqNoOfDemand" : 5, "LiquidCharacter" : "Organic", "CollectionPosition":"Pattern"}
+            }
+         ],		 
+         "DemandTime" : "2024-06-22 21:29:10"		 
+         "error_msg" : "None"
+      } 
+
+
+201. Stocker에서 hole capacity(Bottle Total 적재수량)
+   1) Token : GetBottleCapacityOfStocker
+   2) 관련 controller : 반출입기 Controller, Dispatcher
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기에서 빈병을 출하하기전에 요청수량 빈병이 있는지 확인한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "BottleCapacityOfStocker" : 96
+         "error_msg" : "None"
+      }      
+
+202. Stocker에 bottle 적재할 충분한 공간이 있는지 확인한다
+   1) Token : CheckLoadingableHoleCapaAtStocker
+   2) 관련 controller : 반출입기 Controller, Dispatcher, UI
+   3) Body
+      { 
+         none
+      }      
+   4) Function : Bottle 반출입기에서 실병을 입고하기전에 실병Pack 수량 입고할 충분한 hole 있는지 확인한다
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "LoadingableHoleCapa" : 5
+         "error_msg" : "None"
+      }      
+
+203. Stocker 설비상태를 요청한다.
+   1) Token : ReqStatusOfStocker
+   2) 관련 controller : 반출입기 Controller, Dispatcher, UI
+   3) Body
+      { 
+         None
+      }      
+   4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 요청
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : RetrieveStatuseOfInOutBotEqp
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",
+         "eqp_status" : "Run",
+         "error_msg" : "None"
+      } 
+
+211. Stocker에 입고완료메세지(#21 공정시작)
+   1) Token : LoadCompAtStocker
+   2) 관련 controller : Stocker Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001",
+		 "Position" : "2111"
+      }      
+   4) Function : Stocker Empty hole에 실병을 투입완료했을때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      }  
+
+212. Stocker에 출하완료메세지(#21 공정완료)
+   1) Token : UnoadCompAtStocker
+   2) 관련 controller : Stocker Controller, UI
+   3) Body
+      { 
+         "BottleID" : "ID_001"
+      }      
+   4) Function : Stocker에서 실병을 인출했을때 Event message
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "DB_Manager",    // 
+         "error_msg" : "None"
+      } 
+
+
+
+	  
+
+501. 실험의뢰정보를 세팅한다
+   1) Token : SetProcLaboratoryDemand
+   2) 관련 controller : DBMgr
+   3) Body
+      { 
+         "UserID" : "1",
+         "ProjectNo" : "Prt 001",
+         "BottleDemandTotCount" : 5,
+         "BottleDemands" : [
+            { "No_1" : {
+                 "BottleSeqNoOfDemand" : 1, "LiquidCharacter" : "Acid", "CollectionPosition":"합착기"}
+            },
+            { "No_2" : {
+                 "BottleSeqNoOfDemand" : 2, "LiquidCharacter" : "Base", "CollectionPosition":"Macro"}
+            },
+            ...
+            { "No_5" : {
+                 "BottleSeqNoOfDemand" : 5, "LiquidCharacter" : "Organic", "CollectionPosition":"Pattern"}
+            }
+         ],		 
+         "DemandTime" : "2024-06-22 21:29:10"
+      }      
+   4) Function : 실험의뢰자의 실험요청정보를 저장
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : InsertProcLaboratoryDemand
+   7) Return
+      { 
+         "status_code" : 200,
+         "sender_controller" : "AIMS Controller",    // DB_Manager		 		
+         "error_msg" : "None"
+      }      
+
+
+901. 입고요청(LoadReq)
    1) Token : LoadRequest
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
@@ -128,7 +688,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }      
 
-2. 입고완료(착공-LoadComp)
+902. 입고완료(착공-LoadComp)
    1) Token : LoadComp
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
@@ -155,7 +715,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }  
 
-3. 출하요청(UnloadReq)
+903. 출하요청(UnloadReq)
    1) Token : UnloadRequest
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
@@ -181,7 +741,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }      
 
-4. 출하완료(착공-UnloadComp)
+904. 출하완료(착공-UnloadComp)
    1) Token : UnloadComp
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경
@@ -209,7 +769,7 @@ Normal Sequence Flow
       } 
 
 
-5. 장비반송 사전예약, 다른 Process에서 해당장비 반송을 못하도록 하기 위함
+905. 장비반송 사전예약, 다른 Process에서 해당장비 반송을 못하도록 하기 위함
    Dispatcher에서 To Position 정해지면 To Position을 Reserve한다.
    1) Token : ReserveEqpPort4Dispatch
    2) 관련 controller : Dispatcher
@@ -234,7 +794,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       } 
 
-6. Process상태변경
+906. Process상태변경
    LoadRequest, LoadComp, UnloadRequest, UnloadComp 통합하는 것도 가능
    1) Token : ChangeProcessStatus
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
@@ -256,7 +816,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       } 
       
-7. 장비상태변경
+907. 장비상태변경
    1) Token : ChangeEqpStatus
    2) 관련 controller : Bottle 반출입기, 분석기, Stocker, 폐기설비
                       UI에서 수동변경     
@@ -276,7 +836,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }      
       
-8. 특정장비(분석기)상태요청
+908. 특정장비(분석기)상태요청
    1) Token : ReqAnalysisEqpStatus
    2) 관련 controller : Dispatch,
                       UI
@@ -296,7 +856,7 @@ Normal Sequence Flow
          "process_status" : "UnloadReq",
          "error_msg" : "None"
       } 
-9. 장비상태요청
+909. 장비상태요청
    1) Token : ReqAllEqpStatus
    2) 관련 controller : Dispatch,
                       UI
@@ -328,7 +888,7 @@ Normal Sequence Flow
       } 
       
 
-10. Bottle정보 수동변겅
+910. Bottle정보 수동변겅
    1) Token : ChangeBottleStatus
    2) 관련 controller : UI
    3) Body
@@ -349,7 +909,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }  
       
-11. 반출입기에서 공 Bottle 수량요청   
+911. 반출입기에서 공 Bottle 수량요청   
     반출입기에서 출하할 공 Bottle 있는지 확인한다
    1) Token : GetCountEmptyBottleAtInOutBottle
    2) 관련 controller : UI
@@ -369,7 +929,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       } 
       
-12. 설비내 Bottle 정보요청
+912. 설비내 Bottle 정보요청
     UI화면에서 반출입기 설비에 추출가능한 빈병정보를 확인한다.
    1) Token : ReqBottleInfoFmEqp
    2) 관련 controller : Dispatch,
@@ -402,7 +962,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       } 
       
-13. 모든 Bottle 정보요청
+913. 모든 Bottle 정보요청
    1) Token : ReqAllBottlesInfo
    2) 관련 controller : Dispatch,
                       UI
@@ -433,7 +993,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       } 
       
-14. 작업대기중인 Bottle 정보요청. 분석기에서 의미 있음
+914. 작업대기중인 Bottle 정보요청. 분석기에서 의미 있음
     UI화면 분석기 설비 모니터링 화면에 분석기 투입대기중인 수량과 관련정보 표시(즉, 반출입기 Or Stocker에서 Next 공정이 분석기인 경우) 
    1) Token : InputWaitingBottleInfoFmEqp
    2) 관련 controller : UI
@@ -466,7 +1026,7 @@ Normal Sequence Flow
       } 
 
 
-15. Bottle 공정이력정보 요청        
+915. Bottle 공정이력정보 요청        
    1) Token : Req4BottleProcessHistory
    2) 관련 controller : UI
    3) Body
@@ -495,7 +1055,7 @@ Normal Sequence Flow
          ],          "error_msg" : "None"
       } 
 
-16. stocker내에 반송우선순위 bottle 확인
+916. stocker내에 반송우선순위 bottle 확인
    1) Token : CheckTopPriorityBottle
    2) 관련 controller : Dispatch
    3) Body
@@ -531,7 +1091,7 @@ Normal Sequence Flow
          "bottle_id" : "bot_001"      
       }
 
-16. 공 Bottle 반출지시 ?
+917. 공 Bottle 반출지시 ?
    1) Token : OutEmptyBottle
    2) 관련 controller : Dispatch,
                       UI

@@ -37,12 +37,13 @@ desc
 -- 내 용            : 공정관련 table을 관리하는 table space
 --
 -- 관련 Master Table
---           No.    Table 명             Size   
---          ----  --------------------  ------------
---            1     tProcBottle
---            2     tProcBotOper
---            3     tChgEqpStatus
---            4     tDailyEqpStatus
+--           No.    Table 명                  Size   
+--          ----  ------------------------  ------------
+--            1     tLaboratoryDemandInfo
+--            2     tProcBottle
+--            3     tProcBotOper
+--            4     tChgEqpStatus
+--            5     tDailyEqpStatus
 
 -- ============================================================================ 
 -- Table Space 명   : History
@@ -228,21 +229,12 @@ ALTER TABLE tMstOperation
 ALTER TABLE tMstOperation 
       ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 
-INSERT INTO tMstOperation VALUES ('1', '1', N'공 Bottle 초기상태(반출대기)');     -- 반출입기에서 반출을 대기중인 공 Bottle(작업자가 시료채취를 위해)
-INSERT INTO tMstOperation VALUES ('1', '2', N'시료채취중');              -- 반출입기 작업자공간쪽 Port에서 unloadcomp 수신하면 (/w Bottle Barcode)
-INSERT INTO tMstOperation VALUES ('1', '3', N'실 Bottle 투입');              -- 반출입기 작업자공간쪽 Port에서 Loadcomp하면 (/w Bottle Barcode)
-INSERT INTO tMstOperation VALUES ('1', '4', N'실 Bottle 출하대기');    -- UnloadRequest event
-INSERT INTO tMstOperation VALUES ('1', '5', N'세정후 Bottle 투입');    -- 세정후 재사용을 위하여 반출입기 분석기 Port에 Bottle 투입
-                                                                    -- 반출입기 분석실 Port에서 Loadcomp 호출할때
-
-INSERT INTO tMstOperation VALUES ('1', '1', N'Bottle 반출요청');     -- 작업자가 시료채취를 위해 반출요청
-INSERT INTO tMstOperation VALUES ('1', '2', N'Bottle 반출');              -- 시료채취
-INSERT INTO tMstOperation VALUES ('1', '3', N'Bottle Loader 투입요청');   -- 작업자가 시료채취후 투입 
-INSERT INTO tMstOperation VALUES ('1', '4', N'Bottle 출하대기');    -- UnloadRequest event
-INSERT INTO tMstOperation VALUES ('1', '5', N'Bottle 보관');        -- 세정후 재사용을 위하여 Bottle 반출입기에 보관
+INSERT INTO tMstOperation VALUES ('1', '1', N'공병Zone 대기');     	-- 세정후 공병투입(세정후 재사용을 위하여 투입)
+INSERT INTO tMstOperation VALUES ('1', '2', N'시료채취중');            	-- 작업의뢰자가 시료채취
+INSERT INTO tMstOperation VALUES ('1', '3', N'실병Zone 대기');			-- 시료채취후 실병투입
 
 INSERT INTO tMstOperation VALUES ('2', '1', N'분석 작업중');
-INSERT INTO tMstOperation VALUES ('3', '1', N'Stocker 입고');       -- 
+INSERT INTO tMstOperation VALUES ('3', '1', N'Stocker 입고');       	-- 
 INSERT INTO tMstOperation VALUES ('4', '1', N'폐기설비 작업중');
 INSERT INTO tMstOperation VALUES ('5', '1', N'이동형협업로봇 이동중');
 
@@ -490,7 +482,7 @@ ALTER TABLE tMstScriptID4CoOperRobot
 
 ALTER TABLE tMstScriptID4CoOperRobot 
       ADD CONSTRAINT tMstScriptID4CoOperRobot_CHK CHECK (Activation in ('0', '1')) ON [MasterIdx];
-	  
+      
 INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 1, '1', 'UR Loading시 동작정의');                    -- 
 INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 2, '0', 'UR Loading시 동작 예비 1');                    -- 
 
@@ -533,7 +525,7 @@ ALTER TABLE tMstScriptBody4CoOperRobot
 
 ALTER TABLE tMstScriptID4CoOperRobot 
       ADD CONSTRAINT tMstScriptBody4CoOperRobot_FK FOREIGN KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) 
-	  REFERENCES tMstEqpGroup(EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
+      REFERENCES tMstEqpGroup(EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
 
 
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 1, '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
@@ -576,10 +568,46 @@ CREATE TABLE tMstToken; (
 ALTER TABLE tMstToken 
       ADD CONSTRAINT tMstToken_PK PRIMARY KEY (TokenName) ON [MasterIdx];
 
-
-	  
 -- ========================================================================================
 --   Table No             : 1
+--   Table 명             : tLaboratoryDemandInfo
+--   내  용                : 실험의뢰정보를 관리하는 Table
+--                          AIMS Controller Or LIMS UI에서 요청
+--                         확인*)동일 project no 2번 실험하는 경우 있는지 ?
+--
+--   성  격               : Process
+--   보존기간              : 5년 (순환사용)
+--   Record 발생건수(1일)   :
+--   Total Record 수      : 300개
+--   Record size          : 47
+--   Total size           : 180 = 5 * 36
+--   관리화면 유/무           : 유
+--   P.K                  : UserID, ProjectNo, BottleSeqNoOfDemand
+--   관련 Table            : 
+--   이 력
+--          1. 2024-06-22 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tLaboratoryDemandInfo;
+
+CREATE TABLE tLaboratoryDemandInfo (
+   UserID                 NVARCHAR(30) NOT NULL,    -- 사용자ID (사번)
+   ProjectNo              NVARCHAR(10) NOT NULL,    -- Project No
+   BottleDemandTotCount   TINYINT,                  -- Bottle 전체요청수량
+   BottleSeqNoOfDemand    TINYINT,                  -- Bottle 전체요청수량에서의 순번
+   LiquidCharacter        NVARCHAR(10),             -- 용액종료 (Acid:산, Base:염기, Organic:유기)
+   CollectionPosition     NVARCHAR(20),             -- 수집위치
+   DemandTime             DATETIME                  -- 요청일시
+} ON [Process];
+
+ALTER TABLE tLaboratoryDemandInfo
+       ADD  CONSTRAINT tLaboratoryDemandInfo_PK PRIMARY KEY (UserID, ProjectNo, BottleSeqNoOfDemand) ON [ProcessIdx];
+ALTER TABLE tLaboratoryDemandInfo 
+      ADD CONSTRAINT tLaboratoryDemandInfo_FK FOREIGN KEY (UserID) REFERENCES tMstUser(UserID) ON [ProcessIdx];
+
+      
+-- ========================================================================================
+--   Table No             : 2
 --   Table 명             : tProcBottle
 --   내  용                : LIMS Bottle을 관리하는 Table
 --                         tMstBottle에서는 Bottle정보가 변경되지 않는 것을 관리하고
@@ -652,15 +680,15 @@ ALTER TABLE tProcBottle
       ADD CONSTRAINT tProcBottle_FK FOREIGN KEY (BottleID) REFERENCES tMstEqpGroup(BottleID) ON [ProcessIdx];
 
 -- ========================================================================================
---   Table No             : 2
+--   Table No             : 3
 --   Table 명             : tProcBotOper
 --   내  용                : LIMS Bottle에서 작업이력을 관리하는 Table
 --                         tMstBottle에서는 Bottle정보가 변경되지 않는 것을 관리하고
 --                         tProcBottle에서는 공정진행하면서 정보가 변경되는 것을 별도 Table 관리
 
---							재사용을 위하여 Bottle 반출입기에 입고할때(OpCode=5) tHisProcBotOper table 데이터 이동하고, 
+--                          재사용을 위하여 Bottle 반출입기에 입고할때(OpCode=5) tHisProcBotOper table 데이터 이동하고, 
 --                          기존 Data 삭제한다.
---							6개월 경과한 Garbage Data 자동 삭제를 한다.
+--                          6개월 경과한 Garbage Data 자동 삭제를 한다.
 -- 
 --   성  격               : Process
 --   보존기간              : 영구
@@ -692,7 +720,7 @@ ALTER TABLE tProcBotOper
       ADD  CONSTRAINT tProcBotOper_PK PRIMARY KEY (BottleID, EqpGroupID, OperID, StartTime) ON [ProcessIdx];
 
 -- ========================================================================================
---   Table No             : 3
+--   Table No             : 4
 --   Table 명             : tChgEqpStatus
 --   내  용                : 장비사용시간 관리하는 Table
 --                          Bottle 반출입기, Stocker는 설비내 Bottle 항상 있는 상태이므로 의미 없음
@@ -700,7 +728,7 @@ ALTER TABLE tProcBotOper
 --
 --                          1일 단위로 tDailyEqpStatus summary data만들고, 
 --                          50일 경과된 데이터는 tHisChgEqpStatus table 이동하고 data 삭제한다.
---							6개월 경과한 Garbage Data 자동 삭제를 한다.
+--                          6개월 경과한 Garbage Data 자동 삭제를 한다.
 --   성  격               : Process
 --   보존기간              : 3년
 --   Record 발생건수(1일)   : 
@@ -730,7 +758,7 @@ ALTER TABLE tChgEqpStatus
       ADD CONSTRAINT tChgEqpStatus_FK FOREIGN KEY (EqpGroupID, EqpSeqNo) REFERENCES tMstEqpGroup(EqpGroupID, EqpSeqNo) ON [ProcessIdx];
 
 -- ========================================================================================
---   Table No             : 4
+--   Table No             : 5
 --   Table 명             : tDailyEqpStatus
 --   내  용                : 일일 장비사용시간 관리하는 Table
 --                          날짜가 변경될때 자동생성
