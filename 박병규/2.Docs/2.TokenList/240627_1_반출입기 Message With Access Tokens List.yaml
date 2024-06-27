@@ -1,0 +1,224 @@
+Token List_반출입기
+==================================================================================================
+Comment List
+	240626 -> 해당 토큰 리스트는 필요한 부분의 이름과 리스트만 정의됨 -> 선행작업 이후에 호출 네임을 정할것 박병규
+==================================================================================================
+
+1. Token List - 정의중
+	==================================================================================================
+	규칙 - 추가가 필요한 규칙은 마지막번호에 추가할 것. 박병규
+	1) 작업단위는 Pack으로 정의 -> 불합리하거나 네이밍이 겹치는 경우 재정의 할 것
+	2) Under-Bar는 사용하지 않는다.
+	3) 각 문자의 첫글자는 대문자로 표기, 약어는 모두 대문자로 표기
+	4) 토큰의 마지막에 FmDB, FmEQP로 토큰의 호출위치를 표기할 것
+	5) 반출입기의 번호는 100번지이며 적절히 번호를 띄어서 사용할 것 10단위
+	6) 모든 표현은 반출입기를 기준으로 설명 예) 수신은 어느곳에서든 반출입기로 전달되는 Token이다.
+	7) 상위 시스템은 LIMS로 표현, 반출입기는 InOutEQP로 표현, 협동로봇은 MOMA로 표현한다.
+	8) 네이밍 규칙 선행 구분문자
+		i) 1순위 커맨드의 구분
+			- 장비측 - Name -> BOTInOutEQP
+				요청 -> REQEQP, 응답(보고) -> RSPEQP, 보고 + 데이터 -> RSPDATAEQP, 알람 -> EVENTEQP
+			- LIMS측
+				요청 -> REQLIMS, 응답 -> RSPLIMS, 응답 + 데이터 -> RSPDATALIMS
+
+		ii) 2순위 job의 하달 - 생략가능
+			- LIMS측 Job의 하달 -> JobEX
+			- EQP측 응답 Job의 응답 -> JobRS
+
+		iii) 3순위 EQP구분
+			- 반출입기 InOutEQP
+
+		iv) 4순위 커맨드 이름
+
+		v) 5순위 가져온 데이터의 위치 - 생략가능
+			- DB -> FmDB, EQP -> FmEQP
+	==================================================================================================
+	1-1. 공통부분 선언
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+		
+		
+		102. 설비내 출하가능 공병 현황 보고
+			- Token : 
+			- 의뢰자가 수동으로 처리하므로 필요 없다.
+
+	==================================================================================================
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+
+
+	110. LIMS에서 최초 공병 배출 의뢰(Job)를 수신
+		- Token : REQLIMSJobEXInOutEQPExtractEmptyBOT
+
+	111. 의뢰(Job)의 진행여부를 응답
+		- 의뢰자가 수동으로 의뢰 접수후 응답을 보낸다.
+		- Token : RSPEQPJobRSInOutEQPExtractEmptyBOT
+
+	112. 배출하는 공병의 바코드정보를 보고
+		- Token : RSPDATAEQPInOutEQPExtractEmptyBOTBarcode
+
+	113. 반출된 공병의 레시피정보 요청
+		- Token : REQEQPInOutEQPExtractEmptyBOTRecipe
+
+	114. 반출된 공병의 레시피정보 수신
+		- Token : RSPDATALIMSInOutEQPExtractEmptyBOTRecipe
+
+	115. 반출된 공병의 레시피매칭 완료 보고
+		- 반출된 공병의 모든 정보를 포함한다.
+		- Token : RSPDATAEQPInOutEQPExtractEmptyBOTRecipeMatchDone
+
+	116. 공병반출 종료 보고
+		- Token : RSPEQPInOutEQPExtractEmptyBOTDone
+
+	==================================================================================================
+	120. 입고된 시료의 모든 정보를 보고한다.
+		- 해당 Token은 의뢰자의 시료입고완료 수동 동작에따라 발생한다.
+		- Token : RSPDATAEQPInOutEQPReportAllInputRealBOTData
+		
+	==================================================================================================
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+
+
+	130. LIMS에서 시료검수 Job을 수신
+		- 해당 Job정보는 검수할 Bottle의 정보를 포함한다.
+		- Token : REQLIMSJobEXInOutEQPCheckInputRealBOT
+
+	131. 시료검수 Job 진행여부 응답
+		- Token : RSPEQPJobRSInOutEQPCheckInputRealBOT
+
+	132. LIMS에서 시료검수 정보 요청
+		- 필요하지 않을 수 있음 -> LIMS에서 작업종료 시점을 알 수 없기때문
+		- Token : REQLIMSInOutEQPCheckInputRealBOTData
+
+	133. 시료검수 정보 보고
+		- Token : RSPDATAEQPInOutEQPCheckInputRealBOTData
+
+	134. 시료검수 종료 보고
+		- Token : RSPEQPInOutEQPCheckInputRealBOTDone
+
+	==================================================================================================
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+
+
+	140. LIMS에서 시료운송 Job을 수신
+		- 해당 Job정보는 운송할 Bottle의 정보를 포함한다.
+		- Token : REQLIMSJobEXInOutEQPRealBOTTranferToMOMA
+
+	141. 시료운송 Job 진행여부 응답
+		- Token : RSPEQPJobRSInOutEQPRealBOTTranferToMOMA
+
+	142. LIMS에서 시료반출 요청 수신
+		- Token : REQLIMSInOutEQPRealBOTTranferMOMAReady
+
+	143. 시료 U1포트 도착을 보고
+		- Token : RSPEQPInOutEQPRealBOTTranferEQPMoveDone
+
+	144. LIMS에서 시료 반출 완료 수신
+		- Token : REQLIMSInOutEQPRealBOTTranferMOMAReceiveDone
+
+	145. 시료 반출 종료 보고
+		- Job이 끝났음을 보고한다.
+		- Token : RSPEQPInOutEQPRealBOTTranferToMOMADone
+
+	==================================================================================================
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+
+
+	150. LIMS에서 공병회수 Job을 수신
+		- 해당 Job정보는 회수할 Bottle의 정보를 포함한다.
+		- Token : REQLIMSJobEXInOutEQPEmptyBOTTranferToEQP
+
+	151. 공병회수 Job 진행여부 응답
+		- Token : RSPEQPJobRSInOutEQPEmptyBOTTranferToEQP
+
+	152. 공병투입 요청
+		- Token : REQEQPInOutEQPEmptyBOTTranferEQPReady
+
+	153. LIMS에서 공병 L1포트 도착을 수신
+		- Token : RSPLIMSInOutEQPEmptyBOTTranferMoveOK
+
+	154. 공병 투입 완료 보고
+		- Token : RSPEQPInOutEQPEmptyBOTTranferEQPReceiveOK
+
+	155. 공병 투입 종료 수신
+		- Token : REQLIMSInOutEQPEmptyBOTTranferEQPEnd
+		-Job의 완료를 수신한다
+
+	156. 공병 투입 종료 보고
+		- Token : RSPEQPInOutEQPEmptyBOTTranferToEQPDone
+		-Job이 끝났음을 보고한다.
+
+	==================================================================================================
+	
+2. Token Detail - 기본틀만 남겨둠
+	100. 기능설명
+		1) Token : -
+		2) 관련 controller : AIMS Controller, UI
+		3) Body
+			{ 
+				none
+			}      
+		4) Function : 기능설명
+		5) Return Message 길이 : 1K 이내
+		6) 관련 Stored Procedure : -
+		7) Return
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "DB_Manager",
+				"HoleTotCountInEmptyBottleZone" : 5
+				"error_msg" : "None"
+			}      
+
+	101. 기능설명
+		1) Token : -
+		2) 관련 controller : 반출입기 Controller, UI
+		3) Body
+			{ 
+				"UserID" : "UID_KIM_001",
+				"ProjectNo" : "Prj_001"
+			}      
+		4) Function : 기능설명
+		5) Return Message 길이 : 1K 이내
+		6) 관련 Stored Procedure : -
+		7) Return
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "DB_Manager",
+				"BottleDemandTotCount" : n,
+				"BottleDemands" :
+				[
+					{
+						"No_1" : {
+						"BottleSeqNoOfDemand" : 1, "LiquidCharacter" : "Acid", "CollectionPosition":"합착기"}
+					},
+					{ 
+						"No_2" : {
+						"BottleSeqNoOfDemand" : 2, "LiquidCharacter" : "Base", "CollectionPosition":"Macro"}
+					},
+					...
+					{ 
+						"No_n" : {
+						"BottleSeqNoOfDemand" : 5, "LiquidCharacter" : "Organic", "CollectionPosition":"Pattern"}
+					}
+				],		 
+				"DemandTime" : "2024-06-22 21:29:10"		 
+				"error_msg" : "None"
+			} 
