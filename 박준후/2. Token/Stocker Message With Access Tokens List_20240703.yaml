@@ -1,0 +1,348 @@
+Token List_Stocker
+==================================================================================================
+Comment List
+	240626 -> 해당 토큰 리스트는 필요한 부분의 이름과 리스트만 정의됨 -> 선행작업 이후에 호출 네임을 정할것 박병규
+  240703 -> Stocker Token list 정의
+==================================================================================================
+
+1. Token List - 정의중, 커맨드를 공통으로
+	==================================================================================================
+	규칙 - 추가가 필요한 규칙은 마지막번호에 추가할 것. 박병규
+	1) 작업단위는 Pack으로 정의 -> 불합리하거나 네이밍이 겹치는 경우 재정의 할 것
+	2) Under-Bar는 사용하지 않는다.
+	3) 각 문자의 첫글자는 대문자로 표기, 약어는 모두 대문자로 표기
+	4) 토큰의 마지막에 FmDB, FmEQP로 토큰의 호출위치를 표기할 것
+	5) 반출입기의 번호는 100번지이며 적절히 번호를 띄어서 사용할 것 10단위
+	6) 모든 표현은 반출입기를 기준으로 설명 예) 수신은 어느곳에서든 반출입기로 전달되는 Token이다.
+	7) 상위 시스템은 LIMS로 표현, 반출입기는 InOutEQP로 표현, 협동로봇은 MOMA로 표현한다.
+	8) 네이밍 규칙 선행 구분문자
+		i) 1순위 커맨드의 구분
+			- 장비측
+				요청 -> REQEQP, 응답(보고) -> RSPEQP, 보고 + 데이터 -> RSPDATAEQP, 알람 -> EVENTEQP
+			- LIMS측
+				요청 -> REQLIMS, 응답 -> RSPLIMS, 응답 + 데이터 -> RSPDATALIMS
+
+		ii) 2순위 job의 하달 - 생략가능
+			- LIMS측 Job의 하달 -> JobEX
+			- EQP측 응답 Job의 응답 -> JobRS
+			- EQP측 보고 Job의 종료 -> JobED
+
+		iii) 3순위 EQP구분
+			- 반출입기 InOutEQP
+
+		iv) 4순위 커맨드 이름
+
+		v) 5순위 가져온 데이터의 위치 - 생략가능
+			- DB -> FmDB, EQP -> FmEQP
+	==================================================================================================
+	1-1. 공통부분 선언
+		100. LIMS에서 설비상태 요청
+			- Token : REQLIMSInOutEQPStatus
+
+		101. 설비상태 응답
+			- Token : RSPEQPInOutEQPStatus
+
+		102. 설비내 출하가능 공병 현황 보고
+			- Token : 
+			- 의뢰자가 수동으로 처리하므로 필요 없다.
+
+		103. LIMS에서 Job수신
+			- 해당 Token은 EqpStartSEQ로 Job을 지정한다.
+			- Token : REQLIMSJobEXFromLIMSExcuteJobCMDStart
+
+		104. Job의 진행여부를 응답
+			- Token : RSPEQPJobRSFromLIMSExcuteJobCMDRecieve
+
+		105. Job의 종료 보고
+			- Token : RSPEQPJobEDFromLIMSExcuteJobCMDFinish
+		
+	==================================================================================================
+
+  =================================================================================================
+	9XX. Bottle 반.투입에 대한 준비 정보를 보고한다.
+		- 해당 Token은 각 장비의 준비 및 진행 상태에 따라 보고된다.(모든 Token은 Dispatcher에서 관장한다.)
+		- Token : LoadRequest, LoadReady, LoadReadyComp,LoadComp,
+		          TransferSrtart,TransferRun, TransferComp 
+							MoveTo, MoveToComp,
+							UnloadRequest, UnloadReady, UnloadReadyComp, UnloadComp,   		
+      
+    951. 설비내 Bottle 정보요청
+    - Token : ReqBottleInfoFmEqp
+
+    901. 장비에서 투입요청 
+    - Token : LoadRequest
+    
+    902. 장비에서 투입 준비 
+    - Token : LoadReady
+    
+    903. 장비에서 투입 준비 완료 
+    - Token : LoadReadyComp
+    
+    904. 장비에서 투입 완료 
+    - Token : LoadComp
+    
+    911. Dispatcher에서 투입 시작   
+    - Token : TransferSrtart
+    
+    912. 장비에서 투입 중(Busy)  
+    - Token : TransferRun
+    
+    913. 장비에서 투입 이동 완료  
+    - Token : TransferComp
+
+    921. 장비에서 투입요청 
+    - Token : MoveTo
+    
+    922. 장비에서 투입요청 
+    - Token : MoveToComp
+    
+    931. 장비에서 반출 요청 
+    - Token : UnloadRequest
+
+    932. 장비에서 반출 준비  
+    - Token : UnloadReady
+
+    933. 장비에서 반출 준비 요청 
+    - Token : UnloadReadyComp
+    
+    934. 장비에서 반출 완료 
+    - Token : UnloadComp
+
+   ================================================================================================
+    Stocker -> MOMA Robot
+
+   	100. LIMS에서 설비상태 요청
+		- Token : REQLIMSInOutEQPStatus
+
+    101. 설비상태 응답
+		- Token : RSPEQPInOutEQPStatus
+    
+    951. 설비내 Bottle 정보요청
+    - Token : ReqBottleInfoFmEqp
+
+    931. 장비에서 반출 요청 
+    - Token : UnloadRequest
+    
+    921. 장비에서 투입요청 (Dispatcher-> MOMA)
+    - Token : MoveTo    
+   
+    922. 장비에서 투입요청 (MOMA -> Dispatcher)
+    - Token : MoveToComp
+
+    933. 장비에서 반출 준비 요청 (MOMA -> Dispatcher)
+    - Token : UnloadReadyComp
+
+    932. 장비에서 반출 준비 (Dispatcher-> Stocker) 
+    - Token : UnloadReady
+   
+    933. 장비에서 반출 준비 요청 (Stocker-> Dispatcher)
+    - Token : UnloadReadyComp
+    
+    911. Dispatcher에서 투입 시작 (Dispatcher-> MOMA)  
+    - Token : TransferSrtart    
+
+    912. 장비에서 투입 중(Busy)  (MOMA -> Dispatcher)
+    - Token : TransferRun
+
+    913. 장비에서 투입 이동 완료  (MOMA -> Dispatcher)
+    - Token : TransferComp
+
+    913. 장비에서 투입 이동 완료  (Dispatcher-> Stocker) 
+    - Token : TransferComp
+
+    934. 장비에서 반출 완료 (Stocker-> Dispatcher)
+    - Token : UnloadComp
+
+    105. Job의 종료 보고
+		- Token : RSPEQPJobEDFromLIMSExcuteJobCMDFinish
+
+   ================================================================================================ 
+
+
+           
+
+
+
+	==================================================================================================
+	
+2. Token Detail
+	==================================================================================================
+	규칙 - 추가가 필요한 규칙은 마지막번호에 추가할 것. 박병규
+	1) 작업단위는 Pack으로 정의 -> 불합리하거나 네이밍이 겹치는 경우 재정의 할 것
+	2) Under-Bar는 사용하지 않는다.
+	3) 각 문자의 첫글자는 대문자로 표기, 약어는 모두 대문자로 표기
+	4) 반출입기의 번호는 100번지이며 적절히 번호를 띄어서 사용할 것 10단위
+
+	##########################################중요##########################################
+	5) 해당 Token의 구조는 REST의 구조를 갖으나, 사용은 MES의 형태로 할 예정이다.
+		- 해당 토큰에서 발생하는 Return은 Token수신에대한 응답이다. 데이터나 상태를 포함하지 않음
+	6) 데이터나 상태요청등을 받는경우 반드시 별개의 토큰을 사용하여 그 정보를 전달한다.
+	7) Return의 status_code는 송,수신이 잘 이루어졌는지를 반환하는 값이다.
+		- 200이 정상으로 판단. 나머지는 에러상황으로 정의가 필요하다.
+	8) BottleInfo는 Pack단위로 전달한다.
+	##########################################중요##########################################
+	==================================================================================================
+	100. LIMS에서 설비상태 요청
+		1) Token : REQLIMSInOutEQPStatus
+		2) Controller : Dispatcher, 반출입 Ctrl, UI
+		3) Stored Procedure : -
+		4) Function : LIMS에서 장비단에 현재 상태를 요청한다.
+		5) Body :
+			{ 
+				"EqpGroupID" : 1,
+				"EqpID" : 1
+			}
+		6) Return Message 길이 : 1K 이내
+		7) Return :
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "Dispatcher",
+				"DemandTime" : "2024-06-22 21:29:10",
+				"error_msg" : "None"
+			}
+
+	==================================================================================================
+
+	101. 설비상태 응답
+		1) Token : RSPEQPInOutEQPStatus
+		2) Controller : Dispatcher, 반출입 Ctrl, UI
+		3) Stored Procedure : -
+		4) Function : 요청받은 장비에서 현재상태, 알람코드를 반환한다.
+		5) Body :
+			{ 
+				"EqpGroupID" : 1,
+				"EqpID" : 1,
+				"EqpStatusCode" : 1,
+				"EqpAlarmCode" : 1
+			}
+		6) Return Message 길이 : 1K 이내
+		7) Return :
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "반출입 Ctrl",
+				"DemandTime" : "2024-06-22 21:29:10",
+				"error_msg" : "None"
+			}
+
+	==================================================================================================
+
+	103. LIMS에서 Job수신
+		1) Token : REQLIMSJobEXFromLIMSExcuteJobCMDStart
+		2) Controller : Dispatcher, 반출입 Ctrl, UI
+		3) Stored Procedure : -
+		4) Function : LIMS에서 장비단으로 작업지시를 하달한다.
+		5) Body :
+			{ 
+				"User_Name" : "",
+				"User_ID" : "",
+				"User_Pass" : "",
+				"Project_No" : ""
+				"EqpGroupID" : 1,
+				"EqpID" : 1,
+				"EqpStartSEQ" : 120,
+				"BottleCountOfPack" : n,
+				"BottleInfo" :
+				[
+					{
+						"No_1" : {
+							"Barcode" : "aaaaabbbbb11111",
+							"BottleNoOfPack" : 1,
+							"BottleClassify" : "일반분류",
+							"SampleStatus" : "Material",
+							"BottleMaterialName" : "D-H2SO4",
+							"BottleSamplePoint" : "Mixing Tank",
+							"AnalysysPoint" : "D-H2SO4 A#1",
+							"BottleAnalysysCount" : 1
+							"BottleWorkingStatus" : "분석준비",
+							"BottlePosition" : "공병 반출입기",
+							"BottleTotalWorkTime" : "hh:mm:ss",
+							"AIMSStatus" : "의뢰접수"
+						}
+					},
+					...
+					{ 
+						"No_n" : {
+							"Barcode" : "aaaaabbbbb11111",
+							"BottleNoOfPack" : n,
+							"BottleClassify" : "일반분류",
+							"SampleStatus" : "Material",
+							"BottleMaterialName" : "D-H2SO4",
+							"BottleSamplePoint" : "Mixing Tank",
+							"AnalysysPoint" : "D-H2SO4 A#1",
+							"BottleAnalysysCount" : 1
+							"BottleWorkingStatus" : "분석준비",
+							"BottlePosition" : "공병 반출입기",
+							"BottleTotalWorkTime" : "hh:mm:ss",
+							"AIMSStatus" : "의뢰접수"
+						}
+					}
+				]
+			}
+		6) Return Message 길이 : 1K 이내
+		7) Return :
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "Dispatcher",
+				"DemandTime" : "2024-06-22 21:29:10",
+				"error_msg" : "None"
+			}
+
+	==================================================================================================
+
+	104. Job의 진행여부를 응답
+		1) Token : RSPEQPJobRSFromLIMSExcuteJobCMDRecieve
+		2) Controller : Dispatcher, 반출입 Ctrl, UI
+		3) Stored Procedure : -
+		4) Function : 장비에서 하달받은 작업의 진행여부를 응답한다.
+		5) Body :
+			{ 
+				"User_Name" : "",
+				"User_ID" : "",
+				"User_Pass" : "",
+				"Project_No" : ""
+				"EqpGroupID" : 1,
+				"EqpID" : 1,
+				"EqpStartSEQ" : 120,
+				"EqpStatusCode" : 1,
+				"EqpAlarmCode" : 1,
+				"BottleCountOfPack" : n,
+			}
+		6) Return Message 길이 : 1K 이내
+		7) Return :
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "반출입 Ctrl",
+				"DemandTime" : "2024-06-22 21:29:10",
+				"error_msg" : "None"
+			}
+
+	==================================================================================================
+
+	105. Job의 종료 보고
+		1) Token : RSPEQPJobEDFromLIMSExcuteJobCMDFinish
+		2) Controller : Dispatcher, 반출입 Ctrl, UI
+		3) Stored Procedure : -
+		4) Function : 장비에서 하달받은 작업의 진행종료를 보고한다.
+		5) Body :
+			{ 
+				"User_Name" : "",
+				"User_ID" : "",
+				"User_Pass" : "",
+				"Project_No" : ""
+				"EqpGroupID" : 1,
+				"EqpID" : 1,
+				"EqpStartSEQ" : 120,
+				"EqpStatusCode" : 1,
+				"EqpAlarmCode" : 1,
+				"BottleCountOfPack" : n,
+			}
+		6) Return Message 길이 : 1K 이내
+		7) Return :
+			{ 
+				"status_code" : 200,
+				"sender_controller" : "반출입 Ctrl",
+				"DemandTime" : "2024-06-22 21:29:10",
+				"error_msg" : "None"
+			}
+	==================================================================================================
+	==================================================================================================
