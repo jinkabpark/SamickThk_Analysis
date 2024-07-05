@@ -1,0 +1,89 @@
+MOMA Ctrl 디자인
+- 240705 초안 작성, 박병규
+
+#########################################################################
+1. 기능 리스트
+	1) UI
+		i) 로봇 매뉴얼 컨트롤모드
+		ii) 수동 Jog기능
+		iii) MiR, UR System Status
+
+	2) 인터페이스
+		i) DDS
+		ii) ModBus
+		iii) REST API - 준비만 필요 사용X
+
+	3) 시퀀스 매니저
+
+	4) System Monitor
+		i) Job Monitor
+		ii) MiR, UR 상태 및 통신상태 Monitor
+		iii) Loger
+
+#########################################################################
+
+2. Class 디자인
+	1)  Main Class
+		i) 인터페이스 스레드
+			- DDS -> with 4) DDS Class
+			- ModBus -> with 5) ModBus Class
+			- REST -> with 6) REST Class
+			- 시퀀스 -> with 3) 시퀀스 매니저 Class
+
+		ii) UI Monitor 스레드
+			- with 2 - i, UI Data List
+
+		iii) Loger
+			- Log Writer
+
+		vi) Manual
+			- Func Unit Status Checker
+			- Func Manual Motion
+
+	2) Shared Data Class
+		i) UI Data List
+			- Struct MiR, UR, System Status For UI
+		ii) MiR Status Data List
+			- Struct MiR Status
+		iii) UR Status Data List
+			- Struct UR Status
+		iv) System Status Data List
+			- Struct System Status
+		v) Job List
+			- Struct Main Job, Sub Job
+
+	3) 시퀀스 매니저 Class
+			- Variable => Job Data, Sub Job Data List
+		i) Func Subjob parser 
+		ii) Func Subjob sorter
+		iii) Func Subjob selector
+		iv) Func Subjob executor 
+		v) Func Subjob state checker
+
+	4) DDS Class
+			- Variable => DDS config data
+		i) Func Connection
+		ii) Func Disconnection
+		iii) Func Read Message
+		iv) Func Write Message
+		v) Func Message sorter
+		vi) Func Message parser
+
+	5) ModBus Class
+			- Variable => ModBus config data
+		i) Func Connection
+		ii) Func Disconnection
+		iii) Func Read Coil
+		iv) Func Write Coil
+		v) Func Read Discrete Input
+		vi) Func Write Discrete Input
+		vii) Func Read Input Register
+		viii) Func Write Input Register
+		ix) Func Read holding Register
+		x) Func Write holding Register
+
+	6) REST Class
+			- Variable => REST config data
+		i) Func Post
+		ii) Func Get
+#########################################################################
