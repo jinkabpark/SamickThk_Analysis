@@ -3,56 +3,513 @@ file name   : sp_SamickAnalysis.sql
 author      : JK Park
 desc   
    1.    2024-06-06 최초생성
+   2.    2024-07-06 장비별 stored procedure 추가
 
 token관련 stored procedure
-1.  UpdateEqpStatus                 장비상태를 변경한다. (Idle-->Run, Run-->Idle)
-2.  UpdateEqpProcessStatus          장비의 Process상태를 변경한다. (LoadReq, LoadComp, UnLoadReq, UnLoadComp, Idle, Pause, Reserve)
-3.  FetchNextOperationFromRoute     차기 공정정보를 가져온다
-4.  RetrieveEquipmentStatus         장비상태를 가져온다
-5.  RetrieveAllEquipmentStatuses    모든 장비상태를 가져온다
-6.  UpdateNextOperation             현재공정완료했을때 차기 공정정보 Set한다.
-7.  UpdateNextOper_Insert           LoadComp, UnloadComp에 대한 처리
-8.  ProcessLoadUnloadCompletion     세정후 Bottle 재사용을 위해 분석실 내부 Load Port에 반출입기에 입고될때 기존 Data 삭제하고 History 이동한다
-9.  UpdateBottleStatus              Bottle상태를 변경한다
-10. FetchBottleStatusFmEquipment    Bottle상태를 가져온다
-11. RetrieveAllBottleStatuses       모든 Bottle상태를 가져온다
-12. RetrievePendingBottles          투입대기중인 Bottle정보를 가져온다
-13. RetrieveEmptyBottleCount        설비에서 대기중인 Bottle수량정보를 가져온다
-14. FetchBottleProcessHistory       Bottle에서 수행한 공정이력정보를 가져온다
+
+901. spUpdateStatusAtEquipment        장비상태를 변경한다. (Idle-->Run, Run-->Idle)
+904. spRequestStatusAtEquipment       장비상태를 가져온다
+905. spRetrieveAllEquipmentStatuses   모든 장비상태를 가져온다
+
+921. spLoadReqAtEquipment             장비에서 LoadReq event에 대한 처리 (Dispatcher 반송인식 및 요청 event)
+922. spLoadCompAtEquipment            장비에서 LoadComp event에 대한 처리
+923. spUnloadReqAtEquipment           장비에서 UnloadReq event에 대한 처리 (Dispatcher 반송인식 및 요청 event)
+924. spUnloadCompAtEquipment          장비에서 UnloadComp event에 대한 처리
+925. spLoadComp4BottleAtEquipment     Bottle에서 LoadComp event에 대한 처리
+926. spUnloadComp4BottleAtEquipment   Bottle에서 UnloadComp event에 대한 처리
+
+931. spRequestBottleData              Bottle 관련 정보를 가져온다
+932. spRequestAllBottlesInfoFmEquipment  설비에 있는 모든 Bottle 관련 정보를 가져온다
+933. spUpdateBottleStatus             Bottle상태를 임의적으로 수동 변경한다. 정보불일치 발생시 UI에서 사용.
+934. spRetrieveAllBottleStatuses      모든 Bottle상태를 가져온다
+935. spRetrievePendingBottles         투입대기중인 Bottle정보를 가져온다
+936. spRetrieveEmptyBottleCount       설비에서 대기중인 Bottle수량정보를 가져온다
+937. spFetchBottleProcessHistory      Bottle에서 수행한 공정이력정보를 가져온다
+
+9A1. spTransferAndDeleteBottle        Bottle 재사용을 위하여 데이터를 Hist로 이동하고 기존 데이터는 삭제한다.
+9A2. spFetchNextOperationFromRoute    차기 공정정보를 가져온다
+9A3. spUpdateNextOperation            현재공정완료했을때 차기 공정정보 Set한다.
+
+9B1. UpdateNextOper_Insert            LoadComp, UnloadComp에 대한 처리
+9B2. ProcessLoadUnloadCompletion      세정후 Bottle 재사용을 위해 분석실 내부 Load Port에 반출입기에 입고될때 기존 Data 삭제하고 History 이동한다
+9B3. RetrieveSuitableBottleAtStocker  Stocker에서 Bottle 정보를 가져온다
+9B4. UpdateEqpProcessStatus           장비의 Process상태를 변경한다. (LoadReq, LoadComp, UnLoadReq, UnLoadComp, Idle, Pause, Reserve)
+9B5. GetTopPriorityBottle             stocker내에 bottle 우선순위, 입고순서로 sotting하여 해당 bottle 정보 출력
+
 
 이벤트 스케줄러관련 stored procedure
-1.  AggregateDailyEqpStatus         AggregateDailyEqpStatusEvent event scheduler에서 호출
+E01.  AggregateDailyEqpStatus         AggregateDailyEqpStatusEvent event scheduler에서 호출
 									일일가동률 확인을 위해 일일단위로 설비상태정보 집계한다
-2.  MoveOldEqpStatus				MoveOldRecordOfEqp2History event scheduler에서 호출
+E02.  MoveOldEqpStatus				MoveOldRecordOfEqp2History event scheduler에서 호출
 
 이벤트 스케줄러 생성
-1.  AggregateDailyEqpStatusEvent    장비상태를 1일 단위 집계하여 summary table(tDailyEqpStatus) 저장한다.
-2.  MoveOldRecordOfEqp2History      tChgEqpStatus table 오래된 record를 tHisChgEqpStatus table로 이동
-3.  CleanupOldRecordsOfTbl          tDailyEqpStatus, tHisProcBotOper, tHisChgEqpStatus history table에서 오래된 record 삭제
+E21.  AggregateDailyEqpStatusEvent    장비상태를 1일 단위 집계하여 summary table(tDailyEqpStatus) 저장한다.
+E22.  MoveOldRecordOfEqp2History      tChgEqpStatus table 오래된 record를 tHisChgEqpStatus table로 이동
+E23.  CleanupOldRecordsOfTbl          tDailyEqpStatus, tHisProcBotOper, tHisChgEqpStatus history table에서 오래된 record 삭제
+============================================================================ 
+-- GPT prompt
+--     - maria db를 사용하고 있고, c# 에서 stored procedure 호출하는 방법은 ?
+--     - static string CallStoredProcedure(string connectionString) 부분수정해줘. stored procedure 명 "spRequestStatusAtStocker2DB"을 parameter 넘기는 방식으로 수정해줘.
+--
+-- C# 호출방법 사용법
+-- using System;
+-- using System.Data;
+-- using MySql.Data.MySqlClient;
+
+-- class Program
+-- {
+--     static void Main()
+--     {
+--         string connectionString = "Server=your_server;Database=your_database;User=your_username;Password=your_password;";
+--         string storedProcedureName = "spRequestStatusAtStocker2DB";
+--         string resultJson = CallStoredProcedure(connectionString, storedProcedureName);
+-- 
+--         Console.WriteLine("Output JSON:");
+--         Console.WriteLine(resultJson);
+--     }
+
+--     static string CallStoredProcedure(string connectionString, string storedProcedureName)
+--     {
+--         using (MySqlConnection conn = new MySqlConnection(connectionString))
+--         {
+--             using (MySqlCommand cmd = new MySqlCommand(storedProcedureName, conn))
+--             {
+--                 cmd.CommandType = CommandType.StoredProcedure;
+-- 
+--                 conn.Open();
+-- 
+--                 using (MySqlDataReader reader = cmd.ExecuteReader())
+--                 {
+--                     if (reader.Read())
+--                     {
+--                         return reader["result"].ToString();
+--                     }
+--                 }
+--             }
+--         }
+--         return null;
+--     }
+-- }
 ============================================================================ 
 
+-- 201. Stocker 설비상태를 요청한다.
+-- GPT prompt
+--     - 기존에 만들어진 spRequestStatusAtEquipment 저장 프로시저를 호출하여 EqpGroupID = '2' 및 EqpSeqNo = '1' 값을 전달하는 새로운 저장 프로시저를 작성해줘.
+--       maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
 DELIMITER $$
+CREATE PROCEDURE spRequestStatusAtStocker2DB()
+BEGIN
+    DECLARE v_InputJson JSON;
+    DECLARE v_Result JSON;
+
+    -- 입력 JSON 생성
+    SET v_InputJson = JSON_OBJECT(
+        'EqpGroupID', '2',
+        'EqpSeqNo', '1'
+    );
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- 오류 발생 시, 오류 메시지를 포함한 결과를 반환합니다.
+        SET v_Result = JSON_OBJECT(
+            'status_code', 500,
+            'sender_controller', 'DB_Manager',
+            'error_msg', 'An error occurred while retrieving equipment status.'
+        );
+
+        SELECT v_Result AS result;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- spRequestStatusAtEquipment 저장 프로시저 호출
+    CALL spRequestStatusAtEquipment(v_InputJson, @outputJson);
+
+    -- 결과 반환
+    SELECT @outputJson AS result;
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+
+-- 211. Stocker에 입고완료메세지(#21 공정시작)
+-- GPT prompt
+--     - 기존에 만들어진 spLoadComp4BottleAtEquipment 저장 프로시저를 호출하여 EqpGroupID = '2' 및 EqpSeqNo = '1' 값을 전달하는 새로운 저장 프로시저를 작성해줘.
+--       maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+
+
+
+-- 225. Stocker에서 Hole 존재하는 bottle정보와 DB에 있는 정보를 비교한다
+-- GPT prompt
+--     - stored procedure json type 입력 parameter는 아래와 같은 형식.
+--     - json type return value는 아래와 같은 형식.
+--     - tProcBottle table에서 입력된 bottle id의 position 정보가 일치하면 NormalCountOfBottles 1씩 증가.
+--       틀리면 AbnormalCountOfBottles 1씩 증가하고 틀린 정보를 생성하는 stored procedure 만들어줘.
+--       maria DB 사용중. 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- 
+DELIMITER $$
+CREATE PROCEDURE spCompareEqpBottleInfo2DB_BottleInfoAtStocker (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg NVARCHAR(255) DEFAULT 'None';
+    DECLARE v_TotCountOfBottles INT;
+    DECLARE v_NormalCountOfBottles INT DEFAULT 0;
+    DECLARE v_AbnormalCountOfBottles INT DEFAULT 0;
+    DECLARE v_ResultBottlesJson JSON;
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET p_OutputJson = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', 'Stocker_Controller',
+            'TotCountOfBottles', 0,
+            'NormalCountOfBottles', 0,
+            'AbnormalCountOfBottles', 0,
+            'BottleInfo', JSON_ARRAY(),
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Temporary tables for processing
+    CREATE TEMPORARY TABLE IF NOT EXISTS TempInputBottles (
+        BottleID NVARCHAR(50),
+        Position NVARCHAR(50)
+    );
+
+    CREATE TEMPORARY TABLE IF NOT EXISTS TempResultBottles (
+        BottleID NVARCHAR(50),
+        PositionOfInputParameter NVARCHAR(50),
+        PositionOfDB NVARCHAR(50)
+    );
+
+    -- Parse the input JSON
+    INSERT INTO TempInputBottles (BottleID, Position)
+    SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(Bottle.value, '$.BottleID')) AS BottleID,
+        JSON_UNQUOTE(JSON_EXTRACT(Bottle.value, '$.Position')) AS Position
+    FROM JSON_TABLE(p_InputJson, '$.BottleInfo[*]' COLUMNS (
+        Bottle JSON PATH '$'
+    )) AS Bottle;
+
+    SET v_TotCountOfBottles = (SELECT COUNT(*) FROM TempInputBottles);
+
+    -- Check each bottle
+    INSERT INTO TempResultBottles (BottleID, PositionOfInputParameter, PositionOfDB)
+    SELECT 
+        i.BottleID, 
+        i.Position AS PositionOfInputParameter, 
+        p.Position AS PositionOfDB
+    FROM TempInputBottles i
+    LEFT JOIN tProcBottle p ON i.BottleID = p.BottleID;
+
+    -- Calculate counts
+    SELECT 
+        SUM(CASE WHEN PositionOfInputParameter = PositionOfDB THEN 1 ELSE 0 END),
+        SUM(CASE WHEN PositionOfInputParameter <> PositionOfDB THEN 1 ELSE 0 END)
+    INTO v_NormalCountOfBottles, v_AbnormalCountOfBottles
+    FROM TempResultBottles;
+
+    -- Create the output JSON
+    SELECT JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'BottleID', BottleID,
+            'PositionOfInputParameter', PositionOfInputParameter,
+            'PositionOfDB', COALESCE(PositionOfDB, 'null')
+        )
+    ) INTO v_ResultBottlesJson
+    FROM TempResultBottles;
+
+    SET p_OutputJson = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', 'Stocker_Controller',
+        'TotCountOfBottles', v_TotCountOfBottles,
+        'NormalCountOfBottles', v_NormalCountOfBottles,
+        'AbnormalCountOfBottles', v_AbnormalCountOfBottles,
+        'BottleInfo', v_ResultBottlesJson,
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    -- Cleanup
+    DROP TEMPORARY TABLE IF EXISTS TempInputBottles;
+    DROP TEMPORARY TABLE IF EXISTS TempResultBottles;
+END$$
+DELIMITER ;
+
+-- 231. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
+-- GPT prompt
+--     - json type return value는 아래와 같은 형식.
+--     - tProcBottle table에서 CurrEqpGroupID = '3'인 것중 DispatchingPriority 내림차순, RequestDate 오름차순.
+--       PackID로 group by수행후 첫번째 record의 Position 정보를 먼저찾고,
+--       '1'이면 "Zone"에 "Left", "2"이면 "Zone"에 "Right", 그 이외일때는 "Zone"에 "Error"로 처리.
+--       CurrEqpGroupID = '3'이고 DB field Position의 첫째 자리와  위에서 찾은 Position의 첫번째 자리일치하는 
+--       record중 최대 5개 PackID와 Pack의 bottle 수량을 구하는 stored procedure 만들어줘.
+--       예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+--     - stored procedure where 조건에 다음 내용추가해줘. 현재시간이 > JudgeLimitTm.
+--
+DELIMITER $$
+CREATE PROCEDURE spExtractSuitableBottlePackCountAtStocker (
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_FirstPosition NVARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg NVARCHAR(255) DEFAULT 'None';
+    DECLARE v_TotCountOfBottlePack INT;
+    DECLARE v_Zone NVARCHAR(10);
+    DECLARE v_BottleInfo JSON;
+    DECLARE v_CurrentTime DATETIME;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET p_OutputJson = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', 'DB_Manager',
+            'TotCountOfBottlePack', 0,
+            'Zone', 'Error',
+            'BottleInfo', JSON_ARRAY(),
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Temporary table to store intermediate results
+    CREATE TEMPORARY TABLE TempResult (
+        PackID NVARCHAR(50),
+        TotalBottleCountOfPack INT
+    );
+
+    -- Get the first Position based on the given order and group by PackID
+    SELECT Position
+    INTO v_FirstPosition
+    FROM (
+        SELECT Position
+        FROM tProcBottle
+        WHERE CurrEqpGroupID = '3' AND v_CurrentTime > JudgeLimitTm
+        GROUP BY Position, PackID
+        ORDER BY MAX(DispatchingPriority) DESC, MIN(RequestDate) ASC
+        LIMIT 1
+    ) AS SubQuery;
+
+    -- Determine Zone based on the first character of the Position
+    SET v_Zone = CASE 
+                    WHEN LEFT(v_FirstPosition, 1) = '1' THEN 'Left'
+                    WHEN LEFT(v_FirstPosition, 1) = '2' THEN 'Right'
+                    ELSE 'Error' 
+                END;
+
+    -- Group by PackID and get the bottle count, limit to 5 packs
+    INSERT INTO TempResult (PackID, TotalBottleCountOfPack)
+    SELECT PackID, COUNT(*)
+    FROM tProcBottle
+    WHERE CurrEqpGroupID = '3' AND LEFT(Position, 1) = LEFT(v_FirstPosition, 1) AND v_CurrentTime > JudgeLimitTm
+    GROUP BY PackID
+    LIMIT 5;
+
+    -- Calculate total count of bottle packs
+    SELECT COUNT(*)
+    INTO v_TotCountOfBottlePack
+    FROM TempResult;
+
+    -- Build the JSON output for BottleInfo
+    SELECT JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'PackID', PackID,
+            'TotalBottleCountOfPack', TotalBottleCountOfPack
+        )
+    )
+    INTO v_BottleInfo
+    FROM TempResult;
+
+    SET p_OutputJson = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', 'DB_Manager',
+        'TotCountOfBottlePack', v_TotCountOfBottlePack,
+        'Zone', v_Zone,
+        'BottleInfo', v_BottleInfo,
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    -- Clean up
+    DROP TEMPORARY TABLE IF EXISTS TempResult;
+END$$
+DELIMITER ;
+
+
+-- 232. Stocker에서 추출할 적정 Bottle Pack 정보요청 
+-- GPT prompt
+--     - stored procedure json type 입력 parameter는 아래와 같은 형식.
+--     - json type return value는 아래와 같은 형식.
+--     - tProcBottle table에서 입력된 PackID와 일치하는 BottleID와 position 정보를 postion 순서대로 구하는 stored procedure 만들어줘.
+--       예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+--
+DELIMITER $$
+CREATE PROCEDURE spGetBottleInfoByPackID (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_PackID NVARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg NVARCHAR(255) DEFAULT 'None';
+    DECLARE v_TotCountOfBottlePack INT;
+    DECLARE v_BottleInfo JSON;
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET p_OutputJson = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', 'DB_Manager',
+            'TotCountOfBottlePack', 0,
+            'BottleInfo', JSON_ARRAY(),
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_PackID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.PackID'));
+
+    -- Check if the PackID is valid
+    IF v_PackID IS NULL THEN
+        SET v_StatusCode = 400;
+        SET v_ErrorMsg = 'Invalid input: PackID is required.';
+        SET p_OutputJson = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', 'DB_Manager',
+            'TotCountOfBottlePack', 0,
+            'BottleInfo', JSON_ARRAY(),
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+        LEAVE spGetBottleInfoByPackID;
+    END IF;
+
+    -- Temporary table to store intermediate results
+    CREATE TEMPORARY TABLE TempResultBottles (
+        BottleID NVARCHAR(50),
+        Position NVARCHAR(50)
+    );
+
+    -- Retrieve bottle information
+    INSERT INTO TempResultBottles (BottleID, Position)
+    SELECT BottleID, Position
+    FROM tProcBottle
+    WHERE PackID = v_PackID
+    ORDER BY Position;
+
+    -- Calculate total count of bottles in the pack
+    SELECT COUNT(*)
+    INTO v_TotCountOfBottlePack
+    FROM TempResultBottles;
+
+    -- Build the JSON output for BottleInfo
+    SELECT JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'BottleID', BottleID,
+            'Position', Position
+        )
+    )
+    INTO v_BottleInfo
+    FROM TempResultBottles;
+
+    SET p_OutputJson = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', 'DB_Manager',
+        'TotCountOfBottlePack', v_TotCountOfBottlePack,
+        'BottleInfo', v_BottleInfo,
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    -- Clean up
+    DROP TEMPORARY TABLE IF EXISTS TempResultBottles;
+END$$
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 901. spUpdateStatusAtEquipment        장비상태를 변경한다. (Idle-->Run, Run-->Idle)
 -- ChangeEqpStatus token event에 대한 처리
 -- 장비상태를 변경한다. (Idle-->Run, Run-->Idle)
 -- 사용법
---    CALL UpdateEqpStatus('1', '1', 'Run');
+--     
 -- RETURN
 -- {
 --    "status_code": 200,
 --    "sender_controller": "DB_Manager",
 --    "error_msg": "None"
 -- }
-CREATE PROCEDURE UpdateEqpStatus (
-    IN p_EqpGroupID CHAR(1),
-    IN p_EqpSeqNo CHAR(1),
-    IN p_NewStatus NVARCHAR(10)
+DELIMITER $$
+CREATE PROCEDURE spUpdateStatusAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
 )
 BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_NewStatus NVARCHAR(10);
     DECLARE v_CurrentTime DATETIME;
     DECLARE v_StatusCode INT DEFAULT 200;
     DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
     DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
     DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+    SET v_NewStatus = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.NewStatus'));
 
     -- 예외 처리 시작
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -67,7 +524,7 @@ BEGIN
             'error_msg', v_ErrorMsg
         );
 
-        SELECT v_JsonResult AS result;
+        SET p_OutputJson = v_JsonResult;
         ROLLBACK;
     END;
 
@@ -78,10 +535,10 @@ BEGIN
 
     -- tMstEqp 테이블의 EqpStatus와 EventTime을 업데이트
     UPDATE tMstEqp
-    SET EqpStatus = p_NewStatus,
+    SET EqpStatus = v_NewStatus,
         EventTime = v_CurrentTime
-    WHERE EqpGroupID = p_EqpGroupID
-      AND EqpSeqNo = p_EqpSeqNo;
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo;
 
     COMMIT;
 
@@ -92,117 +549,16 @@ BEGIN
         'error_msg', v_ErrorMsg
     );
 
-    SELECT v_JsonResult AS result;
-END $$
+    SET p_OutputJson = v_JsonResult;
+END$$
 DELIMITER ;
 
 
-DELIMITER $$
--- LoadRequest, UnloadRequest, ReserveEqpPort4Dispatch token event에 대한 처리
--- 장비의 Process상태를 변경한다. (LoadReq, UnLoadReq, Idle, Pause, Reserve)
--- Dispatcher가 반송이 가능한 상태인지 확인하기 위해 필요
---
--- 사용법
---    CALL UpdateEqpProcessStatus('1', '1', 'LoadComp');
--- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "error_msg": "None"
--- }
-CREATE PROCEDURE UpdateEqpProcessStatus (
-    IN p_EqpGroupID CHAR(1),
-    IN p_EqpSeqNo CHAR(1),
-    IN p_NewProcessStatus NVARCHAR(12)
-)
-BEGIN
-    DECLARE v_CurrentTime DATETIME;
-    DECLARE v_StatusCode INT DEFAULT 200;
-    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
-    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
-    DECLARE v_JsonResult JSON;
-
-    -- 예외 처리 시작
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
-        SET v_JsonResult = JSON_OBJECT(
-            'status_code', v_StatusCode,
-            'sender_controller', v_SenderController,
-            'error_msg', v_ErrorMsg
-        );
-
-        SELECT v_JsonResult AS result;
-        ROLLBACK;
-    END;
-
-    START TRANSACTION;
-
-    -- 현재 시간을 가져옴
-    SET v_CurrentTime = NOW();
-
-    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
-    UPDATE tMstEqp
-    SET ProcessStatus = p_NewProcessStatus,
-        EventTime = v_CurrentTime
-    WHERE EqpGroupID = p_EqpGroupID
-      AND EqpSeqNo = p_EqpSeqNo;
-
-    COMMIT;
-
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'error_msg', v_ErrorMsg
-    );
-
-    SELECT v_JsonResult AS result;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
--- 차기 공정정보를 가져온다
--- 사용법
---    1. 세션 변수 선언
---       SET @NextEqpGroupID = '';
---       SET @NextOperID = '';
---    2. 저장 프로시저 호출
---       CALL FetchNextOperationFromRoute('1', '1', @NextEqpGroupID, @NextOperID);
---    3. 결과 확인
---       SELECT @NextEqpGroupID AS NextEqpGroupID, @NextOperID AS NextOperID;
-CREATE PROCEDURE FetchNextOperationFromRoute (
-    IN p_CurrEqpGroupID CHAR(1),
-    IN p_CurrOperID CHAR(1),
-    OUT p_NextEqpGroupID CHAR(1),
-    OUT p_NextOperID CHAR(1)
-)
-BEGIN
-    DECLARE v_NextEqpGroupID CHAR(1);
-    DECLARE v_NextOperID CHAR(1);
-
-    SELECT NextEqpGroupID, NextOperID
-    INTO v_NextEqpGroupID, v_NextOperID
-    FROM tMstRouteOper
-    WHERE CurrEqpGroupID = p_CurrEqpGroupID
-      AND CurrOperID = p_CurrOperID
-    LIMIT 1;
-
-    SET p_NextEqpGroupID = v_NextEqpGroupID;
-    SET p_NextOperID = v_NextOperID;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
+-- 904. spRequestStatusAtEquipment       장비상태를 가져온다
 -- ReqAnalysisEqpStatus token event에 대한 처리
 -- 장비상태를 가져온다
 -- 사용법
---    CALL RetrieveEquipmentStatus();
+--    CALL spRequestStatusAtEquipment();
 --
 -- RETURN
 -- {
@@ -212,13 +568,22 @@ DELIMITER $$
 --    "process_status": "UnloadReq",
 --    "error_msg": "None"
 -- }
-CREATE PROCEDURE RetrieveEquipmentStatus()
+DELIMITER $$
+CREATE PROCEDURE spRequestStatusAtEquipment(
+    IN p_InputJson JSON
+)
 BEGIN
+    DECLARE v_EqpGroupID NVARCHAR(10);
+    DECLARE v_EqpSeqNo NVARCHAR(10);
     DECLARE v_EqpStatus NVARCHAR(10);
     DECLARE v_ProcessStatus NVARCHAR(12);
     DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
     DECLARE v_StatusCode INT DEFAULT 200;
     DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값을 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
 
     -- 예외 처리 시작
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -243,8 +608,8 @@ BEGIN
     SELECT EqpStatus, ProcessStatus
     INTO v_EqpStatus, v_ProcessStatus
     FROM tMstEqp
-    WHERE EqpGroupID = '2'
-      AND EqpSeqNo = '1'
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo
     LIMIT 1;
 
     COMMIT;
@@ -259,15 +624,15 @@ BEGIN
     );
 
     SELECT v_JsonResult AS result;
-END $$
+END$$
 DELIMITER ;
 
 
-DELIMITER $$
+-- 905. spRetrieveAllEquipmentStatuses   모든 장비상태를 가져온다
 -- ReqAllEqpStatus token event에 대한 처리
 -- 모든 장비상태를 가져온다
 -- 사용법
---    CALL RetrieveAllEquipmentStatuses();
+--    CALL spRetrieveAllEquipmentStatuses();
 --
 -- RETURN
 -- {
@@ -288,7 +653,8 @@ DELIMITER $$
 --    ],
 --    "error_msg": "None"
 -- }
-CREATE PROCEDURE RetrieveAllEquipmentStatuses()
+DELIMITER $$
+CREATE PROCEDURE spRetrieveAllEquipmentStatuses()
 BEGIN
     DECLARE v_TotalCntOfEqp INT DEFAULT 0;
     DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
@@ -346,9 +712,1356 @@ END $$
 DELIMITER ;
 
 
+
+-- 921. spLoadReqAtEquipment             장비에서 LoadReq event에 대한 처리
 DELIMITER $$
+CREATE PROCEDURE spLoadReqAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
+    UPDATE tMstEqp
+    SET ProcessStatus = 'LoadReq',
+        EventTime = v_CurrentTime
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 922. spLoadCompAtEquipment            장비에서 LoadComp event에 대한 처리
+DELIMITER $$
+CREATE PROCEDURE spLoadCompAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
+    UPDATE tMstEqp
+    SET ProcessStatus = 'LoadComp',
+        EventTime = v_CurrentTime
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 923. spUnloadReqAtEquipment           장비에서 UnloadReq event에 대한 처리
+DELIMITER $$
+CREATE PROCEDURE spUnloadReqAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
+    UPDATE tMstEqp
+    SET ProcessStatus = 'UnloadReq',
+        EventTime = v_CurrentTime
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 924. spUnloadCompAtEquipment          장비에서 UnloadComp event에 대한 처리
+DELIMITER $$
+CREATE PROCEDURE spUnloadCompAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
+    UPDATE tMstEqp
+    SET ProcessStatus = 'UnloadComp',
+        EventTime = v_CurrentTime
+    WHERE EqpGroupID = v_EqpGroupID
+      AND EqpSeqNo = v_EqpSeqNo;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 925. spLoadComp4BottleAtEquipment     Bottle에서 LoadComp event에 대한 처리
+DELIMITER $$
+CREATE PROCEDURE spLoadComp4BottleAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_CurrEqpGroupID CHAR(1);
+    DECLARE v_CurrOperID CHAR(1);
+    DECLARE v_CurrEqpSeqNo CHAR(1);
+    DECLARE v_Position CHAR(4);
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+    DECLARE v_StartTime DATETIME;
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+    DECLARE v_CurrentNextEqpGroupID CHAR(1);
+    DECLARE v_CurrentNextOperID CHAR(1);
+
+    -- JSON 파라미터에서 값 추출
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.BottleID'));
+    SET v_CurrEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpGroupID'));
+    SET v_CurrOperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrOperID'));
+    SET v_CurrEqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpSeqNo'));
+    SET v_Position = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.Position'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tProcBottle 테이블에서 NextEqpGroupID와 NextOperID를 가져옴
+    SELECT NextEqpGroupID, NextOperID
+    INTO v_CurrentNextEqpGroupID, v_CurrentNextOperID
+    FROM tProcBottle
+    WHERE BottleID = v_BottleID
+    LIMIT 1;
+
+    -- input parameter의 CurrEqpGroupID가 NULL이면 v_CurrentNextEqpGroupID를 사용
+    IF v_CurrEqpGroupID IS NULL THEN
+        SET v_CurrEqpGroupID = v_CurrentNextEqpGroupID;
+    END IF;
+
+    -- input parameter의 CurrOperID가 NULL이면 v_CurrentNextOperID를 사용
+    IF v_CurrOperID IS NULL THEN
+        SET v_CurrOperID = v_CurrentNextOperID;
+    END IF;
+
+    -- input parameter의 CurrEqpSeqNo가 NULL이면 1을 사용
+    IF v_CurrEqpSeqNo IS NULL THEN
+        SET v_CurrEqpSeqNo = '1';
+    END IF;
+
+    -- input parameter의 Position이 NULL이면 '0001'을 사용
+    IF v_Position IS NULL THEN
+        SET v_Position = '0001';
+    END IF;
+
+    -- tMstRouteOper 테이블에서 NextEqpGroupID와 NextOperID를 가져옴
+    SELECT NextEqpGroupID, NextOperID
+    INTO v_NextEqpGroupID, v_NextOperID
+    FROM tMstRouteOper
+    WHERE CurrEqpGroupID = v_CurrEqpGroupID
+      AND CurrOperID = v_CurrOperID
+    LIMIT 1;
+
+    -- tProcBottle 테이블의 CurrEqpGroupID, CurrOperID, CurrEqpSeqNo, Position, NextEqpGroupID, NextOperID, StartTime, EndTime 업데이트
+    UPDATE tProcBottle
+    SET CurrEqpGroupID = v_CurrEqpGroupID,
+        CurrOperID = v_CurrOperID,
+        CurrEqpSeqNo = v_CurrEqpSeqNo,
+        Position = v_Position,
+        NextEqpGroupID = v_NextEqpGroupID,
+        NextOperID = v_NextOperID,
+        StartTime = v_CurrentTime,
+        EndTime = NULL
+    WHERE BottleID = v_BottleID;        
+
+    -- 조건에 따라 spTransferAndDeleteBottle 호출
+    IF v_CurrEqpGroupID = '1' AND v_CurrOperID = '1' THEN
+        CALL spTransferAndDeleteBottle(v_BottleID);
+    END IF;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'current_next_eqp_group_id', v_CurrentNextEqpGroupID,
+        'current_next_oper_id', v_CurrentNextOperID,
+        'new_next_eqp_group_id', v_NextEqpGroupID,
+        'new_next_oper_id', v_NextOperID,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 926. spUnloadComp4BottleAtEquipment   Bottle에서 UnloadComp event에 대한 처리
+DELIMITER $$
+CREATE PROCEDURE spUnloadComp4BottleAtEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_CurrEqpGroupID CHAR(1);
+    DECLARE v_CurrOperID CHAR(1);
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+    DECLARE v_DispatchingPriority TINYINT;
+    DECLARE v_Position CHAR(4);
+    DECLARE v_StartTime DATETIME;
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_AdjStartTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.BottleID'));
+    SET v_CurrEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpGroupID'));
+    SET v_CurrOperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrOperID'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+    SET v_AdjStartTime = DATE_SUB(v_CurrentTime, INTERVAL 60 SECOND);
+
+    -- tProcBottle 테이블 EndTime 수정하고 tProcBotOper에 공정진행정보 insert
+    IF v_CurrEqpGroupID = '1' AND v_CurrOperID = '1' THEN
+        -- LoadComp Event 발생하지 않아 Next 공정정보를 수정해준다.
+        -- Empty Bottle 반출을 Event 기준으로 함
+        -- tProcBottle 테이블의 NextEqpGroupID, NextOperID, StartTime, EndTime 업데이트
+		
+		-- tMstRouteOper 테이블에서 NextEqpGroupID와 NextOperID를 가져옴
+		SELECT NextEqpGroupID, NextOperID
+		INTO v_NextEqpGroupID, v_NextOperID
+		FROM tMstRouteOper
+		WHERE CurrEqpGroupID = v_CurrEqpGroupID
+		  AND CurrOperID = v_CurrOperID
+		LIMIT 1;
+
+        UPDATE tProcBottle
+        SET NextEqpGroupID = v_NextEqpGroupID,
+            NextOperID = v_NextOperID,
+            StartTime = IFNULL(StartTime, v_AdjStartTime),
+            EndTime = v_CurrentTime
+        WHERE BottleID = v_BottleID;
+    ELSE
+        -- tProcBottle 테이블의 EndTime을 업데이트
+        UPDATE tProcBottle
+        SET StartTime = IFNULL(StartTime, v_AdjStartTime),
+            EndTime = v_CurrentTime
+        WHERE BottleID = v_BottleID;
+    END IF;
+
+    -- tProcBottle 테이블에서 추가 정보를 가져옴
+    SELECT DispatchingPriority, Position, StartTime
+    INTO v_DispatchingPriority, v_Position, v_StartTime
+    FROM tProcBottle
+    WHERE BottleID = v_BottleID;
+
+    INSERT INTO tProcBotOper (
+        BottleID,
+        EqpGroupID,
+        OperID,
+        StartTime,
+        EndTime,
+        DispatchingPriority,
+        Position
+    )
+    VALUES (
+        v_BottleID,
+        v_CurrEqpGroupID,
+        v_CurrOperID,
+        v_StartTime,
+        v_CurrentTime,
+        v_DispatchingPriority,
+        v_Position
+    );
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 931. spRequestBottleData              Bottle 관련 정보를 가져온다
+-- GPT prompt
+--     - tProcBottle table 데이터를 읽고 가져오는 저장 프로시저를 작성해줘.
+--       입력파라메터는 json type BottleID이고 출력은 json type tProcBottle 데이터값으로 만들어줘.
+--       maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+DELIMITER $$
+CREATE PROCEDURE spRequestBottleData (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+    DECLARE v_TotCountOfBottlePack INT;
+    DECLARE v_JsonBottleInfo JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.BottleID'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- tProcBottle 테이블의 데이터를 JSON 형식으로 변환하여 가져옴
+    SELECT JSON_OBJECT(
+        'BottleID', BottleID,
+        'CurrEqpGroupID', CurrEqpGroupID,
+        'CurrEqpSeqNo', CurrEqpSeqNo,
+        'CurrOperID', CurrOperID,
+        'NextEqpGroupID', NextEqpGroupID,
+        'NextOperID', NextOperID,
+        'ProjectNo', ProjectNo,
+        'PackID', PackID,
+        'AnalyzerCompletedTm', AnalyzerCompletedTm,
+        'JudgeOfResearcher', JudgeOfResearcher,
+        'ExperimentRequestName', ExperimentRequestName,
+        'CurrLiquid', CurrLiquid,
+        'RequestDate', RequestDate,
+        'RequestTotCnt', RequestTotCnt,
+        'RequestRealCnt', RequestRealCnt,
+        'RequestSeqNo', RequestSeqNo,
+        'MemberOfBottlePack', MemberOfBottlePack,
+        'Position', Position,
+        'StartTime', StartTime,
+        'EndTime', EndTime,
+        'DispatchingPriority', DispatchingPriority,
+        'EventTime', EventTime,
+        'PrevLiquid', PrevLiquid
+    ) INTO v_JsonBottleInfo
+    FROM tProcBottle
+    WHERE BottleID = v_BottleID;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'bottle_info', v_JsonBottleInfo,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 932. spRequestAllBottlesInfoFmEquipment       Bottle 관련 정보를 가져온다
+DELIMITER $$
+-- ReqBottleInfoFmEqp token event에 대한 처리
+-- Bottle상태를 가져온다
+-- 사용법
+--    CALL spRequestAllBottlesInfoFmEquipment('1', '1');
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "total_cnt_of_eqp": 70,
+--    "eqp_status": [
+--        {
+--            "No_1": {
+--                "BottleID": "Bot_001",
+--                "ExperimentRequestName": "홍길동",
+--                "CurrLiquid": "Acid",
+--                "RequestDate": "2024-06-05",
+--                "DispatchingPriority": 1,
+--                "Position": "0110",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        {
+--            "No_2": {
+--                "BottleID": "Bot_002",
+--                "ExperimentRequestName": "심봉사",
+--                "CurrLiquid": "Base",
+--                "RequestDate": "2024-06-06",
+--                "DispatchingPriority": 9,
+--                "Position": "0001",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        ...
+--        {
+--            "No_70": {
+--                "BottleID": "Bot_090",
+--                "ExperimentRequestName": "이몽룡",
+--                "CurrLiquid": "Organic",
+--                "RequestDate": "2024-06-07",
+--                "DispatchingPriority": 5,
+--                "Position": "0105",
+--                "EventTime": "2024-06-05"
+--            }
+--        }
+--    ],
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spRequestAllBottlesInfoFmEquipment (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_TotalCntOfEqp INT;
+    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 테이블의 총 레코드 수를 계산
+    SELECT COUNT(*) INTO v_TotalCntOfEqp 
+    FROM tProcBottle 
+    WHERE CurrEqpGroupID = v_EqpGroupID AND CurrEqpSeqNo = v_EqpSeqNo;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'total_cnt_of_eqp', v_TotalCntOfEqp,
+        'eqp_status', (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY BottleID)), JSON_OBJECT(
+                        'BottleID', BottleID,
+                        'ExperimentRequestName', ExperimentRequestName,
+                        'CurrLiquid', CurrLiquid,
+                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
+                        'DispatchingPriority', DispatchingPriority,
+                        'Position', Position,
+                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
+                    )
+                )
+            )
+            FROM tProcBottle
+            WHERE CurrEqpGroupID = v_EqpGroupID 
+              AND CurrEqpSeqNo = v_EqpSeqNo
+            ORDER BY EventTime
+        ),
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 933. spUpdateBottleStatus             Bottle상태를 임의적으로 수동 변경한다. 정보불일치 발생시 UI에서 사용.
+-- ChangeBottleInfo token event에 대한 처리
+-- Bottle상태를 변경한다
+--
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spUpdateBottleStatus (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1);
+    DECLARE v_OperID CHAR(1);
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+    DECLARE v_CurrentTime DATETIME;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.BottleID'));
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpGroupID'));
+    SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.EqpSeqNo'));
+    SET v_OperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.OperID'));
+    SET v_NextEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.NextEqpGroupID'));
+    SET v_NextOperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.NextOperID'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 현재 시간을 가져옴
+    SET v_CurrentTime = NOW();
+
+    -- tProcBottle 테이블의 레코드를 업데이트
+    UPDATE tProcBottle
+    SET CurrEqpGroupID = v_EqpGroupID,
+        CurrEqpSeqNo = v_EqpSeqNo,
+        CurrOperID = v_OperID,
+        NextEqpGroupID = v_NextEqpGroupID,
+        NextOperID = v_NextOperID,
+        EventTime = v_CurrentTime
+    WHERE BottleID = v_BottleID;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 934. spRetrieveAllBottleStatuses      모든 Bottle상태를 가져온다
+-- ReqAllBottlesInfo token event에 대한 처리
+-- 모든 Bottle상태를 가져온다
+--
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "total_cnt_of_eqp": 300,
+--    "eqp_status": [
+--        {
+--            "No_1": {
+--                "BottleID": "Bot_001",
+--                "EqpGroupID": "1",
+--                "EqpSeqNo": "1",
+--                "ExperimentRequestName": "홍길동",
+--                "CurrLiquid": "Acid",
+--                "RequestDate": "2024-06-05",
+--                "DispatchingPriority": 1,
+--                "Position": "0110",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        {
+--            "No_2": {
+--                "BottleID": "Bot_002",
+--                "EqpGroupID": "1",
+--                "EqpSeqNo": "1",
+--                "ExperimentRequestName": "심봉사",
+--                "CurrLiquid": "Base",
+--                "RequestDate": "2024-06-06",
+--                "DispatchingPriority": 9,
+--                "Position": "0001",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        ...
+--        {
+--            "No_300": {
+--                "BottleID": "Bot_090",
+--                "EqpGroupID": "5",
+--                "EqpSeqNo": "1",
+--                "ExperimentRequestName": "이몽룡",
+--                "CurrLiquid": "Organic",
+--                "RequestDate": "2024-06-07",
+--                "DispatchingPriority": 5,
+--                "Position": "0105",
+--                "EventTime": "2024-06-05"
+--            }
+--        }
+--    ],
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spRetrieveAllBottleStatuses()
+BEGIN
+    DECLARE v_TotalCntOfEqp INT;
+    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SELECT v_JsonResult AS result;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 테이블의 총 레코드 수를 계산
+    SELECT COUNT(*) INTO v_TotalCntOfEqp 
+    FROM tProcBottle;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'total_cnt_of_eqp', v_TotalCntOfEqp,
+        'eqp_status', (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY CurrEqpGroupID, CurrEqpSeqNo)), JSON_OBJECT(
+                        'BottleID', BottleID,
+                        'EqpGroupID', CurrEqpGroupID,
+                        'EqpSeqNo', CurrEqpSeqNo,
+                        'ExperimentRequestName', ExperimentRequestName,
+                        'CurrLiquid', CurrLiquid,
+                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
+                        'DispatchingPriority', DispatchingPriority,
+                        'Position', Position,
+                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
+                    )
+                )
+            )
+            FROM tProcBottle
+            ORDER BY CurrEqpGroupID, CurrEqpSeqNo
+        ),
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    SELECT v_JsonResult AS result;
+END $$
+DELIMITER ;
+
+
+-- 935. spRetrievePendingBottles         투입대기중인 Bottle정보를 가져온다
+-- InputWaitingBottleInfoFmEqp token event에 대한 처리
+-- 투입대기중인 Bottle정보를 가져온다
+--
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "total_cnt_of_eqp": 5,
+--    "eqp_status": [
+--        {
+--            "No_1": {
+--                "BottleID": "Bot_001",
+--                "ExperimentRequestName": "홍길동",
+--                "CurrLiquid": "Acid",
+--                "RequestDate": "2024-06-05",
+--                "DispatchingPriority": 1,
+--                "Position": "0110",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        {
+--            "No_2": {
+--                "BottleID": "Bot_002",
+--                "ExperimentRequestName": "심봉사",
+--                "CurrLiquid": "Base",
+--                "RequestDate": "2024-06-06",
+--                "DispatchingPriority": 9,
+--                "Position": "0001",
+--                "EventTime": "2024-06-05"
+--            }
+--        },
+--        ...
+--        {
+--            "No_5": {
+--                "BottleID": "Bot_090",
+--                "ExperimentRequestName": "이몽룡",
+--                "CurrLiquid": "Organic",
+--                "RequestDate": "2024-06-07",
+--                "DispatchingPriority": 5,
+--                "Position": "0105",
+--                "EventTime": "2024-06-05"
+--            }
+--        }
+--    ],
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spRetrievePendingBottles (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+    DECLARE v_TotalCntOfEqp INT;
+    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_NextEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.NextEqpGroupID'));
+    SET v_NextOperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.NextOperID'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 테이블의 총 레코드 수를 계산
+    SELECT COUNT(*) INTO v_TotalCntOfEqp 
+    FROM tProcBottle 
+    WHERE NextEqpGroupID = v_NextEqpGroupID AND NextOperID = v_NextOperID;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'total_cnt_of_eqp', v_TotalCntOfEqp,
+        'eqp_status', (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY BottleID)), JSON_OBJECT(
+                        'BottleID', BottleID,
+                        'ExperimentRequestName', ExperimentRequestName,
+                        'CurrLiquid', CurrLiquid,
+                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
+                        'DispatchingPriority', DispatchingPriority,
+                        'Position', Position,
+                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
+                    )
+                )
+            )
+            FROM tProcBottle
+            WHERE NextEqpGroupID = v_NextEqpGroupID AND NextOperID = v_NextOperID
+            ORDER BY BottleID
+        ),
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 936. spRetrieveEmptyBottleCount       설비에서 대기중인 Bottle수량정보를 가져온다
+-- GetCountEmptyBottleAtInOutBottle token event에 대한 처리
+-- 설비에서 대기중인 Bottle수량정보를 가져온다
+--
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "total_cnt_of_empty_bottle": 10,
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spRetrieveEmptyBottleCount (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_CurrEqpGroupID CHAR(1);
+    DECLARE v_CurrEqpSeqNo CHAR(1);
+    DECLARE v_TotalCntOfEmptyBottle INT;
+    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_CurrEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpGroupID'));
+    SET v_CurrEqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpSeqNo'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 테이블의 총 빈 병 레코드 수를 계산
+    SELECT COUNT(*) INTO v_TotalCntOfEmptyBottle 
+    FROM tProcBottle 
+    WHERE CurrEqpGroupID = v_CurrEqpGroupID 
+      AND CurrEqpSeqNo = v_CurrEqpSeqNo;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'total_cnt_of_empty_bottle', v_TotalCntOfEmptyBottle,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+-- 937. spFetchBottleProcessHistory      Bottle에서 수행한 공정이력정보를 가져온다
+-- Req4BottleProcessHistory token event에 대한 처리
+-- Bottle에서 수행한 공정이력정보를 가져온다
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--    "total_cnt_of_process": 5,
+--    "process_of_bottle": [
+--        {
+--            "No_1": {
+--                "EqpGroupID": "1",
+--                "OperID": "2",
+--                "StartTime": "2024-06-05",
+--                "EndTime": "2024-06-05",
+--                "DispatchingPriority": 1,
+--                "Position": "0110"
+--            }
+--        },
+--        {
+--            "No_2": {
+--                "EqpGroupID": "2",
+--                "OperID": "1",
+--                "StartTime": "2024-06-06",
+--                "EndTime": "2024-06-05",
+--                "DispatchingPriority": 9,
+--                "Position": "0001"
+--            }
+--        },
+--        ...
+--        {
+--            "No_5": {
+--                "EqpGroupID": "5",
+--                "OperID": "1",
+--                "StartTime": "2024-06-07",
+--                "EndTime": "2024-06-05",
+--                "DispatchingPriority": 5,
+--                "Position": "0105"
+--            }
+--        }
+--    ],
+--    "error_msg": "None"
+-- }
+DELIMITER $$
+CREATE PROCEDURE spFetchBottleProcessHistory (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_TotalCntOfProcess INT;
+    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.BottleID'));
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- 테이블의 총 프로세스 레코드 수를 계산
+    SELECT COUNT(*) INTO v_TotalCntOfProcess 
+    FROM tProcBotOper 
+    WHERE BottleID = v_BottleID;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'total_cnt_of_process', v_TotalCntOfProcess,
+        'process_of_bottle', (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY EqpGroupID, OperID)), JSON_OBJECT(
+                        'BottleID', BottleID,
+                        'EqpGroupID', EqpGroupID,
+                        'OperID', OperID,
+                        'StartTime', DATE_FORMAT(StartTime, '%Y-%m-%d'),
+                        'EndTime', DATE_FORMAT(EndTime, '%Y-%m-%d'),
+                        'DispatchingPriority', DispatchingPriority,
+                        'Position', Position
+                    )
+                )
+            )
+            FROM tProcBotOper
+            WHERE BottleID = v_BottleID
+            ORDER BY EqpGroupID, OperID
+        ),
+        'error_msg', v_ErrorMsg
+    );
+
+    COMMIT;
+
+    SET p_OutputJson = v_JsonResult;
+END$$
+DELIMITER ;
+
+
+
+
+
+-- 9A1. spTransferAndDeleteBottle        Bottle 재사용을 위하여 데이터를 Hist로 이동하고 기존 데이터는 삭제한다.
+DELIMITER $$
+CREATE PROCEDURE spTransferAndDeleteBottle (
+    IN p_BottleID CHAR(15)
+)
+BEGIN
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SELECT v_JsonResult AS result;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- tHisProcBotOper 테이블에 tProcBotOper 테이블의 데이터를 삽입
+    INSERT INTO tHisProcBotOper (
+        BottleID,
+        EqpGroupID,
+        OperID,
+        StartTime,
+        EndTime,
+        DispatchingPriority,
+        Position
+    )
+    SELECT 
+        BottleID,
+        CurrEqpGroupID AS EqpGroupID,
+        CurrOperID AS OperID,
+        StartTime,
+        EndTime,
+        DispatchingPriority,
+        Position
+    FROM tProcBotOper
+    WHERE BottleID = p_BottleID;
+
+    -- tProcBotOper 테이블에서 해당 BottleID의 데이터를 삭제
+    DELETE FROM tProcBotOper
+    WHERE BottleID = p_BottleID;
+
+    COMMIT;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'error_msg', v_ErrorMsg
+    );
+
+    SELECT v_JsonResult AS result;
+END$$
+DELIMITER ;
+
+
+-- 9A2. spFetchNextOperationFromRoute    차기 공정정보를 가져온다
+DELIMITER $$
+-- 차기 공정정보를 가져온다
+-- 사용법
+--    1. 세션 변수 선언
+--       SET @NextEqpGroupID = '';
+--       SET @NextOperID = '';
+--    2. 저장 프로시저 호출
+--       CALL spFetchNextOperationFromRoute('1', '1', @NextEqpGroupID, @NextOperID);
+--    3. 결과 확인
+--       SELECT @NextEqpGroupID AS NextEqpGroupID, @NextOperID AS NextOperID;
+DELIMITER $$
+CREATE PROCEDURE spFetchNextOperationFromRoute (
+    IN p_InputJson JSON,
+    OUT p_OutputJson JSON
+)
+BEGIN
+    DECLARE v_CurrEqpGroupID CHAR(1);
+    DECLARE v_CurrOperID CHAR(1);
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_JsonResult JSON;
+
+    -- 예외 처리 시작
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'error_msg', v_ErrorMsg
+        );
+
+        SET p_OutputJson = v_JsonResult;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- JSON 파라미터에서 값 추출
+    SET v_CurrEqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrEqpGroupID'));
+    SET v_CurrOperID = JSON_UNQUOTE(JSON_EXTRACT(p_InputJson, '$.CurrOperID'));
+
+    -- 다음 작업 정보를 조회
+    SELECT NextEqpGroupID, NextOperID
+    INTO v_NextEqpGroupID, v_NextOperID
+    FROM tMstRouteOper
+    WHERE CurrEqpGroupID = v_CurrEqpGroupID
+      AND CurrOperID = v_CurrOperID
+    LIMIT 1;
+
+    -- JSON 형식으로 결과 반환
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'NextEqpGroupID', v_NextEqpGroupID,
+        'NextOperID', v_NextOperID,
+        'error_msg', v_ErrorMsg
+    );
+
+    SET p_OutputJson = v_JsonResult;
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+
+-- 9A3. spUpdateNextOperation            현재공정완료했을때 차기 공정정보 Set한다.
 -- 현재공정완료했을때 차기 공정정보 Set한다.
-CREATE PROCEDURE UpdateNextOperation (
+DELIMITER $$
+CREATE PROCEDURE spUpdateNextOperation (
     IN p_BottleID CHAR(1),
     IN p_CurrEqpGroupID CHAR(1),
     IN p_CurrOperID CHAR(1)
@@ -376,9 +2089,10 @@ END $$
 DELIMITER ;
 
 
-DELIMITER $$
+-- 9B1.  UpdateNextOper_Insert           LoadComp, UnloadComp에 대한 처리
 -- 사용안함
 -- ProcessLoadUnloadCompletion 통합됨
+DELIMITER $$
 CREATE PROCEDURE UpdateNextOper_Insert (
     IN p_BottleID CHAR(15),
     IN p_CurrEqpGroupID CHAR(1),
@@ -446,7 +2160,8 @@ END $$
 DELIMITER ;
 
 
-DELIMITER $$
+-- 9B2.  ProcessLoadUnloadCompletion     세정후 Bottle 재사용을 위해 분석실 내부 Load Port에 반출입기에 입고될때 기존 Data 삭제하고 History 이동한다
+-- 사용안함. LoadComp, UnloadComp 분리해서 처리
 -- LoadComp, UnloadComp token event에 대한 처리
 -- LoadComp, UnloadComp Token 수신시 호출
 -- 세정후 Bottle 재사용을 위해 분석실 내부 Load Port에 반출입기에 입고될때 기존 Data 삭제하고 History 이동한다
@@ -460,6 +2175,7 @@ DELIMITER $$
 --    "sender_controller": "DB_Manager",
 --    "error_msg": "None"
 -- }
+DELIMITER $$
 CREATE PROCEDURE ProcessLoadUnloadCompletion (
     IN p_BottleID CHAR(15),
     IN p_CurrEqpGroupID CHAR(1),
@@ -607,32 +2323,135 @@ END $$
 DELIMITER ;
 
 
-DELIMITER $$
--- ChangeBottleInfo token event에 대한 처리
--- Bottle상태를 변경한다
--- 사용법
---    CALL UpdateBottleStatus(
---       'BOTTLE12345',  -- p_BottleID
---       'A',            -- p_EqpGroupID
---       '1',            -- p_EqpSeqNo
---       '2',            -- p_OperID
---       'B',            -- p_NextEqpGroupID
---       '3'             -- p_NextOperID
---    );
+-- 9B3.  RetrieveSuitableBottleAtStocker Stocker에서 Bottle 정보를 가져온다
+-- 현재 사용하지 않음.
+-- spExtractSuitableBottlePackCountAtStocker, spGetBottleInfoByPackID 분리해서 처리하는 방식으로 변경됨
+-- RETURN
+-- {
+--    "status_code": 200,
+--    "sender_controller": "DB_Manager",
+--	  "TotCountOfBottlePack" : 5,
+--	  "BottleInfo" : [
+--		{ 
+--			"BottleID_1" : "ID_001",
+--			"Position_1" : "1021"
+--		},
+--		{ 
+--			"BottleID_2" : "ID_002",
+--			"Position_2" : "1022"
+--		},
+--		...
+--		{ 
+--			"BottleID_5" : "ID_005",
+--			"Position_5" : "1025"
+--		}
+--	 ],    
+--    "error_msg": "None"
+-- }
+DELIMITER //
+CREATE PROCEDURE RetrieveSuitableBottleAtStocker()
+BEGIN
+    DECLARE TotCountOfBottlePack INT;
+    DECLARE Zone NVARCHAR(10);
+    DECLARE SelectedPosition CHAR(1);
+    DECLARE SelectedBottleID CHAR(15);
+    DECLARE SelectedRequestDate DATETIME;
+
+    -- Declare variables for error handling
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg TEXT DEFAULT 'None';
+    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_JsonResult JSON;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_StatusCode = MYSQL_ERRNO, 
+            v_ErrorMsg = MESSAGE_TEXT;
+        
+        SET v_JsonResult = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+
+        SELECT v_JsonResult AS result;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Get the first position, BottleID, total count of bottles in a pack, and RequestDate to determine the Zone
+    SELECT 
+        LEFT(Position, 1), 
+        BottleID,
+        RequestTotCnt,
+        RequestDate
+    INTO
+        SelectedPosition,
+        SelectedBottleID,
+        TotCountOfBottlePack,
+        SelectedRequestDate
+    FROM tProcBottle
+    ORDER BY DispatchingPriority DESC, RequestDate
+    LIMIT 1;
+
+    IF SelectedPosition = '1' THEN
+        SET Zone = 'Left';
+    ELSEIF SelectedPosition = '2' THEN
+        SET Zone = 'Right';
+    ELSE
+        SET Zone = 'NotFound';
+    END IF;
+
+    -- Select the results in the required JSON format
+    SET v_JsonResult = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'TotCountOfBottlePack', TotCountOfBottlePack,
+        'Zone', Zone,
+        'BottleInfo', (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'BottleID', BottleID,
+                    'Position', Position
+                )
+            )
+            FROM (
+                SELECT BottleID, Position
+                FROM tProcBottle
+                WHERE RequestDate = SelectedRequestDate
+            ) AS BottleDetails
+        ),
+        'error_msg', v_ErrorMsg
+    );
+
+    SELECT v_JsonResult AS result;
+
+    COMMIT;
+END //
+DELIMITER ;
+
+
+-- 9B4.  UpdateEqpProcessStatus          장비의 Process상태를 변경한다. (LoadReq, LoadComp, UnLoadReq, UnLoadComp)
+-- 사용안함. LoadReq, LoadComp, UnLoadReq, UnLoadComp stored procedure 분리처리
+-- LoadRequest, UnloadRequest, ReserveEqpPort4Dispatch token event에 대한 처리
+-- 장비의 Process상태를 변경한다. (LoadReq, UnLoadReq, Idle, Pause, Reserve)
+-- Dispatcher가 반송이 가능한 상태인지 확인하기 위해 필요
 --
+-- 사용법
+--    CALL UpdateEqpProcessStatus('1', '1', 'LoadComp');
 -- RETURN
 -- {
 --    "status_code": 200,
 --    "sender_controller": "DB_Manager",
 --    "error_msg": "None"
 -- }
-CREATE PROCEDURE UpdateBottleStatus (
-    IN p_BottleID CHAR(15),
+DELIMITER $$
+CREATE PROCEDURE UpdateEqpProcessStatus (
     IN p_EqpGroupID CHAR(1),
     IN p_EqpSeqNo CHAR(1),
-    IN p_OperID CHAR(1),
-    IN p_NextEqpGroupID CHAR(1),
-    IN p_NextOperID CHAR(1)
+    IN p_NewProcessStatus NVARCHAR(12)
 )
 BEGIN
     DECLARE v_CurrentTime DATETIME;
@@ -663,15 +2482,12 @@ BEGIN
     -- 현재 시간을 가져옴
     SET v_CurrentTime = NOW();
 
-    -- tProcBottle 테이블의 레코드를 업데이트
-    UPDATE tProcBottle
-    SET CurrEqpGroupID = p_EqpGroupID,
-        CurrEqpSeqNo = p_EqpSeqNo,
-        CurrOperID = p_OperID,
-        NextEqpGroupID = p_NextEqpGroupID,
-        NextOperID = p_NextOperID,
+    -- tMstEqp 테이블의 ProcessStatus와 EventTime을 업데이트
+    UPDATE tMstEqp
+    SET ProcessStatus = p_NewProcessStatus,
         EventTime = v_CurrentTime
-    WHERE BottleID = p_BottleID;
+    WHERE EqpGroupID = p_EqpGroupID
+      AND EqpSeqNo = p_EqpSeqNo;
 
     COMMIT;
 
@@ -687,311 +2503,53 @@ END $$
 DELIMITER ;
 
 
-DELIMITER $$
--- ReqBottleInfoFmEqp token event에 대한 처리
--- Bottle상태를 가져온다
+-- 9B5. GetTopPriorityBottle             stocker내에 bottle 우선순위, 입고순서로 sotting하여 해당 bottle 정보 출력
+-- stocker내에 bottle 우선순위, 입고순서로 sotting하여 해당 bottle 정보 출력
 -- 사용법
---    CALL FetchBottleStatusFmEquipment('1', '1');
+--    CALL GetTopPriorityBottle('3', '1', '2', '1');
 -- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "total_cnt_of_eqp": 70,
---    "eqp_status": [
---        {
---            "No_1": {
---                "BottleID": "Bot_001",
---                "ExperimentRequestName": "홍길동",
---                "CurrLiquid": "Acid",
---                "RequestDate": "2024-06-05",
---                "DispatchingPriority": 1,
---                "Position": "0110",
---                "EventTime": "2024-06-05"
---            }
---        },
---        {
---            "No_2": {
---                "BottleID": "Bot_002",
---                "ExperimentRequestName": "심봉사",
---                "CurrLiquid": "Base",
---                "RequestDate": "2024-06-06",
---                "DispatchingPriority": 9,
---                "Position": "0001",
---                "EventTime": "2024-06-05"
---            }
---        },
---        ...
---        {
---            "No_70": {
---                "BottleID": "Bot_090",
---                "ExperimentRequestName": "이몽룡",
---                "CurrLiquid": "Organic",
---                "RequestDate": "2024-06-07",
---                "DispatchingPriority": 5,
---                "Position": "0105",
---                "EventTime": "2024-06-05"
---            }
---        }
---    ],
---    "error_msg": "None"
--- }
-CREATE PROCEDURE FetchBottleStatusFmEquipment (
-    IN p_EqpGroupID CHAR(1),
-    IN p_EqpSeqNo CHAR(1)
-)
-BEGIN
-    DECLARE v_TotalCntOfEqp INT;
-    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
-    DECLARE v_StatusCode INT DEFAULT 200;
-    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
-    DECLARE v_JsonResult JSON;
-
-    -- 예외 처리 시작
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
-        SET v_JsonResult = JSON_OBJECT(
-            'status_code', v_StatusCode,
-            'sender_controller', v_SenderController,
-            'error_msg', v_ErrorMsg
-        );
-
-        SELECT v_JsonResult AS result;
-        ROLLBACK;
-    END;
-
-    START TRANSACTION;
-
-    -- 테이블의 총 레코드 수를 계산
-    SELECT COUNT(*) INTO v_TotalCntOfEqp 
-    FROM tProcBottle 
-    WHERE CurrEqpGroupID = p_EqpGroupID AND CurrEqpSeqNo = p_EqpSeqNo;
-
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'total_cnt_of_eqp', v_TotalCntOfEqp,
-        'eqp_status', (
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY BottleID)), JSON_OBJECT(
-                        'BottleID', BottleID,
-                        'ExperimentRequestName', ExperimentRequestName,
-                        'CurrLiquid', CurrLiquid,
-                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
-                        'DispatchingPriority', DispatchingPriority,
-                        'Position', Position,
-                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
-                    )
-                )
-            )
-            FROM tProcBottle
-            WHERE CurrEqpGroupID = p_EqpGroupID 
-              AND CurrEqpSeqNo = p_EqpSeqNo
-            ORDER BY EventTime
-        ),
-        'error_msg', v_ErrorMsg
-    );
-
-    COMMIT;
-
-    SELECT v_JsonResult AS result;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
--- ReqAllBottlesInfo token event에 대한 처리
--- 모든 Bottle상태를 가져온다
--- 사용법
---    CALL RetrieveAllBottleStatuses();
--- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "total_cnt_of_eqp": 300,
---    "eqp_status": [
---        {
---            "No_1": {
---                "BottleID": "Bot_001",
---                "EqpGroupID": "1",
---                "EqpSeqNo": "1",
---                "ExperimentRequestName": "홍길동",
---                "CurrLiquid": "Acid",
---                "RequestDate": "2024-06-05",
---                "DispatchingPriority": 1,
---                "Position": "0110",
---                "EventTime": "2024-06-05"
---            }
---        },
---        {
---            "No_2": {
---                "BottleID": "Bot_002",
---                "EqpGroupID": "1",
---                "EqpSeqNo": "1",
---                "ExperimentRequestName": "심봉사",
---                "CurrLiquid": "Base",
---                "RequestDate": "2024-06-06",
---                "DispatchingPriority": 9,
---                "Position": "0001",
---                "EventTime": "2024-06-05"
---            }
---        },
---        ...
---        {
---            "No_300": {
---                "BottleID": "Bot_090",
---                "EqpGroupID": "5",
---                "EqpSeqNo": "1",
---                "ExperimentRequestName": "이몽룡",
---                "CurrLiquid": "Organic",
---                "RequestDate": "2024-06-07",
---                "DispatchingPriority": 5,
---                "Position": "0105",
---                "EventTime": "2024-06-05"
---            }
---        }
---    ],
---    "error_msg": "None"
--- }
-CREATE PROCEDURE RetrieveAllBottleStatuses()
-BEGIN
-    DECLARE v_TotalCntOfEqp INT;
-    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
-    DECLARE v_StatusCode INT DEFAULT 200;
-    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
-    DECLARE v_JsonResult JSON;
-
-    -- 예외 처리 시작
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
-        SET v_JsonResult = JSON_OBJECT(
-            'status_code', v_StatusCode,
-            'sender_controller', v_SenderController,
-            'error_msg', v_ErrorMsg
-        );
-
-        SELECT v_JsonResult AS result;
-        ROLLBACK;
-    END;
-
-    START TRANSACTION;
-
-    -- 테이블의 총 레코드 수를 계산
-    SELECT COUNT(*) INTO v_TotalCntOfEqp 
-    FROM tProcBottle;
-
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'total_cnt_of_eqp', v_TotalCntOfEqp,
-        'eqp_status', (
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY CurrEqpGroupID, CurrEqpSeqNo)), JSON_OBJECT(
-                        'BottleID', BottleID,
-                        'EqpGroupID', CurrEqpGroupID,
-                        'EqpSeqNo', CurrEqpSeqNo,
-                        'ExperimentRequestName', ExperimentRequestName,
-                        'CurrLiquid', CurrLiquid,
-                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
-                        'DispatchingPriority', DispatchingPriority,
-                        'Position', Position,
-                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
-                    )
-                )
-            )
-            FROM tProcBottle
-            ORDER BY CurrEqpGroupID, CurrEqpSeqNo
-        ),
-        'error_msg', v_ErrorMsg
-    );
-
-    COMMIT;
-
-    SELECT v_JsonResult AS result;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
--- InputWaitingBottleInfoFmEqp token event에 대한 처리
--- 투입대기중인 Bottle정보를 가져온다
--- 사용법
---    CALL RetrievePendingBottles('2', '1');
--- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "total_cnt_of_eqp": 5,
---    "eqp_status": [
---        {
---            "No_1": {
---                "BottleID": "Bot_001",
---                "ExperimentRequestName": "홍길동",
---                "CurrLiquid": "Acid",
---                "RequestDate": "2024-06-05",
---                "DispatchingPriority": 1,
---                "Position": "0110",
---                "EventTime": "2024-06-05"
---            }
---        },
---        {
---            "No_2": {
---                "BottleID": "Bot_002",
---                "ExperimentRequestName": "심봉사",
---                "CurrLiquid": "Base",
---                "RequestDate": "2024-06-06",
---                "DispatchingPriority": 9,
---                "Position": "0001",
---                "EventTime": "2024-06-05"
---            }
---        },
---        ...
---        {
---            "No_5": {
---                "BottleID": "Bot_090",
---                "ExperimentRequestName": "이몽룡",
---                "CurrLiquid": "Organic",
---                "RequestDate": "2024-06-07",
---                "DispatchingPriority": 5,
---                "Position": "0105",
---                "EventTime": "2024-06-05"
---            }
---        }
---    ],
---    "error_msg": "None"
--- }
-CREATE PROCEDURE RetrievePendingBottles (
+--    정상적으로 병 정보를 조회한 경우
+-- 	  {
+--    	"status_code": 200,
+--    	"sender_controller": "DB_Manager",
+--    	"top_priority_of_bottle": 9,
+--    	"bottle_id": "bot_001"
+-- 	  }
+--    병 정보를 찾지 못했을 때
+--    {
+--    	"status_code": 404,
+--    	"sender_controller": "DB_Manager",
+--    	"top_priority_of_bottle": null,
+--    	"bottle_id": null
+--    }
+DELIMITER //
+CREATE PROCEDURE GetTopPriorityBottle (
+    IN p_CurrEqpGroupID CHAR(1),
+    IN p_CurrEqpSeqNo CHAR(1),
     IN p_NextEqpGroupID CHAR(1),
     IN p_NextOperID CHAR(1)
 )
 BEGIN
-    DECLARE v_TotalCntOfEqp INT;
-    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
+    DECLARE done INT DEFAULT 0;
+    DECLARE err_code INT;
+    DECLARE bottleID CHAR(15);
+    DECLARE dispatchingPriority TINYINT;
     DECLARE v_StatusCode INT DEFAULT 200;
     DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
+    DECLARE v_ErrorMsg VARCHAR(100) DEFAULT 'None';
     DECLARE v_JsonResult JSON;
 
-    -- 예외 처리 시작
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
+            err_code = MYSQL_ERRNO,
+            v_ErrorMsg = MESSAGE_TEXT;        
+        SET v_StatusCode = err_code;
         SET v_JsonResult = JSON_OBJECT(
             'status_code', v_StatusCode,
             'sender_controller', v_SenderController,
+            'top_priority_of_bottle', NULL,
+            'bottle_id', NULL,
             'error_msg', v_ErrorMsg
         );
 
@@ -999,221 +2557,57 @@ BEGIN
         ROLLBACK;
     END;
 
+    DECLARE cur CURSOR FOR
+    SELECT 
+        BottleID,
+        DispatchingPriority
+    FROM 
+        tProcBottle
+    WHERE 
+        CurrEqpGroupID = p_CurrEqpGroupID
+        AND CurrEqpSeqNo = p_CurrEqpSeqNo
+        AND NextEqpGroupID = p_NextEqpGroupID
+        AND NextOperID = p_NextOperID
+    ORDER BY 
+        DispatchingPriority DESC, 
+        StartTime ASC;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
     START TRANSACTION;
 
-    -- 테이블의 총 레코드 수를 계산
-    SELECT COUNT(*) INTO v_TotalCntOfEqp 
-    FROM tProcBottle 
-    WHERE NextEqpGroupID = p_NextEqpGroupID AND NextOperID = p_NextOperID;
+    OPEN cur;
+    FETCH cur INTO bottleID, dispatchingPriority;
 
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'total_cnt_of_eqp', v_TotalCntOfEqp,
-        'eqp_status', (
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY BottleID)), JSON_OBJECT(
-                        'BottleID', BottleID,
-                        'ExperimentRequestName', ExperimentRequestName,
-                        'CurrLiquid', CurrLiquid,
-                        'RequestDate', DATE_FORMAT(RequestDate, '%Y-%m-%d'),
-                        'DispatchingPriority', DispatchingPriority,
-                        'Position', Position,
-                        'EventTime', DATE_FORMAT(EventTime, '%Y-%m-%d')
-                    )
-                )
-            )
-            FROM tProcBottle
-            WHERE NextEqpGroupID = p_NextEqpGroupID AND NextOperID = p_NextOperID
-            ORDER BY BottleID
-        ),
-        'error_msg', v_ErrorMsg
-    );
-
-    COMMIT;
-
-    SELECT v_JsonResult AS result;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
--- GetCountEmptyBottleAtInOutBottle token event에 대한 처리
--- 설비에서 대기중인 Bottle수량정보를 가져온다
--- 사용법
---    CALL RetrieveEmptyBottleCount('1', '1');
--- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "total_cnt_of_empty_bottle": 10,
---    "error_msg": "None"
--- }
-CREATE PROCEDURE RetrieveEmptyBottleCount (
-    IN p_CurrEqpGroupID CHAR(1),
-    IN p_CurrEqpSeqNo CHAR(1)
-)
-BEGIN
-    DECLARE v_TotalCntOfEmptyBottle INT;
-    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
-    DECLARE v_StatusCode INT DEFAULT 200;
-    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
-    DECLARE v_JsonResult JSON;
-
-    -- 예외 처리 시작
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
+    IF NOT done THEN
         SET v_JsonResult = JSON_OBJECT(
             'status_code', v_StatusCode,
             'sender_controller', v_SenderController,
+            'top_priority_of_bottle', dispatchingPriority,
+            'bottle_id', bottleID,
             'error_msg', v_ErrorMsg
         );
-
-        SELECT v_JsonResult AS result;
-        ROLLBACK;
-    END;
-
-    START TRANSACTION;
-
-    -- 테이블의 총 빈 병 레코드 수를 계산
-    SELECT COUNT(*) INTO v_TotalCntOfEmptyBottle 
-    FROM tProcBottle 
-    WHERE CurrEqpGroupID = p_CurrEqpGroupID 
-      AND CurrEqpSeqNo = p_CurrEqpSeqNo;
-
-    COMMIT;
-
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'total_cnt_of_empty_bottle', v_TotalCntOfEmptyBottle,
-        'error_msg', v_ErrorMsg
-    );
-
-    SELECT v_JsonResult AS result;
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
--- Req4BottleProcessHistory token event에 대한 처리
--- Bottle에서 수행한 공정이력정보를 가져온다
--- 사용법
---    CALL FetchBottleProcessHistory('Bot_001');
--- RETURN
--- {
---    "status_code": 200,
---    "sender_controller": "DB_Manager",
---    "total_cnt_of_process": 5,
---    "process_of_bottle": [
---        {
---            "No_1": {
---                "EqpGroupID": "1",
---                "OperID": "2",
---                "StartTime": "2024-06-05",
---                "EndTime": "2024-06-05",
---                "DispatchingPriority": 1,
---                "Position": "0110"
---            }
---        },
---        {
---            "No_2": {
---                "EqpGroupID": "2",
---                "OperID": "1",
---                "StartTime": "2024-06-06",
---                "EndTime": "2024-06-05",
---                "DispatchingPriority": 9,
---                "Position": "0001"
---            }
---        },
---        ...
---        {
---            "No_5": {
---                "EqpGroupID": "5",
---                "OperID": "1",
---                "StartTime": "2024-06-07",
---                "EndTime": "2024-06-05",
---                "DispatchingPriority": 5,
---                "Position": "0105"
---            }
---        }
---    ],
---    "error_msg": "None"
--- }
-CREATE PROCEDURE FetchBottleProcessHistory (
-    IN p_BottleID CHAR(15)
-)
-BEGIN
-    DECLARE v_TotalCntOfProcess INT;
-    DECLARE v_ErrorMsg NVARCHAR(100) DEFAULT 'None';
-    DECLARE v_StatusCode INT DEFAULT 200;
-    DECLARE v_SenderController VARCHAR(20) DEFAULT 'DB_Manager';
-    DECLARE v_JsonResult JSON;
-
-    -- 예외 처리 시작
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        GET DIAGNOSTICS CONDITION 1
-            v_StatusCode = MYSQL_ERRNO, 
-            v_ErrorMsg = MESSAGE_TEXT;
-        
+    ELSE
         SET v_JsonResult = JSON_OBJECT(
-            'status_code', v_StatusCode,
+            'status_code', 404,
             'sender_controller', v_SenderController,
-            'error_msg', v_ErrorMsg
+            'top_priority_of_bottle', NULL,
+            'bottle_id', NULL,
+            'error_msg', 'Bottle not found'
         );
+    END IF;
 
-        SELECT v_JsonResult AS result;
-        ROLLBACK;
-    END;
-
-    START TRANSACTION;
-
-    -- 테이블의 총 프로세스 레코드 수를 계산
-    SELECT COUNT(*) INTO v_TotalCntOfProcess 
-    FROM tProcBotOper 
-    WHERE BottleID = p_BottleID;
-
-    -- JSON 형식으로 결과 반환
-    SET v_JsonResult = JSON_OBJECT(
-        'status_code', v_StatusCode,
-        'sender_controller', v_SenderController,
-        'total_cnt_of_process', v_TotalCntOfProcess,
-        'process_of_bottle', (
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    CONCAT('No_', ROW_NUMBER() OVER (ORDER BY EqpGroupID, OperID)), JSON_OBJECT(
-                        'BottleID', BottleID,
-                        'EqpGroupID', EqpGroupID,
-                        'OperID', OperID,
-                        'StartTime', DATE_FORMAT(StartTime, '%Y-%m-%d'),
-                        'EndTime', DATE_FORMAT(EndTime, '%Y-%m-%d'),
-                        'DispatchingPriority', DispatchingPriority,
-                        'Position', Position
-                    )
-                )
-            )
-            FROM tProcBotOper
-            WHERE BottleID = p_BottleID
-            ORDER BY EqpGroupID, OperID
-        ),
-        'error_msg', v_ErrorMsg
-    );
-
+    CLOSE cur;
     COMMIT;
 
     SELECT v_JsonResult AS result;
-END $$
+END //
 DELIMITER ;
 
 
+============================================================================ 
+-- 이벤트 스케줄러 관련 PROCEDURE
+============================================================================ 
 DELIMITER $$
 -- AggregateDailyEqpStatusEvent event scheduler에서 호출
 -- 일일가동률 확인을 위해 일일단위로 설비상태정보 집계한다
