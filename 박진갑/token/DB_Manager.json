@@ -85,16 +85,14 @@ desc
      --> Stocker hole에 bottle을 내려놓았을때
      --> LoadComp4BottleAtStocker 대치가능
 221. GetBottleCapacityAtStocker                     Stocker에서 hole capacity(Bottle 총 적재가능수량)
-     GetHoleTotalCountAtStocker 적정용어 선택
      --> 설비에서 Token정의하고 메세지수신 처리
-222. RequestLoadingableHoleCapaAtStocker            Stocker에 bottle 적재할 Empty hole 수량요청
-     RequestAdequateNumberOfSpareHolesAtStocker 적정용어 선택
-     --> RequestLoadingableHoleCapaAtStocker2Eqp    실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
-     --> RequestLoadingableHoleCapaAtStocker2DB     UI 호출할때 장비에 부담경감을 위해 DB token사용
-223. RequestCheckLoadingableHoleInfoAtStocker       Stocker에 bottle투입하기 위한 Empty hole 정보요청
+222. RequestNumOfEmptyHoleAtStocker            Stocker에 bottle 적재할 Empty hole 수량요청
+     --> RequestNumOfEmptyHoleAtStocker2Eqp    실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
+     --> RequestNumOfEmptyHoleAtStocker2DB     UI 호출할때 장비에 부담경감을 위해 DB token사용
+223. RequestInfoOfEmptyHoleAtStocker       Stocker에 bottle투입하기 위한 Empty hole 정보요청
      RequestAdequateInfoOfSpareHolesAtStocker 적정용어 선택
-     --> RequestCheckLoadingableHoleInfoAtStocker2Eqp   실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
-     --> RequestCheckLoadingableHoleInfoAtStocker2DB    UI 호출할때 장비에 부담경감을 위해 DB token사용
+     --> RequestInfoOfEmptyHoleAtStocker2Eqp   실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
+     --> RequestInfoOfEmptyHoleAtStocker2DB    UI 호출할때 장비에 부담경감을 위해 DB token사용
 224. RequestBottleInfoByHoleAtStocker2Eqp           Stocker에서 Hole 존재하는 bottle정보요청
 225. CompareEqpBottleInfo2DB_BottleInfoAtStocker    Stocker에에 있는 재공재고정보와 DB에 있는 정보를 비교한다
 231. ExtractSuitableBottlePackCountAtStocker        Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
