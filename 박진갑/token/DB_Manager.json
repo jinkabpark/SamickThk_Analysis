@@ -15,29 +15,28 @@ desc
 101. ReqStatusOfInOutBotEqp                         반출입기 설비상태를 요청한다.
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
      --> UI 호출할때 사용
-102. ReqLoadingableHoleCapaAtEmptyBottleZoneFmDB    반출입기에서 공병Zone에 투입가능한 Bottle 수량요청
+102. ReqLoadingAvailableHoleCapaAtEmptyBottleZoneFmDB    반출입기에서 공병Zone에 투입가능한 Bottle 수량요청 ------ able => Available
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
      --> UI 호출할때 사용
-103. ReqLoadingableHoleCapaAtRealBottleZoneFmDB     반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청
-     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+103. ReqLoadingAvailableHoleCapaAtBottleZoneFmDB     반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청
      --> UI 호출할때 사용
-104. ExtractSuitableEmptyBottleAtInOutBotEqp        반출입기에서 적정 빈병을 추출한다
-105. ExtractSuitableRealBottleAtInOutBotEqp         반출입기에서 적정 Real Bottle을 추출한다
+104. ExtractProperEmptyBottleAtInOutBotEqp        반출입기에서 적정 빈병을 추출한다 ----- Suitable => Proper
+105. ExtractProperFillledBottleAtInOutBotEqp         반출입기에서 적정 Real Bottle을 추출한다 ----- RealBottle => FilledBottle
 
-111. RealBottleLoadReqAtWorkingArea                 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
-112. RealBottleLoadCompAtWorkingArea                반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
-113. RealBottleUnloadReqAtWorkingArea               반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
+111. FilledBottleLoadReqAtWorkingArea                 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
+112. FilledBottleLoadCompAtWorkingArea                반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
+113. FilledBottleUnloadReqAtWorkingArea               반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
      --> 112, 113번 한개만 사용해도 가능할 수 있음. 검토필요
-114. RealBottleTransferCompAtWorkingArea            반출입기에서 실병 출하완료메세지(#13 공정완료)
+114. FilledBottleTransferCompAtWorkingArea            반출입기에서 실병 출하완료메세지(#13 공정완료)
 115. EmptyBottleLoadReqAtWorkingArea                반출입기 L1(입고) Port에서 빈병 입고요청메세지
 116. EmptyBottleLoadCompAtWorkingArea               반출입기 L1(입고) Port에서 빈병 도착완료메세지(#11 공정시작)
 117. EmptyBottleUnloadReqAtWorkingArea              반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
      --> 116, 117번 한개만 사용해도 가능할 수 있음. 검토필요
 118. EmptyBottleTransferCompAtWorkingArea           반출입기에서 빈병 입고완료메세지
 
-121. RealBottleLoadReqAtOutArea                     반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
-122. RealBottleLoadCompAtOutArea                    반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)
-123. RealBottleTransferCompAtOutArea                반출입기에서 실병 입고완료메세지
+121. FilledBottleLoadReqAtOutArea                     반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
+122. FilledBottleLoadCompAtOutArea                    반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)
+123. FilledBottleTransferCompAtOutArea                반출입기에서 실병 입고완료메세지
 124. EmptyBottleLoadReqAtOutArea                    반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지
 125. EmptyBottleLoadCompAtOutArea                   반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지
 126. EmptyBottleTransferCompAtOutArea               반출입기에서 빈병 출하완료메세지(#11 공정완료)
@@ -46,7 +45,7 @@ desc
      --> json 별도정의하지 않고 #105번 sp 내부에서만 사용
 132. ResetMemberOfBottlePack                        의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Reset
      --> json 별도정의하지 않고 #113번 sp 내부에서만 사용
-133. GetLaboratoryDemandInformation                 세팅된 실험의뢰정보를 가져온다
+133. GetLaboratoryRequestInfo                 세팅된 실험의뢰정보를 가져온다 ----- DemandInformation => RequestInfo
 
 151. SetUsageStatus4HoleAtInOutBot                  Hole 사용여부 정의한다
      --> DefineUsageStatus4HoleAtInOutBot 적정용어 선택
@@ -90,14 +89,14 @@ desc
      --> RequestNumOfEmptyHoleAtStocker2Eqp    실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
      --> RequestNumOfEmptyHoleAtStocker2DB     UI 호출할때 장비에 부담경감을 위해 DB token사용
 223. RequestInfoOfEmptyHoleAtStocker       Stocker에 bottle투입하기 위한 Empty hole 정보요청
-     RequestAdequateInfoOfSpareHolesAtStocker 적정용어 선택
+     RequestAdequateInfoOfSpareHolesAtStocker 적정용어 선택 ----- Adquete는 없어도 될 듯
      --> RequestInfoOfEmptyHoleAtStocker2Eqp   실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
      --> RequestInfoOfEmptyHoleAtStocker2DB    UI 호출할때 장비에 부담경감을 위해 DB token사용
 224. RequestBottleInfoByHoleAtStocker2Eqp           Stocker에서 Hole 존재하는 bottle정보요청
 225. CompareEqpBottleInfo2DB_BottleInfoAtStocker    Stocker에에 있는 재공재고정보와 DB에 있는 정보를 비교한다
-231. ExtractSuitableBottlePackCountAtStocker        Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
+231. ExtractProperBottlePackCountAtStocker        Stocker에서 추출할 우선순위별 Bottle Pack 수량요청 ----- Suitable => Proper
      --> Target 위치가 분석기 Or 폐기.모사
-232. ExtractSuitableBottlePackInfoAtStocker         Stocker에서 추출할 적정 Bottle Pack 정보요청
+232. ExtractProperBottlePackInfoAtStocker         Stocker에서 추출할 적정 Bottle Pack 정보요청
      --> Target 위치가 분석기 Or 폐기.모사
 251. SetUsageStatus4HoleAtStocker                   Hole 사용여부 정의한다
      --> DefineUsageStatus4HoleAtStocker
@@ -113,7 +112,7 @@ desc
      2) Run     : 분석기 작업시작
      3) Waiting : 분석기 작업종료후 추출대기
      4) Idle    : bottle 이재가 완료되면
-303. CheckRunableStatusAtAnalyzer                   분석기가 작업가능여부 사전 확인한다
+303. CheckAvailabilityAtAnalyzer                   분석기가 작업가능여부 사전 확인한다 ----- RunableStatus => Availability
      --> RequestStatusAtAnalyzer 대치
 311. LoadReqAtAnalyzer                              분석기에서 입고요청메세지
      --> 장비단위 event. Dispatch에서 반송요청 처리를 위해서 필요한 event.
@@ -150,7 +149,7 @@ desc
      2) Ready   : MOMA 장비앞에 도착후 PIO 통신을 통해 정렬 완료된 상태. Dispatcher에게 다음 수행할 명령에 대한 요청
      3) Run     : MOMA Bottle 이동 (장비에서 MOMA or MOMA에서 장비)
      4) Idle    : bottle 이재가 완료되면
-503. CheckRunableStatusAtMOMA                       MOMA 작업가능여부 사전 확인한다
+503. CheckAvailabilityStatusAtMOMA                       MOMA 작업가능여부 사전 확인한다 ----- Runable => Availability
      --> ReqStatusOfMOMA 대치
 511. LoadComp4BottleAtMOMA                          MOMA 작업시작메세지(#41 공정시작)
      --> 설비에서 MOMA로 bottle 이동한 경우 (hole에 bottle 내려놓았을때)
@@ -160,7 +159,7 @@ desc
      GetHoleTotalCountAtMOMA 적정용어 선택
      --> 설비에서 Token정의하고 메세지수신 처리
 522. RequestLoadingableHoleCapaAtMOMA               MOMA에 bottle 적재할 Empty hole 수량요청
-     RequestAdequateNumberOfSpareHolesAtMOMA 적정용어 선택
+     RequestAdequateNumberOfSpareHolesAtMOMA 적정용어 선택 ----- Adequate은 빼도 될 듯
      --> RequestLoadingableHoleCapaAtMOMA2Eqp       실시간 상태확인 위해 설비에서 처리하는 것이 바람직한 방향
      --> RequestLoadingableHoleCapaAtMOMA2DB        UI 호출할때 장비에 부담경감을 위해 DB token사용
 523. RequestCheckLoadingableHoleInfoAtMOMA          MOMA에 bottle투입하기 위한 Empty hole 정보요청
@@ -175,7 +174,7 @@ desc
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
 
 --------------------- UI Or AIMS
-601. SetLaboratoryDemandInformation                 실험의뢰정보를 세팅한다
+601. SetLaboratoryRequestInfo                 실험의뢰정보를 세팅한다 ----- DemandInformation => RequestInfo
 651. RequestBottleInfoByHoleAtMOMA                  MOMA Hole선반에 hole별 bottle정보요청. MOMA 비정상으로 Power-On될때 기존 bottle 정보를 가져온다.
 652. ResetBottleInfoByHoleAtMOMA                    MOMA Hole선반에 hole별 bottle정보 reset요청. MOMA hole 상태를 초기화할 경우 사용한다
 653. AlarmMessage									수행중 발생한 Alarm Message 화면에 출력한다.
@@ -242,7 +241,7 @@ Normal Sequence Flow
       }
    4) Function : Bottle 반출입기에서 빈병을 출하하기전에 요청수량 빈병이 있는지 확인한다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -260,7 +259,7 @@ Normal Sequence Flow
       }
    4) Function : Bottle 반출입기에서 실병을 입고하기전에 실병Pack 수량 입고할 충분한 hole 있는지 확인한다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -289,7 +288,7 @@ Normal Sequence Flow
       }
 
 104. 반출입기에서 적정 빈병을 추출한다
-   1) Token : ExtractSuitableEmptyBottleAtInOutBotEqp
+   1) Token : ExtractPropermptyBottleAtInOutBotEqp ----- Suitable는 빼도 좋을 듯... 일단은 Proper로...
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -297,7 +296,7 @@ Normal Sequence Flow
       }
    4) Function : Bottle 반출입기 빈병Zone에서 빈병Pack 수량 만큼 출고한다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -315,8 +314,8 @@ Normal Sequence Flow
          "error_msg" : "None"
       }
 
-105. 반출입기에서 적정 Real Bottle을 추출한다
-   1) Token : ExtractSuitableRealBottleAtInOutBotEqp
+105. 반출입기에서 적정 Filled Bottle을 추출한다   ----- Real Bottle => Filled Bottle
+   1) Token : ExtractProperFilledBottleAtInOutBotEqp    ----- Suitable는 빼도 좋을 듯... 일단은 Proper로...
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -324,7 +323,7 @@ Normal Sequence Flow
       }
    4) Function : Bottle 반출입기 실병Zone에서 실병Pack 수량 만큼 출고한다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -343,7 +342,7 @@ Normal Sequence Flow
       }
 
 111. 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
-   1) Token : RealBottleLoadReqAtWorkingArea
+   1) Token : FilledBottleLoadReqAtWorkingArea      ----- Real Bottle => Filled Bottle
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -351,7 +350,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 실병없을때(비어있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -360,7 +359,7 @@ Normal Sequence Flow
       }
 
 112. 반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
-   1) Token : RealBottleLoadCompAtWorkingArea
+   1) Token : FilledBottleLoadCompAtWorkingArea      ----- Real Bottle => Filled Bottle
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -368,7 +367,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 실병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -377,7 +376,7 @@ Normal Sequence Flow
       }
 
 113. 반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
-   1) Token : RealBottleUnloadReqAtWorkingArea
+   1) Token : FilledBottleUnloadReqAtWorkingArea      ----- Real Bottle => Filled Bottle
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -385,7 +384,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 실병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -394,7 +393,7 @@ Normal Sequence Flow
       }
 
 114. 반출입기에서 실병 출하완료메세지(#13 공정완료)
-   1) Token : RealBottleTransferCompAtWorkingArea
+   1) Token : FilledBottleTransferCompAtWorkingArea      ----- Real Bottle => Filled Bottle
    2) 관련 controller : 반출입기 Controller, UI
    3) Body
       {
@@ -402,7 +401,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 있는 실병을 MOMA 이동했을때 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -419,7 +418,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 빈병없을때(비어있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -436,7 +435,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -453,7 +452,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U1 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -471,7 +470,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 빈병Area hole에 bottle을 투입완료했을때 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -488,7 +487,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 L2 Port에 실병없을때(비어있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -505,7 +504,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 L2 Port에 실병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -523,7 +522,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 실병Area hole에 bottle을 투입완료했을때 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -540,7 +539,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U2 Port에 빈병없을때(비어있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -557,7 +556,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U2 Port에 빈병도착했을때(병 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -574,7 +573,7 @@ Normal Sequence Flow
       }
    4) Function : 반출입기 U2 Port에 있는 빈병을 작업자가 끄집어낼때 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryDemand
+   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
    7) Return
       {
          "status_code" : 200,
@@ -593,12 +592,12 @@ Normal Sequence Flow
    4) Function : 빈병을 추출하기 위하여 설비에서 작업자가 Login 할때 Event.
                  저장된 실험의뢰자의 실험요청정보를 가져온다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectLaboratoryDemandInformation
+   6) 관련 Stored Procedure : SelectLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
    7) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
-         "BottleDemandTotCount" : 5,
+         "BottleDemandTotCount" : 5,             ----- 여기서는 Request보다 Demand가 맞음 (Request로 해도 됨)
          "BottleDemands" : [
             { "No_1" : {
                  "BottleSeqNoOfDemand" : 1, "LiquidCharacter" : "Acid", "CollectionPosition":"합착기"}
@@ -806,8 +805,8 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "Stocker",    //
-         "LoadingableHoleCapaInLeftZone" : 5,
-         "LoadingableHoleCapaInRightZone" : 10,
+         "LoadingAvailableHoleCapaInLeftZone" : 5,          ----- able => Available
+         "LoadingAvailableHoleCapaInRightZone" : 10,
          "error_msg" : "None"
       }
 
@@ -817,7 +816,7 @@ Normal Sequence Flow
    3) Body
       {
          "Zone" : "Left",  or "Right"
-         "CountOfPack" : 5
+         "CountOfPack" : 5                  ----- Count 보다는 Number가 나을 듯
       }
    4) Function : Stocker에서 Bottle을 Pack 단위로 출고한다
    5) Return Message 길이 : 1K 이내
@@ -827,7 +826,7 @@ Normal Sequence Flow
       {
          "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
          "sender_controller" : "DB_Manager", or "Stocker"
-         "TotCountOfBottlePack" : 5,
+         "TotCountOfBottlePack" : 5,                  ----- Count 보다는 Number가 나을 듯
          "BottleInfo" : [
             {
                 "PositionOfHole_01" : "1021"
@@ -925,7 +924,7 @@ Normal Sequence Flow
       }
 
 231. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
-   1) Token : ExtractSuitableBottlePackCountAtStocker
+   1) Token : ExtractProperBottlePackCountAtStocker           ----- Suitable => Proper
    2) 관련 controller : 반출입기 Controller, Dispatcher
    3) Body
       {
@@ -933,7 +932,7 @@ Normal Sequence Flow
       }
    4) Function : Stocker에서 Bottle을 Pack 단위로 출고한다. 우선순위 Bottle선택후 해당영역에서 우선순위별 최대 5개 Pack 수량 산출한다.
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spExtractSuitableBottlePackCountAtStocker
+   6) 관련 Stored Procedure : spExtractProperBottlePackCountAtStocker           ----- Suitable => Proper
    7) Return 예제
       {
          "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
@@ -959,7 +958,7 @@ Normal Sequence Flow
       }
 
 232. Stocker에서 추출할 적정 Bottle Pack 정보요청
-   1) Token : ExtractSuitableBottlePackInfoAtStocker
+   1) Token : ExtractProperBottlePackInfoAtStocker           ----- Suitable => Proper
    2) 관련 controller : 반출입기 Controller, Dispatcher
    3) Body
       {
@@ -967,7 +966,7 @@ Normal Sequence Flow
       }
    4) Function : Stocker에서 Bottle을 Pack 단위로 출고한다
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spExtractSuitableBottlePackInfoAtStocker
+   6) 관련 Stored Procedure : spExtractProperBottlePackInfoAtStocker           ----- Suitable => Proper
    7) Return 예제
       {
          "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
@@ -1239,7 +1238,7 @@ Normal Sequence Flow
       }
 
 522. MOMA에 bottle 적재할 Empty hole 수량요청
-   1) Token : RequestLoadingableHoleCapaAtMOMA
+   1) Token : RequestLoadingAvailableHoleCapaAtMOMA     ----- able => Available
    2) 관련 controller : DB_Manager
    3) Body
       {
@@ -1251,13 +1250,13 @@ Normal Sequence Flow
    7) Return
       {
          "status_code" : 200,
-         "LoadingableHoleCapa" : 24,
+         "LoadingAvailableHoleCapa" : 24,     ----- able => Available
          "sender_controller" : "DB_Manager",    //
          "error_msg" : "None"
       }
 
 523. MOMA에 bottle투입하기 위한 Empty hole 정보요청
-   1) Token : RequestCheckLoadingableHoleInfoAtMOMA
+   1) Token : RequestCheckLoadingAvailableHoleInfoAtMOMA     ----- able => Available
    2) 관련 controller : DB_Manager
    3) Body
       {
@@ -1265,11 +1264,11 @@ Normal Sequence Flow
       }
    4) Function : Analyzer에서 실병을 인출했을때 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestCheckLoadingableHoleInfoAtMOMA
+   6) 관련 Stored Procedure : spRequestCheckLoadingAvailableHoleInfoAtMOMA     ----- able => Available
    7) Return
       {
          "status_code" : 200,
-         "LoadingableHoleInfo" : "0101, 0102, 0103, 0105, 0106",
+         "LoadingAvailableHoleInfo" : "0101, 0102, 0103, 0105, 0106",
          "sender_controller" : "DB_Manager",    //
          "error_msg" : "None"
       }
@@ -1293,7 +1292,7 @@ Normal Sequence Flow
 
 
 601. 실험의뢰정보를 세팅한다
-   1) Token : SetLaboratoryDemandInformation
+   1) Token : SetLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
    2) 관련 controller : DBMgr
    3) Body
       {
@@ -1312,11 +1311,11 @@ Normal Sequence Flow
                  "BottleSeqNoOfDemand" : 5, "LiquidCharacter" : "Organic", "CollectionPosition":"Pattern"}
             }
          ],
-         "DemandTime" : "2024-06-22 21:29:10"
+         "RequestTime" : "2024-06-22 21:29:10"
       }
    4) Function : 실험의뢰자의 실험요청정보를 저장
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spSetLaboratoryDemandInformation
+   6) 관련 Stored Procedure : spSetLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
    7) Return
       {
          "status_code" : 200,
