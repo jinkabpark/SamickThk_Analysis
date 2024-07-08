@@ -1,0 +1,25 @@
+용어정의
+
+1. 반출입기     		InOutBottle
+    1) 반출입기 컨트롤러      InOutBottle_Controller
+2. 분석기			Analyzer
+    1) Analyzer 컨트롤러      Analyzer_Controller
+3. 스토커                    Stocker
+    1) Stocker 컨트롤러      Stocker_Controller
+4. 세정,폐기/모사         CleaningDiscard
+    1) Stocker 컨트롤러      Cleaning_Controller
+5. DB 메니져               DB_Manager
+6. UI
+7. AIMS
+    1) AIMS 컨트롤러      AIMS_Controller
+8. Dispatcher
+9. Validation
+
+
+
+
+역활
+1. 장비내 반송은 장비에서 처리
+2. 장비간 반송은 Dispatcher
+
+
