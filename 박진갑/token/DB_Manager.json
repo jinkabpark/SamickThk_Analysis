@@ -12,45 +12,187 @@ desc
 관련 Token List
 
 ---------------------
-101. ReqStatusOfInOutBotEqp                         반출입기 설비상태를 요청한다.
-     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
-     --> UI 호출할때 사용
-102. ReqLoadingAvailableHoleCapaAtEmptyBottleZoneFmDB    반출입기에서 공병Zone에 투입가능한 Bottle 수량요청 ------ able => Available
-     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
-     --> UI 호출할때 사용
-103. ReqLoadingAvailableHoleCapaAtBottleZoneFmDB     반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청
-     --> UI 호출할때 사용
-104. ExtractProperEmptyBottleAtInOutBotEqp        반출입기에서 적정 빈병을 추출한다 ----- Suitable => Proper
-105. ExtractProperFillledBottleAtInOutBotEqp         반출입기에서 적정 Real Bottle을 추출한다 ----- RealBottle => FilledBottle
+240710 - 박병규\2.Docs\2.TokenList\240708_1_InOutEQP_MOMA_TokensList.yaml에 재정의중 입니다.
 
-111. FilledBottleLoadReqAtWorkingArea                 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
-112. FilledBottleLoadCompAtWorkingArea                반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
-113. FilledBottleUnloadReqAtWorkingArea               반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
+101. ReqStatusOfInOutBotEqp                         반출입기 설비상태를 요청한다. / 박병규, 재정의 되었습니다.
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+     --> UI 호출할때 사용
+102. ReqLoadingAvailableHoleCapaAtEmptyBottleZoneFmDB    반출입기에서 공병Zone에 투입가능한 Bottle 수량요청 ------ able => Available / 박병규, 장비내부의 동작으로 요청이 필요하지 않아보입니다.
+     --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
+     --> UI 호출할때 사용
+103. ReqLoadingAvailableHoleCapaAtBottleZoneFmDB     반출입기에서 실병Zone에 Bottle 입고할 충분한 공간 있는지 확인을 위한 Empty hole수량요청 / 박병규, 장비내부의 동작으로 사용자가 수동 투입하므로 요청이 필요하지 않아보입니다.
+     --> UI 호출할때 사용
+104. ExtractProperEmptyBottleAtInOutBotEqp        반출입기에서 적정 빈병을 추출한다 ----- Suitable => Proper / 박병규, 장비 내부의 동작. Job의 형태로 수신필요 합니다.
+105. ExtractProperFillledBottleAtInOutBotEqp         반출입기에서 적정 Real Bottle을 추출한다 ----- RealBottle => FilledBottle / 박병규, 장비 내부의 동작. Job의 형태로 수신필요 합니다.
+
+111. FilledBottleLoadReqAtWorkingArea                 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지 / 박병규, 재정의 되었습니다.
+112. FilledBottleLoadCompAtWorkingArea                반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지 / 박병규, 재정의 되었습니다.
+113. FilledBottleUnloadReqAtWorkingArea               반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지 / 박병규, 재정의 되었습니다.
      --> 112, 113번 한개만 사용해도 가능할 수 있음. 검토필요
-114. FilledBottleTransferCompAtWorkingArea            반출입기에서 실병 출하완료메세지(#13 공정완료)
-115. EmptyBottleLoadReqAtWorkingArea                반출입기 L1(입고) Port에서 빈병 입고요청메세지
-116. EmptyBottleLoadCompAtWorkingArea               반출입기 L1(입고) Port에서 빈병 도착완료메세지(#11 공정시작)
-117. EmptyBottleUnloadReqAtWorkingArea              반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
+114. FilledBottleTransferCompAtWorkingArea            반출입기에서 실병 출하완료메세지(#13 공정완료) / 박병규, 재정의 되었습니다.
+115. EmptyBottleLoadReqAtWorkingArea                반출입기 L1(입고) Port에서 빈병 입고요청메세지 / 박병규, 재정의 되었습니다.
+116. EmptyBottleLoadCompAtWorkingArea               반출입기 L1(입고) Port에서 빈병 도착완료메세지(#11 공정시작) / 박병규, 재정의 되었습니다.
+117. EmptyBottleUnloadReqAtWorkingArea              반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지 / 박병규, 재정의 되었습니다.
      --> 116, 117번 한개만 사용해도 가능할 수 있음. 검토필요
-118. EmptyBottleTransferCompAtWorkingArea           반출입기에서 빈병 입고완료메세지
+118. EmptyBottleTransferCompAtWorkingArea           반출입기에서 빈병 입고완료메세지 / 박병규, 재정의 되었습니다.
 
-121. FilledBottleLoadReqAtOutArea                     반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
-122. FilledBottleLoadCompAtOutArea                    반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)
-123. FilledBottleTransferCompAtOutArea                반출입기에서 실병 입고완료메세지
-124. EmptyBottleLoadReqAtOutArea                    반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지
-125. EmptyBottleLoadCompAtOutArea                   반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지
-126. EmptyBottleTransferCompAtOutArea               반출입기에서 빈병 출하완료메세지(#11 공정완료)
+121. FilledBottleLoadReqAtOutArea                     반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지 / 박병규, 사용자의 수동으로 투입부분으로 자원 낭비가 발생합니다.(입고시점을 알 수 없음)
+122. FilledBottleLoadCompAtOutArea                    반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작) / 박병규, 재정의 되었습니다.
+123. FilledBottleTransferCompAtOutArea                반출입기에서 실병 입고완료메세지 / 박병규, 재정의 되었습니다.
+124. EmptyBottleLoadReqAtOutArea                    반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지 / 박병규, 재정의 되었습니다.
+125. EmptyBottleLoadCompAtOutArea                   반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지 / 박병규, 재정의 되었습니다.
+126. EmptyBottleTransferCompAtOutArea               반출입기에서 빈병 출하완료메세지(#11 공정완료) / 박병규, 재정의 되었습니다.
 
-131. SetMemberOfBottlePack                          의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Set
+131. SetMemberOfBottlePack                          의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Set / 박병규, 별도의 협의가 필요해 보입니다.
      --> json 별도정의하지 않고 #105번 sp 내부에서만 사용
-132. ResetMemberOfBottlePack                        의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Reset
+132. ResetMemberOfBottlePack                        의뢰수량에 대한 일괄처리를 위한 MemberOfBottlePack Reset / 박병규, 별도의 협의가 필요해 보입니다.
      --> json 별도정의하지 않고 #113번 sp 내부에서만 사용
-133. GetLaboratoryRequestInfo                 세팅된 실험의뢰정보를 가져온다 ----- DemandInformation => RequestInfo
+133. GetLaboratoryRequestInfo                 세팅된 실험의뢰정보를 가져온다 ----- DemandInformation => RequestInfo / 박병규, 재정의 되었습니다.
 
-151. SetUsageStatus4HoleAtInOutBot                  Hole 사용여부 정의한다
+151. SetUsageStatus4HoleAtInOutBot                  Hole 사용여부 정의한다 / 박병규, MOMA의 Hole인경우 정의위치 변경이 필요해 보입니다. 해당부분은 반출입기에서 정의하지 않고 Dispatcher가 적절할것 같습니다.
      --> DefineUsageStatus4HoleAtInOutBot 적정용어 선택
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
 
+   ==================================================================================================
+   240710 - 박병규, 반출입기 재정의 부분 입니다.
+   
+	1) 네이밍 규칙 선행 구분문자
+		i) 1순위 커맨드의 구분 - 생략가능
+			- 요청 -> Req
+			- 응답 -> Rsp
+			- 데이터 설정 -> Set
+			- 데이터 요청 -> Get
+			- Job 하달 -> JobReq
+			- Report -> Rpt / 상태변화, Job종료등을 보고한다. 보고에대한 응답이 반드시 필요하진 않다.
+
+		ii) 2순위 커맨드 이름
+
+		iii) 3순위 EQP구분
+			- 반출입기 InOutBotEQP
+
+		iv) 4순위 가져온, 기록할 데이터의 위치 - 생략가능
+			- DB -> FmDB, EQP -> FmEQP
+			- DB -> ToDB, EQP -> ToEQP
+   ==================================================================================================
+   100. InOutEQP Token List
+      공통 시퀀스
+   
+      101. LIMS에서 반출입기로 설비상태 요청
+         - Token : ReqStatusOfInOutBotEqp
+         - From -> To : LIMS -> EQP
+   
+      102. 반출입기에서 LIMS로 설비상태 응답 -> Sync인경우 101요청에 대한 응답
+         - Token : RspStatusOfInOutBotEqp
+         - From -> To : EQP -> LIMS
+   
+      103. LIMS에서 반출입기로 Job을 하달
+         - Token : JobReqExportJobOfInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+      104. 반출입기에서 Job의 진행여부 또는 알람등의 상황을 LIMS에 응답 -> Sync인경우 103요청에 대한 응답
+         - Token : RspExportJobOfInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      note 1. 100번때의 시퀀스은 LIMS에서 Job을 수신하는 기본구조이다
+      note  2. 104까지 진행한뒤 장비내부 시퀀스을 수행하고, Job이 모두 완료되면 106을 보고한다.
+   
+      106. 반출입기에서 Job 종료를 LIMS로 보고 / 전체 -> Job의 종료시점을 알 수 없기때문에 상위에서 요청하지 않는다. Async
+         - Token : RptEndJobOfInOutBotEQP
+         - From -> To : EQP -> LIMS
+   ==================================================================================================
+      공병 배출 시퀀스
+      Note. 101, 102, 103, 104를 수행
+   
+      110. 반출입기에서 U2포트로 배출하는 공병의 바코드 정보를 LIMS로 보고 / 개별
+         - Token : RptSingleExportEmptyBOTToU2PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      112. 반출입기에서 U2포트로 배출하는 공병의 바코드 정보를 LIMS로 보고 / 전체 - 기본동작은 개별보고
+         - Token : RptMultiExportEmptyBOTToU2PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+   
+      113. 반출입기에서 LIMS로 U2포트로 반출된 공병의 레시피 정보를 요청 / 개별 - 기본동작은 전체요청
+         - Token : GetSingleEmptyBOTRecipeInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      115. 반출입기에서 LIMS로 U2포트로 반출된 공병의 레시피 정보를 요청 / 전체
+         - Token : GetMultiEmptyBOTRecipeInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+   
+      116. LIMS에서 반출입기로 입고된 공병의 레시피 정보를 설정 / 개별 - 기본동작은 전체수신
+         - Token : SetSingleEmptyBOTRecipeInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+      118. LIMS에서 반출입기로 입고된 공병의 레시피 정보를 설정 / 전체
+         - Token : SetMultiEmptyBOTRecipeInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+   
+      119. 반출입기에서 반출된 공병의 레시피매칭 완료를 LIMS로 보고
+         - Token : RptEmptyBOTRecipeMatchCOMP
+         - From -> To : EQP -> LIMS
+   
+      Note. 106을 수행
+   ==================================================================================================
+      시료 입고 시퀀스
+   
+      122. 반출입기에서 L2포트로 입고된 시료의 모든 정보를 LIMS에 설정 -> 사용자의 장비조작에 의한 보고로 상위에서 요청하지 않는다. Async
+         - Token : SetUpdateFilledBOTDataFromL2PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   ==================================================================================================
+      시료 검수 시퀀스
+      Note. 101, 102, 103, 104를 수행
+   
+      132. 반출입기에서 L2포트로 입고된 시료의 검수 정보를 LIMS로 보고
+         - Token : RptUpdateFilledBOTCheckDataInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      Note. 106을 수행
+   ==================================================================================================
+      시료 반출 시퀀스
+      Note. 101, 102, 103, 104를 수행
+   
+   
+      141. LIMS에서 반출입기로 시료반출 요청
+         - Token : ReqFilledBOTUnloadReqAtU1PortInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+      142. 반출입기에서 LIMS로 시료 U1포트 도착을 LIMS로 응답
+         - Token : RspFilledBOTUnloadReadyAtU1PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      143. LIMS에서 반출입기로 시료 반출 완료 보고
+         - Token : RptFilledBOTUnloadDoneAtU1PortInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+   
+      Note. 106을 수행
+   ==================================================================================================
+      공병 투입 시퀀스
+      Note. 101, 102, 103, 104를 수행
+   
+   
+      151. 반출입기에서 LIMS로 공병투입 요청
+         - Token : ReqEmptyBOTLoadReqAtL1PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      152. LIMS에서 반출입기로 공병 L1포트 도착 응답
+         - Token : RspEmptyBOTLoadReadyAtL1PortInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+      153. 반출입기에서 공병 투입 완료를 LIMS로 보고
+         - Token : RptEmptyBOTLoadDoneAtL1PortInOutBotEQP
+         - From -> To : EQP -> LIMS
+   
+      154. LIMS에서 반출입기로 공병 투입 종료를 보고
+         - Token : RptEmptyBOTLoadDoneInOutBotEQP
+         - From -> To : LIMS -> EQP
+   
+   
+      Note. 106을 수행
+   ==================================================================================================
 ---------------------
 201. RequestStatusAtStocker                         Stocker 설비상태를 요청한다.
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
@@ -141,6 +283,8 @@ desc
 401. ReqStatusAtCleaning                            폐기/모사 설비상태를 요청한다.
 
 ---------------------
+240710 - 박병규\2.Docs\2.TokenList\240708_1_InOutEQP_MOMA_TokensList.yaml에 재정의중 입니다.
+
 501. RequestStatusOfMOMA                            MOMA 설비상태를 요청한다.
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
      --> UI 호출할때 사용
@@ -172,6 +316,34 @@ desc
      --> 장비에서 MOMA or MOMA에서 장비
 551. SetUsageStatus4HoleAtMOMA                      MOMA Hole별 사용여부정의
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
+
+   ==================================================================================================
+   240710 - 박병규, 반출입기 재정의 부분 입니다. / 추가 및 수정 작업중입니다.
+   500. MOMA Token List
+      501. LIMS에서 MOMA의 상태 요청
+         - Token : ReqStatusOfMOMA
+         - From -> To : LIMS -> MOMA
+
+      502. MOMA상태를 LIMS에 응답
+         - Token : RspStatusOfMOMA
+         - From -> To : MOMA -> LIMS
+
+      503. LIMS에서 MOMA에 Job을 하달
+         - MOMA는 장비와 별개의 Job시작을 수신한다.
+         - Token : JobReqExportJobOfMOMA
+         - From -> To : LIMS -> MOMA
+
+      504. LIMS에 MOMA의 이동완료를 보고
+         - 해당 Token은 이동완료만을 보고한다.
+         - Token : RptMoveEQPPositionCompMOMA
+         - From -> To : MOMA -> LIMS
+
+
+      506. LIMS에 MOMA의 Job 종료를 보고
+         - Token : RptExportJobOfInOutBotEQP
+         - From -> To : MOMA -> LIMS
+
+   ==================================================================================================
 
 --------------------- UI Or AIMS
 601. SetLaboratoryRequestInfo                 실험의뢰정보를 세팅한다 ----- DemandInformation => RequestInfo
