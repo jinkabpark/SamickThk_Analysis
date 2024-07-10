@@ -474,7 +474,7 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 --   Record size          : 31
 --   Total size           : 155 = 5 * 31
 --   관리화면 유/무           : 유
---   P.K                  : EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID
+--   P.K                  : SequenceNum
 --   관련 Table            : 
 --   이 력
 --          1.2024-06-16 : 최초 생성
@@ -483,6 +483,7 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 DROP TABLE tMstScriptID4CoOperRobot;
 
 CREATE TABLE tMstScriptID4CoOperRobot; (
+   SequenceNum             	TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
    EqpGroupID             	CHAR(1) NOT NULL,       -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
    ProcessStatus          	NVARCHAR(10) NOT NULL,  -- Loading, Unloading
    ObjectOfCoOperRobot    	NVARCHAR(10) NOT NULL,  -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
@@ -492,13 +493,13 @@ CREATE TABLE tMstScriptID4CoOperRobot; (
 }  ON [Master];
    
 ALTER TABLE tMstScriptID4CoOperRobot 
-      ADD CONSTRAINT tMstScriptID4CoOperRobot_PK PRIMARY KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID) ON [MasterIdx];
+      ADD CONSTRAINT tMstScriptID4CoOperRobot_PK PRIMARY KEY (SequenceNum) ON [MasterIdx];
 
 ALTER TABLE tMstScriptID4CoOperRobot 
       ADD CONSTRAINT tMstScriptID4CoOperRobot_CHK CHECK (Activation in ('0', '1')) ON [MasterIdx];
       
-INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 1, '1', 'UR Loading시 동작정의');                    -- 
-INSERT INTO tMstScriptID4CoOperRobot VALUES ('1', 'Loading', "UR", 2, '0', 'UR Loading시 동작 예비 1');                    -- 
+INSERT INTO tMstScriptID4CoOperRobot VALUES (1, '1', 'Loading', "UR", 1, '1', 'UR Loading시 동작정의');                    -- 
+INSERT INTO tMstScriptID4CoOperRobot VALUES (2, '1', 'Loading', "UR", 2, '0', 'UR Loading시 동작 예비 1');                    -- 
 
 -- ========================================================================================
 --   Table No             : 11
@@ -1064,6 +1065,37 @@ INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1603', 'O', null);
 INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1604', 'O', null);
 INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1605', 'O', null);
 INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1606', 'O', null);
+
+-- ========================================================================================
+--   Table No             : 9
+--   Table 명              : tProcScriptID4CoOperRobot
+--   내  용                : tMstScriptID4CoOperRobot중 특정 동작을 별도 sub job으로 정의할때 사용
+--   성  격                : Process
+--   보존기간                : 영구
+--   Record 발생건수(1일)    :
+--   Total Record 수      : 5
+--   Record size          : 31
+--   Total size           : 155 = 5 * 31
+--   관리화면 유/무           : 유
+--   P.K                  : JobID, SequenceNum
+--   관련 Table            : 
+--   이 력
+--          1.2024-07-10 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tProcScriptID4CoOperRobot;
+
+CREATE TABLE tProcScriptID4CoOperRobot; (
+   JobID			TINYINT  NOT NULL,      -- sub job ID
+   SequenceNum             	TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
+   JobDescription      		NVARCHAR(256)           -- Script 내용
+}  ON [Process];
+   
+ALTER TABLE tMstScriptID4CoOperRobot 
+      ADD CONSTRAINT tMstScriptID4CoOperRobot_PK PRIMARY KEY (JobID, SequenceNum) ON [ProcessIdx];
+      
+INSERT INTO tProcScriptID4CoOperRobot VALUES (1, 1, 'Bottle 입출력기 관련 Sub Job');                    -- 
+
   
 -- ========================================================================================
 --   Table No             : 1

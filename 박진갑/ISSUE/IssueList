@@ -1,8 +1,16 @@
-2024-06-23   1    빈병출하수량과 실병투입수량이 불일치하는 경우 처리방법
-2024-07-06   1    stocker door open은 stocker에게 명령을 주어야 하는가 ? 
-                  MOMA와 stocker간 PIO 통신을 통해 자동으로 개폐가 이루어지나 ?
-			 2    stocker door close은 stocker에게 명령을 주어야 하는가 ? 
-			      MOMA 앞에 계속 있으면 계속 열려 있는가 ?
+2024-06-23  1   빈병출하수량과 실병투입수량이 불일치하는 경우 처리방법
+2024-07-06  1   stocker door open은 stocker에게 명령을 주어야 하는가 ? 
+                MOMA와 stocker간 PIO 통신을 통해 자동으로 개폐가 이루어지나 ?
+			2   stocker door close은 stocker에게 명령을 주어야 하는가 ? 
+			    MOMA 앞에 계속 있으면 계속 열려 있는가 ?
+2024-07-10  1   Bottle barcode label 내용 및 barcode id 확정시점은 ?
+				작업자 의뢰시점인가 ? 출고명령을 받을때인가 ?
+				- 작업자사번(Employee ID), Project No
+			2	Bottle 인출절차는 AIMS or LIMS에서 인출명령을 받을때인가 ?
+				AIMS Or LIMS인출요청후 설비에서 수동으로 인출요청을 하는가 ?
+			3	한개 topic을 2개 node에서 받고 2개 node에서 응답을 받는경우에 대한 처리방안은 ?
+			
+
 				  
 				  
 
