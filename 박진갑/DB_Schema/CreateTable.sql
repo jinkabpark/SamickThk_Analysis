@@ -16,7 +16,7 @@ desc
 --
 --          No.   Table 명                   Size
 --         ----  -----------------         --------
---          1   tMstUser                  1 K
+--          1   tMstUser                   1 K
 --          2   tMstEqpGroup               1 K
 --          3   tMstEqp                    1 K
 --          4   tMstOperation              1 K
@@ -271,9 +271,9 @@ INSERT INTO tMstOperation VALUES ('5', '1', N'이동형협업로봇 이동중');
 DROP TABLE tMstBottle;
 
 CREATE TABLE tMstBottle (
-   BottleID               CHAR(10) NOT NULL,         -- Bottle ID
-   Creation               DATETIME,                  -- 생성일
-   Termination               DATETIME                  -- 폐기일
+   BottleID                 CHAR(10) NOT NULL,      -- Bottle ID
+   Creation                 DATETIME,               -- 생성일
+   Termination              DATETIME                -- 폐기일
 ) ON [Master];
 
 ALTER TABLE tMstBottle
@@ -1083,7 +1083,7 @@ INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1606', 'O', null);
 DROP TABLE tProcScriptID4CoOperRobot;
 
 CREATE TABLE tProcScriptID4CoOperRobot; (
-   JobID            TINYINT  NOT NULL,      -- sub job ID
+   JobID                    TINYINT  NOT NULL,      -- sub job ID
    SequenceNum              TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
    JobDescription           NVARCHAR(256)           -- Script 내용
 }  ON [Process];
