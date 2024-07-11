@@ -12,7 +12,7 @@ desc
 관련 Topic List
 ---------------------
 101. RequestStatus                                  반출입기 설비상태를 요청한다.
-102  ChangeEqpStatus                                반출입기 장비상태를 변경
+102. ChangeEqpStatus                                반출입기 장비상태를 변경
 103. RequestNumberOfEmptyBottle                     반출입기에서 추출가능한 빈병수량요청
 104. RequestNumberOfFilledBottle                    반출입기에서 추출가능한 실병수량요청
 105. ExtractProperEmptyBottle                       반출입기에서 적정(실험의뢰자에 의해 생성된정보) 빈병정보를 요청후 빈병을 추출한다 ----- Suitable => Proper
@@ -51,7 +51,7 @@ desc
 201. RequestStatus                                  Stocker 설비상태를 요청한다.
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
      --> UI 호출할때 사용
-202  ChangeEqpStatus                                반출입기 장비상태를 변경
+202. ChangeEqpStatus                                반출입기 장비상태를 변경
 203. ExtractProperBottlePackCount                   Stocker에서 추출할 우선순위별 Bottle Pack 수량요청 ----- Suitable => Proper
      --> Target 위치가 분석기 Or 폐기.모사
 204. ExtractProperBottlePackInfo                    Stocker에서 추출할 적정 Bottle Pack 정보요청
@@ -117,8 +117,8 @@ desc
      --> 분석기 hole에 bottle을 끄집어낼때
 331. GetBottleCapacity                              분석기에서 hole capacity(Bottle 총 적재가능수량)
      --> 설비에서 Topic정의하고 메세지수신 처리
-332. RequestNumberOfSpareHoles                		분석기에 bottle 적재할 Empty hole 수량요청
-333. RequestInfoOfSpareHoles                		분석기에 bottle투입하기 위한 Empty hole 정보요청
+332. RequestNumberOfSpareHoles                      분석기에 bottle 적재할 Empty hole 수량요청
+333. RequestInfoOfSpareHoles                        분석기에 bottle투입하기 위한 Empty hole 정보요청
 334. RequestBottleInfoByHole                        분석기에 Hole 존재하는 bottle정보요청
 381. SetUsageStatus4Hole                            Hole 사용여부 정의한다
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
@@ -130,7 +130,7 @@ desc
 501. RequestStatus                                  MOMA 설비상태를 요청한다.
      --> 설비에서 대치가능. 실시간 상태확인 필요한 경우 (바람직한 방향)
      --> UI 호출할때 사용
-502  ChangeStatus                                   MOMA 장비상태를 변경
+502. ChangeStatus                                   MOMA 장비상태를 변경
      1) Reserve : MOMA 사용할 예정임을 알림
      2) Ready   : MOMA 장비앞에 도착후 PIO 통신을 통해 정렬 완료된 상태. Dispatcher에게 다음 수행할 명령에 대한 요청
      3) Run     : MOMA Bottle 이동 (장비에서 MOMA or MOMA에서 장비)
@@ -221,8 +221,8 @@ Normal Sequence Flow
    3) 송신메세지
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "InOutBottle"  	--> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
-                    "DB_Manager"   	--> UI 호출할때 사용
+         "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
+                    "DB_Manager"    --> UI 호출할때 사용
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
    5) Return Message 길이 : 1K 이내
@@ -231,7 +231,7 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
-         "eqp_status" : "PowerOn"		// PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
 
@@ -247,7 +247,7 @@ Normal Sequence Flow
       }
    4) Function : tMstEqp table의 InOutBottle EqpStatus(장비상태) 변경
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : ChangeEqpStatus          
+   6) 관련 Stored Procedure : ChangeEqpStatus
    7) Return
       {
          "status_code" : 200,
@@ -719,15 +719,15 @@ Normal Sequence Flow
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
          "empty_bottle_zone" : [
-			{"1011" : "bot_0136"},
-				...
-			{"1035" : "bot_0136"}
-		 ],
+            {"1011" : "bot_0136"},
+                ...
+            {"1035" : "bot_0136"}
+         ],
          "filled_bottle_zone" : [
-			{"2011" : "bot_2136"},
-				...
-			{"2035" : "bot_2136"}
-		 ],
+            {"2011" : "bot_2136"},
+                ...
+            {"2035" : "bot_2136"}
+         ],
          "error_msg" : "None"
       }
 
@@ -739,15 +739,15 @@ Normal Sequence Flow
          "FmNode" : "UI_Manager", "Validation"
          "ToNode" : "DB_Manager"
          "empty_bottle_zone" : [
-			{"1011" : "bot_0136"},
-				...
-			{"1035" : "bot_0136"}
-		 ],
+            {"1011" : "bot_0136"},
+                ...
+            {"1035" : "bot_0136"}
+         ],
          "filled_bottle_zone" : [
-			{"2011" : "bot_2136"},
-				...
-			{"2035" : "bot_2136"}
-		 ],
+            {"2011" : "bot_2136"},
+                ...
+            {"2035" : "bot_2136"}
+         ],
       }
    4) Function : 설비에 있는 재공재고정보와 DB에 있는 정보를 비교한다
    5) Return Message 길이 : 1K 이내
@@ -774,7 +774,7 @@ Normal Sequence Flow
          ],
          "error_msg" : "None"
       }
-	  
+
 181. 반출입기에서 Hole 사용여부 변경한다
    1) Topic Subject : SetUsageStatus4Hole
    2) 메세지 송수신방식 : sync
@@ -803,9 +803,9 @@ Normal Sequence Flow
    3) 송신메세지
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "Stocker"  		--> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
-                    "DB_Manager"   	--> UI 호출할때 사용
-	  }
+         "ToNode" : "Stocker"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
+                    "DB_Manager"    --> UI 호출할때 사용
+      }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 요청
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : spRequestStatus
@@ -813,7 +813,7 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager", or "Stocker"
-         "eqp_status" : "PowerOn"		// PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
 
@@ -829,14 +829,14 @@ Normal Sequence Flow
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 변경
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : ChangeEqpStatus          
+   6) 관련 Stored Procedure : ChangeEqpStatus
    7) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager"
          "error_msg" : "None"
       }
-	  
+
 203. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
    1) Topic Subject : ExtractProperBottlePackCount
    2) 메세지 송수신방식 : sync
@@ -1097,15 +1097,15 @@ Normal Sequence Flow
          "status_code" : 200,
          "sender_controller" : "Stocker" or "DB_Manager"
          "left_zone" : [
-			{"1011" : "bot_0136"},
-				...
-			{"1035" : "bot_0136"}
-		 ],
+            {"1011" : "bot_0136"},
+                ...
+            {"1035" : "bot_0136"}
+         ],
          "right_zone" : [
-			{"2011" : "bot_2136"},
-				...
-			{"2035" : "bot_2136"}
-		 ],
+            {"2011" : "bot_2136"},
+                ...
+            {"2035" : "bot_2136"}
+         ],
          "error_msg" : "None"
       }
 
@@ -1117,15 +1117,15 @@ Normal Sequence Flow
          "FmNode" : "UI_Manager", "Validation"
          "ToNode" : "DB_Manager"
          "left_zone" : [
-			{"1011" : "bot_0136"},
-				...
-			{"1035" : "bot_0136"}
-		 ],
+            {"1011" : "bot_0136"},
+                ...
+            {"1035" : "bot_0136"}
+         ],
          "right_zone" : [
-			{"2011" : "bot_2136"},
-				...
-			{"2035" : "bot_2136"}
-		 ],
+            {"2011" : "bot_2136"},
+                ...
+            {"2035" : "bot_2136"}
+         ],
       }
    4) Function : 설비에 있는 재공재고정보와 DB에 있는 정보를 비교한다
    5) Return Message 길이 : 1K 이내
@@ -1169,7 +1169,7 @@ Normal Sequence Flow
    7) Return 예제
       {
          "status_code" : 200,
-         "sender_controller" : "Stocker" and "DB_Manager" 
+         "sender_controller" : "Stocker" and "DB_Manager"
          "error_msg" : "None"
       }
 
@@ -1180,8 +1180,8 @@ Normal Sequence Flow
    3) 송신메세지
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "Analyzer"  	--> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
-                    "DB_Manager"   	--> UI 호출할때 사용
+         "ToNode" : "Analyzer"      --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
+                    "DB_Manager"    --> UI 호출할때 사용
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
    5) Return Message 길이 : 1K 이내
@@ -1190,7 +1190,7 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "Analyzer" or "DB_Manager"
-         "eqp_status" : "PowerOn"		// PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
 
@@ -1206,7 +1206,7 @@ Normal Sequence Flow
       }
    4) Function : tMstEqp table의 Analyzer EqpStatus(장비상태) 변경
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : ChangeEqpStatus          
+   6) 관련 Stored Procedure : ChangeEqpStatus
    7) Return
       {
          "status_code" : 200,
@@ -1401,15 +1401,15 @@ Normal Sequence Flow
          "status_code" : 200,
          "sender_controller" : "Analyzer" or "DB_Manager"
          "empty_bottle_zone" : {
-			["1011" : "bot_0136"],
-				...
-			["1035" : "bot_0136"]
-		 },
+            ["1011" : "bot_0136"],
+                ...
+            ["1035" : "bot_0136"]
+         },
          "filled_bottle_zone" : {
-			["2011" : "bot_2136"],
-				...
-			["2035" : "bot_2136"]
-		 },
+            ["2011" : "bot_2136"],
+                ...
+            ["2035" : "bot_2136"]
+         },
          "error_msg" : "None"
       }
 
@@ -1441,8 +1441,8 @@ Normal Sequence Flow
    3) 송신메세지
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "MOMA"  		--> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
-                    "DB_Manager"   	--> UI 호출할때 사용
+         "ToNode" : "MOMA"          --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher 호출할때)
+                    "DB_Manager"    --> UI 호출할때 사용
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
    5) Return Message 길이 : 1K 이내
@@ -1451,7 +1451,7 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "MOMA" or "DB_Manager"
-         "eqp_status" : "PowerOn"		// PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
 
@@ -1467,14 +1467,14 @@ Normal Sequence Flow
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 변경
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : ChangeEqpStatus          
+   6) 관련 Stored Procedure : ChangeEqpStatus
    7) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager"
          "error_msg" : "None"
       }
-	  
+
 521. MOMA에 입고완료메세지(#21 공정시작)
    1) Topic Subject : LoadComp4Bottle
    2) 메세지 송수신방식 : sync
@@ -1494,7 +1494,7 @@ Normal Sequence Flow
          "sender_controller" : "DB_Manager",    //
          "error_msg" : "None"
       }
-	  
+
 522. MOMA에 출하완료메세지(#21 공정완료)
    1) Topic Subject : UnloadComp4Bottle
    2) 메세지 송수신방식 : sync
@@ -1514,7 +1514,7 @@ Normal Sequence Flow
          "sender_controller" : "DB_Manager",    //
          "error_msg" : "None"
       }
-	  
+
 531. MOMA에서 hole capacity(Bottle 총 적재가능수량)
    1) Topic Subject : GetBottleCapacity
    2) 메세지 송수신방식 : sync
@@ -1588,10 +1588,10 @@ Normal Sequence Flow
          "status_code" : 200,
          "sender_controller" : "MOMA" or "DB_Manager"
          "on_shelf" : {
-			["1011" : "bot_0136"],
-				...
-			["1035" : "bot_0136"]
-		 },
+            ["1011" : "bot_0136"],
+                ...
+            ["1035" : "bot_0136"]
+         },
          "error_msg" : "None"
       }
 
