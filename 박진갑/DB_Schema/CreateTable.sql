@@ -1,8 +1,4 @@
-Equipment에 port 추가
-Script 처리방식 변경
-이슈
-   착공(작업시작), 완공(작업종료)에 대한 재정의 필요
-   
+
    
 ============================================================================ 
 file name   : CreateTable.sql
@@ -18,44 +14,45 @@ desc
 --
 -- 관련 MASTER Table
 --
---           No.   Table 명                   Size
---          ----  -----------------         --------
---            1     tMstUser                  1 K
---            2     tMstEqpGroup               1 K
---            3     tMstEqp                    1 K
---            4     tMstOperation              1 K
---            5     tMstBottle                 1 K
---            6     tMstRouteOper              1 K
---            7     tMstScript4Manipulator     1 K
---            8     tMstScript4UR              1 K
---            9     tMstScript4CoOperRobot     1 K
---           10     tMstScriptID4CoOperRobot   1 K
---           11     tMstScriptBody4CoOperRobot 1 K
---           12     tMstToken                  1 K
+--          No.   Table 명                   Size
+--         ----  -----------------         --------
+--          1   tMstUser                  1 K
+--          2   tMstEqpGroup               1 K
+--          3   tMstEqp                    1 K
+--          4   tMstOperation              1 K
+--          5   tMstBottle                 1 K
+--          6   tMstRouteOper              1 K
+--          7   tMstScript4Manipulator     1 K
+--          8   tMstScript4UR              1 K
+--          9   tMstScript4CoOperRobot     1 K
+--          10  tMstScriptID4CoOperRobot   1 K
+--          11  tMstScriptBody4CoOperRobot 1 K
+--          12  tMstToken                  1 K
 -- ============================================================================ 
 -- Table Space 명   : Process
 -- 내 용            : 공정관련 table을 관리하는 table space
 --
 -- 관련 Master Table
---           No.    Table 명                  Size   
---          ----  ------------------------  ------------
---            1     tLaboratoryDemandInfo
---            2     tProcBottle
---            3     tProcBotOper
---            4     tChgEqpStatus
---            5     tDailyEqpStatus
---            6     tBottleInfoOfHoleAtMOMA
---            7     tBottleInfoOfHoleAtAnalyzer
---            8		tBottleInfoOfHoleAtStocker
+--          No.    Table 명                  Size   
+--         ----  ------------------------  ------------
+--          1   tLaboratoryDemandInfo
+--          2   tProcBottle
+--          3   tProcBotOper
+--          4   tChgEqpStatus
+--          5   tDailyEqpStatus
+--          6   tBottleInfoOfHoleAtMOMA
+--          7   tBottleInfoOfHoleAtAnalyzer
+--          8   tBottleInfoOfHoleAtStocker
+--          9   tProcScriptID4CoOperRobot
 -- ============================================================================ 
 -- Table Space 명   : History
 -- 내 용            : 공정관련 table을 관리하는 table space
 --
 -- 관련 Master Table
---           No.    Table 명             Size   
---          ----  --------------------  ------------
---            1     tHisProcBotOper
---            2     tHisChgEqpStatus
+--          No.    Table 명             Size   
+--         ----  --------------------  ------------
+--          1   tHisProcBotOper
+--          2   tHisChgEqpStatus
 -- ========================================================================================
 --   Table No             : 1
 --   Table 명              : tMstUser
@@ -76,11 +73,11 @@ desc
 DROP TABLE tMstUser;;
 
 CREATE TABLE tMstUser; (
-   UserID                 	NVARCHAR(30) NOT NULL,  -- 사용자ID (사번)
-   UserName               	NVARCHAR(10),           -- 사용자ID (사번)
-   Password               	NVARCHAR(16),           -- Password, 패스워드 속성
-   ClassID                	TINYINT,                -- 사용자 권한 등급 (1:MONITORING, 3:OP, 5:MASTER, 9:DEV) 
-   UpdateTime             	DATETIME
+   UserID                   NVARCHAR(30) NOT NULL,  -- 사용자ID (사번)
+   UserName                 NVARCHAR(10),           -- 사용자ID (사번)
+   Password                 NVARCHAR(16),           -- Password, 패스워드 속성
+   ClassID                  TINYINT,                -- 사용자 권한 등급 (1:MONITORING, 3:OP, 5:MASTER, 9:DEV) 
+   UpdateTime               DATETIME
 ) ON [Master];
 
 ALTER TABLE tMstUser 
@@ -108,8 +105,8 @@ INSERT INTO tMstUser VALUES ('9999999', 'Developer',    'DEVELOPER',    9,  NULL
 DROP TABLE tMstEqpGroup;
 
 CREATE TABLE tMstEqpGroup (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군ID
-   EqpGroupName           	NVARCHAR(30),           -- 설비명 
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+   EqpGroupName             NVARCHAR(30),           -- 설비명 
 ) ON [Master];
 
 ALTER TABLE tMstEqpGroup 
@@ -166,29 +163,29 @@ INSERT INTO tMstEqpGroup VALUES ('5', N'이동형협업로봇');
 DROP TABLE tMstEqp;
 
 CREATE TABLE tMstEqp (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군ID
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   EqpName                	NVARCHAR(30),           -- 설비명 
-   CapacityOfHole         	TINYINT,                -- 설비별 hole(병을 처리할수 있는) 케파
-   EqpStatus              	NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble, Maintenance, Waiting)
-													-- 1) 반출입기 상태 : PowerOn, Trouble, Maintenance
-													-- 2) Stocker 상태 : PowerOn, Trouble, Maintenance
-													-- 3) 분석기 상태 : PowerOn, Trouble, Maintenance, Reserve, Run, Waiting, Idle
-													-- 4) 폐기/모사 상태 : PowerOn, Trouble, Maintenance
-													-- 5) MOMA 상태 : PowerOn, Trouble, Maintenance, Reserve, Ready, Run, Idle
-													-- Ready는 MOMA에서만 사용. MOMA 장비앞에 도착하여 장비와 정렬 맞춘후(PIO통신을 이용) 작업준비가 완료된 상태
-   ProcessStatus          	NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve), 반출입기 이외 장비에서 사용
-													-- stocker, 분석기, MOMA에서는 port 개념없음. 
-													--     LoadReq, UnLoadReq event가 장비단위로 발생됨. Dispatcher에게 반송정보 전달을 위해 관리함.
-													--     LoadComp, UnLoadComp event가 장비아닌 bottle단위로 발생됨
-													-- 따라서, stocker, 분석기, MOMA에서는 장비상태 변경이 불필요
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   EqpName                  NVARCHAR(30),           -- 설비명 
+   CapacityOfHole           TINYINT,                -- 설비별 hole(병을 처리할수 있는) 케파
+   EqpStatus                NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting)
+                                                    -- 1) 반출입기 상태 : PowerOn, Trouble, Maintenance
+                                                    -- 2) Stocker 상태 : PowerOn, Trouble, Maintenance
+                                                    -- 3) 분석기 상태 : PowerOn, Trouble, Maintenance, Reserve, Run, Waiting, Idle
+                                                    -- 4) 폐기/모사 상태 : PowerOn, Trouble, Maintenance
+                                                    -- 5) MOMA 상태 : PowerOn, Trouble, Maintenance, Reserve, Ready, Run, Idle
+                                                    -- Ready는 MOMA에서만 사용. MOMA 장비앞에 도착하여 장비와 정렬 맞춘후(PIO통신을 이용) 작업준비가 완료된 상태
+   ProcessStatus            NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve), 반출입기 이외 장비에서 사용
+                                                    -- stocker, 분석기, MOMA에서는 port 개념없음. 
+                                                    --     LoadReq, UnLoadReq event가 장비단위로 발생됨. Dispatcher에게 반송정보 전달을 위해 관리함.
+                                                    --     LoadComp, UnLoadComp event가 장비아닌 bottle단위로 발생됨
+                                                    -- 따라서, stocker, 분석기, MOMA에서는 장비상태 변경이 불필요
    // 반출입기에서는 Process status를 port별로 관리
-   LoadPort_1             	NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
-   LoadPort_2             	NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
-   UnloadPort_1           	NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
-   UnloadPort_2           	NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
-   EventTime              	DATETIME,               -- Event Time
-   EqpTimeWriteLog        	INT default 0           -- 장비 내부 LOG 저장 시간
+   LoadPort_1               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
+   LoadPort_2               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
+   UnloadPort_1             NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
+   UnloadPort_2             NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
+   EventTime                DATETIME,               -- Event Time
+   EqpTimeWriteLog          INT default 0           -- 장비 내부 LOG 저장 시간
 ) ON [Master];
 
 ALTER TABLE tMstEqp 
@@ -231,10 +228,10 @@ INSERT INTO tMstEqp VALUES ('5', '1', N'이동형협업로봇', 12, "Idle", "Loa
 DROP TABLE tMstOperation;
 
 CREATE TABLE tMstOperation (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군 ID 
-   --OperGroupID          	CHAR(1) NOT NULL,       -- Operation Group 
-   OperID                 	CHAR(1) NOT NULL,       -- 작업 ID
-   OperName               	NVARCHAR(40)            -- Operation Description   
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군 ID 
+   --OperGroupID            CHAR(1) NOT NULL,       -- Operation Group 
+   OperID                   CHAR(1) NOT NULL,       -- 작업 ID
+   OperName                 NVARCHAR(40)            -- Operation Description   
 ) ON [Master];
 
 ALTER TABLE tMstOperation
@@ -242,13 +239,13 @@ ALTER TABLE tMstOperation
 ALTER TABLE tMstOperation 
       ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 
-INSERT INTO tMstOperation VALUES ('1', '1', N'공병Zone 대기');     	-- 세정후 공병투입(세정후 재사용을 위하여 투입)
-INSERT INTO tMstOperation VALUES ('1', '2', N'시료채취중');            	-- 작업의뢰자가 시료채취
-INSERT INTO tMstOperation VALUES ('1', '3', N'실병Zone 대기');			-- 시료채취후 실병투입
+INSERT INTO tMstOperation VALUES ('1', '1', N'공병Zone 대기');      -- 세정후 공병투입(세정후 재사용을 위하여 투입)
+INSERT INTO tMstOperation VALUES ('1', '2', N'시료채취중');              -- 작업의뢰자가 시료채취
+INSERT INTO tMstOperation VALUES ('1', '3', N'실병Zone 대기');          -- 시료채취후 실병투입
 
 INSERT INTO tMstOperation VALUES ('2', '1', N'분석 작업중');
-INSERT INTO tMstOperation VALUES ('3', '1', N'분석전 Stocker 입고');       	-- 
-INSERT INTO tMstOperation VALUES ('3', '2', N'분석후 Stocker 입고');       	-- 
+INSERT INTO tMstOperation VALUES ('3', '1', N'분석전 Stocker 입고');         -- 
+INSERT INTO tMstOperation VALUES ('3', '2', N'분석후 Stocker 입고');         -- 
 INSERT INTO tMstOperation VALUES ('4', '1', N'폐기설비 작업중');
 INSERT INTO tMstOperation VALUES ('5', '1', N'이동형협업로봇 이동중');
 
@@ -306,13 +303,13 @@ ALTER TABLE tMstBottle
 DROP TABLE tMstRouteOper;
 
 CREATE TABLE tMstRouteOper (
-   RouteID                	CHAR(5) NOT NULL,       -- Route ID
+   RouteID                  CHAR(5) NOT NULL,       -- Route ID
    -- 현공정에 대한 정의  
-   CurrEqpGroupID         	CHAR(1) NOT NULL,       -- 현재 설비군 ID 
-   CurrOperID             	CHAR(1) NOT NULL,       -- 현재 작업 ID
+   CurrEqpGroupID           CHAR(1) NOT NULL,       -- 현재 설비군 ID 
+   CurrOperID               CHAR(1) NOT NULL,       -- 현재 작업 ID
    -- 다음공정에 대한 정의  
-   NextEqpGroupID         	CHAR(1) NOT NULL,       -- 차기 설비군 ID 
-   NextOperID             	CHAR(1) NOT NULL        -- 차기 작업 ID
+   NextEqpGroupID           CHAR(1) NOT NULL,       -- 차기 설비군 ID 
+   NextOperID               CHAR(1) NOT NULL        -- 차기 작업 ID
 ) ON [Master];
 
 ALTER TABLE tMstRouteOper
@@ -351,12 +348,12 @@ INSERT INTO tMstRouteOper VALUES ('R1', '4', '1', '1', '1');     -- 폐기설비
 DROP TABLE tMstScript4Manipulator;
 
 CREATE TABLE tMstScript4Manipulator; (
-   FmEqpGroupID           	CHAR(1) NOT NULL,       -- 이동시작설비
-   ToEqpGroupID           	CHAR(1) NOT NULL,       -- 이동종료설비   
-   ScriptSeqNo            	INT,                    -- Script Sequence No
-   X_Coordinate           	FLOAT,                  -- X 좌표
-   Y_Coordinate           	FLOAT,                  -- Y 좌표
-   Orientation            	FLOAT                   -- 방향
+   FmEqpGroupID             CHAR(1) NOT NULL,       -- 이동시작설비
+   ToEqpGroupID             CHAR(1) NOT NULL,       -- 이동종료설비   
+   ScriptSeqNo              INT,                    -- Script Sequence No
+   X_Coordinate             FLOAT,                  -- X 좌표
+   Y_Coordinate             FLOAT,                  -- Y 좌표
+   Orientation              FLOAT                   -- 방향
 ) ON [Master];
 
 ALTER TABLE tMstScript4Manipulator 
@@ -391,10 +388,10 @@ INSERT INTO tMstScript4Manipulator VALUES ('1', '3', 4, 0.0, 0.0, 0.0);       --
 DROP TABLE tMstScript4UR;
 
 CREATE TABLE tMstScript4UR; (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 이동시작설비
-   ProcessStatus          	NVARCHAR(10) NOT NULL,  -- Loading, Unloading
-   ScriptSeqNo            	INT,                    -- Script Sequence No
-   ScriptBody             	NVARCHAR(256)           -- Script 내용
+   EqpGroupID               CHAR(1) NOT NULL,       -- 이동시작설비
+   ProcessStatus            NVARCHAR(10) NOT NULL,  -- Loading, Unloading
+   ScriptSeqNo              INT,                    -- Script Sequence No
+   ScriptBody               NVARCHAR(256)           -- Script 내용
 ) ON [Master];
 
 ALTER TABLE tMstScript4UR 
@@ -431,12 +428,12 @@ INSERT INTO tMstScript4UR VALUES ('1',  'Loading',  4,  '0, -1.5708, 0, -1.5708,
 DROP TABLE tMstScript4CoOperRobot;
 
 CREATE TABLE tMstScript4CoOperRobot; (
-   FmEqpGroupID           	CHAR(1) NOT NULL,       -- 이동시작설비
-   ToEqpGroupID           	CHAR(1) NOT NULL,       -- 이동종료설비   
-   ScriptSeqNo            	INT,                    -- Script Sequence No
-   TgtObject              	NVARCHAR(10),           -- Object (UR, MIR, Gripper, Vision), 즉 Table명
-   BodyOfJsonType         	TEXT,                   -- 장치별 JSON Type Script Body
-   Description            	TEXT                    -- Script에 대한 내용기술   
+   FmEqpGroupID             CHAR(1) NOT NULL,       -- 이동시작설비
+   ToEqpGroupID             CHAR(1) NOT NULL,       -- 이동종료설비   
+   ScriptSeqNo              INT,                    -- Script Sequence No
+   TgtObject                NVARCHAR(10),           -- Object (UR, MIR, Gripper, Vision), 즉 Table명
+   BodyOfJsonType           TEXT,                   -- 장치별 JSON Type Script Body
+   Description              TEXT                    -- Script에 대한 내용기술   
    --X_Coordinate_MIR       FLOAT,                  -- X 좌표
    --Y_Coordinate_MIR       FLOAT,                  -- Y 좌표
    --Orientation_MIR        FLOAT,                  -- 방향   
@@ -483,13 +480,13 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', '3', 8, "UR", '{"Body":"0, -1.57
 DROP TABLE tMstScriptID4CoOperRobot;
 
 CREATE TABLE tMstScriptID4CoOperRobot; (
-   SequenceNum             	TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
-   ProcessStatus          	NVARCHAR(10) NOT NULL,  -- Loading, Unloading
-   ObjectOfCoOperRobot    	NVARCHAR(10) NOT NULL,  -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
-   ScriptID               	INT NOT NULL,           -- Script ID No
-   Activation             	CHAR(1),                -- 1:활성화, 0:비활성화
-   ScriptDescription      	NVARCHAR(256)           -- Script 내용
+   SequenceNum              TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
+   EqpGroupID               CHAR(1) NOT NULL,       -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   ProcessStatus            NVARCHAR(10) NOT NULL,  -- Loading, Unloading
+   ObjectOfCoOperRobot      NVARCHAR(10) NOT NULL,  -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
+   ScriptID                 INT NOT NULL,           -- Script ID No
+   Activation               CHAR(1),                -- 1:활성화, 0:비활성화
+   ScriptDescription        NVARCHAR(256)           -- Script 내용
 }  ON [Master];
    
 ALTER TABLE tMstScriptID4CoOperRobot 
@@ -526,13 +523,13 @@ INSERT INTO tMstScriptID4CoOperRobot VALUES (2, '1', 'Loading', "UR", 2, '0', 'U
 DROP TABLE tMstScriptBody4CoOperRobot;
 
 CREATE TABLE tMstScriptBody4CoOperRobot; (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
-   ProcessStatus          	NVARCHAR(10) NOT NULL,  -- Loading, Unloading
-   ObjectOfCoOperRobot    	NVARCHAR(10) NOT NULL,  -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
-   ScriptID               	INT NOT NULL,           -- Script ID No
-   ScriptSeqNoOfBody      	INT NOT NULL,           -- Script Body의 Sequence No
-   ScriptBody             	NVARCHAR(256),          -- Script 구분동작
-   ScriptDescription      	NVARCHAR(256)           -- Script 내용
+   EqpGroupID               CHAR(1) NOT NULL,       -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   ProcessStatus            NVARCHAR(10) NOT NULL,  -- Loading, Unloading
+   ObjectOfCoOperRobot      NVARCHAR(10) NOT NULL,  -- 이동형 협업로봇 Object (UR, MIR, Gripper, Vision), 즉 Device명
+   ScriptID                 INT NOT NULL,           -- Script ID No
+   ScriptSeqNoOfBody        INT NOT NULL,           -- Script Body의 Sequence No
+   ScriptBody               NVARCHAR(256),          -- Script 구분동작
+   ScriptDescription        NVARCHAR(256)           -- Script 내용
 }  ON [Master];
    
 ALTER TABLE tMstScriptBody4CoOperRobot 
@@ -574,9 +571,9 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 4, '{"Body"
 DROP TABLE tMstToken;
 
 CREATE TABLE tMstToken; (
-   TokenName              	NVARCHAR(50) NOT NULL,  -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
-   SelectedFlag           	CHAR(1) default NULL,   -- Loading, Unloading
-   TokenDescription      	NVARCHAR(256)           -- Token 내용
+   TokenName                NVARCHAR(50) NOT NULL,  -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
+   SelectedFlag             CHAR(1) default NULL,   -- Loading, Unloading
+   TokenDescription         NVARCHAR(256)           -- Token 내용
 }  ON [Master];
    
 ALTER TABLE tMstToken 
@@ -606,13 +603,13 @@ ALTER TABLE tMstToken
 DROP TABLE tLaboratoryDemandInfo;
 
 CREATE TABLE tLaboratoryDemandInfo (
-   UserID                 	NVARCHAR(30) NOT NULL,  -- 사용자ID (사번)
-   ProjectNo              	NVARCHAR(10) NOT NULL,  -- Project No
-   BottleDemandTotCount   	TINYINT,                -- Bottle 전체요청수량
-   BottleSeqNoOfDemand    	TINYINT,                -- Bottle 전체요청수량에서의 순번
-   LiquidCharacter        	NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
-   CollectionPosition     	NVARCHAR(20),           -- 수집위치
-   RequestDate            	DATETIME                -- 요청일시 (Pack ID로 사용)
+   UserID                   NVARCHAR(30) NOT NULL,  -- 사용자ID (사번)
+   ProjectNo                NVARCHAR(10) NOT NULL,  -- Project No
+   BottleDemandTotCount     TINYINT,                -- Bottle 전체요청수량
+   BottleSeqNoOfDemand      TINYINT,                -- Bottle 전체요청수량에서의 순번
+   LiquidCharacter          NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
+   CollectionPosition       NVARCHAR(20),           -- 수집위치
+   RequestDate              DATETIME                -- 요청일시 (Pack ID로 사용)
 } ON [Process];
 
 ALTER TABLE tLaboratoryDemandInfo
@@ -669,41 +666,41 @@ ALTER TABLE tLaboratoryDemandInfo
 DROP TABLE tProcBottle;
 
 CREATE TABLE tProcBottle (
-   BottleID               	CHAR(15) NOT NULL,      -- Bottle ID
+   BottleID                 CHAR(15) NOT NULL,      -- Bottle ID
    -- 현공정에 대한 정의
-   CurrEqpGroupID         	CHAR(1) NOT NULL,       -- 현재 설비군 ID 
-   CurrEqpSeqNo           	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   CurrOperID             	CHAR(1) NOT NULL,       -- 현재 작업 ID
+   CurrEqpGroupID           CHAR(1) NOT NULL,       -- 현재 설비군 ID 
+   CurrEqpSeqNo             CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   CurrOperID               CHAR(1) NOT NULL,       -- 현재 작업 ID
    -- 다음공정에 대한 정의  
-   NextEqpGroupID         	CHAR(1) NOT NULL,       -- 차기 설비군 ID 
-   NextOperID             	CHAR(1) NOT NULL,       -- 현재 작업 ID
+   NextEqpGroupID           CHAR(1) NOT NULL,       -- 차기 설비군 ID 
+   NextOperID               CHAR(1) NOT NULL,       -- 현재 작업 ID
    -- 
-   ProjectNo              	NVARCHAR(10),           -- Project No, 빈병일 경우 Null (특히 반출입기)
-   PackID                 	NVARCHAR(10),           -- Project No or RequestDate or Project No+RequestDate
-   AnalyzerCompletedTm    	DATETIME,               -- 실험분석완료 시간
-   JudgeLimitTm    			DATETIME,               -- 실험분석완료후 지정된 시간 경과후, 분석완료후 작업의뢰자 응답이 없는 경우 자동 폐기 처리
-   JudgeOfResearcher      	NVARCHAR(10),           -- 실험의뢰자 판단. (Discard, Cleaning)
-   ExperimentRequestName  	NVARCHAR(10),           -- 실험의뢰자
-   CurrLiquid             	NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
-   RequestDate            	DATETIME,               -- 요청의뢰일시 (YYYYmmdd hhmmss), 초단위 관리 필요, 의뢰단위 구분
+   ProjectNo                NVARCHAR(10),           -- Project No, 빈병일 경우 Null (특히 반출입기)
+   PackID                   NVARCHAR(10),           -- Project No or RequestDate or Project No+RequestDate
+   AnalyzerCompletedTm      DATETIME,               -- 실험분석완료 시간
+   JudgeLimitTm             DATETIME,               -- 실험분석완료후 지정된 시간 경과후, 분석완료후 작업의뢰자 응답이 없는 경우 자동 폐기 처리
+   JudgeOfResearcher        NVARCHAR(10),           -- 실험의뢰자 판단. (Discard, Cleaning)
+   ExperimentRequestName    NVARCHAR(10),           -- 실험의뢰자
+   CurrLiquid               NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
+   RequestDate              DATETIME,               -- 요청의뢰일시 (YYYYmmdd hhmmss), 초단위 관리 필요, 의뢰단위 구분
                                                     -- AIMS 의뢰사간정보 Or AIMS에서 수신한 시간 Or LIMS UI에서 의뢰요청시각
-													-- tLaboratoryDemandInfo table의 RequestDate
-													-- Pack ID로 사용
-   RequestTotCnt          	TINYINT,                -- 작업자 분석의뢰 bottle수량
-   RequestRealCnt         	TINYINT,                -- 실제작업할 수량. 의뢰자 또는 관리자가 임의적으로 Bottle 제거한 예외 경우 차감필요
+                                                    -- tLaboratoryDemandInfo table의 RequestDate
+                                                    -- Pack ID로 사용
+   RequestTotCnt            TINYINT,                -- 작업자 분석의뢰 bottle수량
+   RequestRealCnt           TINYINT,                -- 실제작업할 수량. 의뢰자 또는 관리자가 임의적으로 Bottle 제거한 예외 경우 차감필요
                                                     -- 처음값은 RequestTotCnt 일치
                                                     -- Bottle 폐기, Bottle split 고려
-													-- Lot Split, Lot 폐기시 RequestDate(Pack ID), RequestTotCnt, RequestRealCnt를 수정
-   RequestSeqNo           	TINYINT,                -- 일련번호. 의뢰자가 중간에 임의 제거한 경우 SeqNo 다시 부여하여야 함
+                                                    -- Lot Split, Lot 폐기시 RequestDate(Pack ID), RequestTotCnt, RequestRealCnt를 수정
+   RequestSeqNo             TINYINT,                -- 일련번호. 의뢰자가 중간에 임의 제거한 경우 SeqNo 다시 부여하여야 함
                                                     -- RequestRealCnt와 RequestSeqNo 일치할때 반송시작, 작업의뢰단위
-   MemberOfBottlePack     	TINYINT default 0,      -- Pack 단위로 작업수행. Pack에 첫번째 Bottle 반송이 일어날 경우 나머지 Bottle을 set하여 reserve 한다.
-   Position               	CHAR(4),                -- Bottle 반출입기, Stocker에서 위치정보, 분석기에서 위치정보
+   MemberOfBottlePack       TINYINT default 0,      -- Pack 단위로 작업수행. Pack에 첫번째 Bottle 반송이 일어날 경우 나머지 Bottle을 set하여 reserve 한다.
+   Position                 CHAR(4),                -- Bottle 반출입기, Stocker에서 위치정보, 분석기에서 위치정보
                                                     -- '0000'인 경우 반출 또는 이동중인 Bottle 
-   StartTime              	DATETIME,               -- 착공시간
-   EndTime                	DATETIME,               -- 완공시간
-   DispatchingPriority    	TINYINT,                -- 작업우선순위 (1:가장 낮음, 9:Hot Run)
-   EventTime              	DATETIME,               -- Event Time (장비에 입고완료시점)
-   PrevLiquid             	NVARCHAR(10),           -- 이전 작업에서 용액종료 (산, 염기, 유기)
+   StartTime                DATETIME,               -- 착공시간
+   EndTime                  DATETIME,               -- 완공시간
+   DispatchingPriority      TINYINT,                -- 작업우선순위 (1:가장 낮음, 9:Hot Run)
+   EventTime                DATETIME,               -- Event Time (장비에 입고완료시점)
+   PrevLiquid               NVARCHAR(10),           -- 이전 작업에서 용액종료 (산, 염기, 유기)
 ) ON [Process];
 
 ALTER TABLE tProcBottle
@@ -738,14 +735,14 @@ ALTER TABLE tProcBottle
 DROP TABLE tProcBotOper;
 
 CREATE TABLE tProcBotOper (
-   BottleID               	CHAR(15) NOT NULL,      -- Bottle ID
+   BottleID                 CHAR(15) NOT NULL,      -- Bottle ID
    -- 현공정에 대한 정의
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군 ID 
-   OperID                 	CHAR(1) NOT NULL,       -- 작업 ID  
-   StartTime              	DATETIME NOT NULL,      -- 착공시간
-   EndTime                	DATETIME,               -- 완공시간
-   DispatchingPriority    	TINYINT,                -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
-   Position               	CHAR(4)                 -- Bottle 반출입기, Stocker에서 위치정보
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군 ID 
+   OperID                   CHAR(1) NOT NULL,       -- 작업 ID  
+   StartTime                DATETIME NOT NULL,      -- 착공시간
+   EndTime                  DATETIME,               -- 완공시간
+   DispatchingPriority      TINYINT,                -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
+   Position                 CHAR(4)                 -- Bottle 반출입기, Stocker에서 위치정보
 ) ON [Process];
 
 ALTER TABLE tProcBotOper
@@ -777,11 +774,11 @@ ALTER TABLE tProcBotOper
 DROP TABLE tChgEqpStatus;
 
 CREATE TABLE tChgEqpStatus (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군ID
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   EqpStatus              	NVARCHAR(10) NOT NULL,  -- 장비상태(Run, Idle, Trouble, Maintenance)
-   StartTime              	DATETIME NOT NULL,      -- 장비상태 시작시간
-   EndTime                	DATETIME                -- 장비상태 종료시간
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   EqpStatus                NVARCHAR(10) NOT NULL,  -- 장비상태(Run, Idle, Trouble, Maintenance)
+   StartTime                DATETIME NOT NULL,      -- 장비상태 시작시간
+   EndTime                  DATETIME                -- 장비상태 종료시간
 ) ON [Process];
 
 ALTER TABLE tChgEqpStatus
@@ -811,11 +808,11 @@ ALTER TABLE tChgEqpStatus
 DROP TABLE tDailyEqpStatus;
 
 CREATE TABLE tDailyEqpStatus (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군ID
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   SummaryDate            	DATE NOT NULL,          -- 날짜
-   EqpStatus              	NVARCHAR(10)  NOT NULL, -- 장비상태(Run, Idle, Trouble, Maintenance)
-   AccumTmByOneDay        	TIME                    -- 상태별 누적시간 (EndTime-StartTime, 24시간 넘을수 없다)
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   SummaryDate              DATE NOT NULL,          -- 날짜
+   EqpStatus                NVARCHAR(10)  NOT NULL, -- 장비상태(Run, Idle, Trouble, Maintenance)
+   AccumTmByOneDay          TIME                    -- 상태별 누적시간 (EndTime-StartTime, 24시간 넘을수 없다)
 ) ON [Process];
 
 ALTER TABLE tDailyEqpStatus
@@ -851,9 +848,9 @@ ALTER TABLE tDailyEqpStatus
 DROP TABLE tBottleInfoOfHoleAtMOMA;
 
 CREATE TABLE tBottleInfoOfHoleAtMOMA (
-   Position               	CHAR(4) NOT NULL,       -- MOMA에서 위치정보
-   UsageFlag                CHAR(1) default 'O',	-- 'O':사용가능, 'X':사용불가
-   BottleID               	CHAR(15)                -- Bottle ID
+   Position                 CHAR(4) NOT NULL,       -- MOMA에서 위치정보
+   UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+   BottleID                 CHAR(15)                -- Bottle ID
 ) ON [Process];
 
 ALTER TABLE tBottleInfoOfHoleAtMOMA
@@ -910,10 +907,10 @@ INSERT INTO tMstEqpGroup VALUES ('1202', 'O', null);
 DROP TABLE tBottleInfoOfHoleAtAnalyzer;
 
 CREATE TABLE tBottleInfoOfHoleAtAnalyzer (
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   Position               	CHAR(4) NOT NULL,       -- Analyzer에서 위치정보
-   UsageFlag                CHAR(1) default 'O',	-- 'O':사용가능, 'X':사용불가
-   BottleID               	CHAR(15)                -- Bottle ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   Position                 CHAR(4) NOT NULL,       -- Analyzer에서 위치정보
+   UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+   BottleID                 CHAR(15)                -- Bottle ID
 ) ON [Process];
 
 ALTER TABLE tBottleInfoOfHoleAtAnalyzer
@@ -956,11 +953,11 @@ INSERT INTO tMstEqpGroup VALUES ('1', '0012', 'O', null);
 DROP TABLE tBottleInfoOfHoleAtStocker;
 
 CREATE TABLE tBottleInfoOfHoleAtStocker (
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   ZoneName					CHAR(5),				-- 좌:Left, 우:Right
-   Position               	CHAR(4) NOT NULL,       -- Stocker에서 위치정보
-   UsageFlag                CHAR(1) default 'O',	-- 'O':사용가능, 'X':사용불가
-   BottleID               	CHAR(15)                -- Bottle ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   ZoneName                 CHAR(5),                -- 좌:Left, 우:Right
+   Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+   UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+   BottleID                 CHAR(15)                -- Bottle ID
 ) ON [Process];
 
 ALTER TABLE tBottleInfoOfHoleAtStocker
@@ -1086,9 +1083,9 @@ INSERT INTO tMstEqpGroup VALUES ('1', 'Right', '1606', 'O', null);
 DROP TABLE tProcScriptID4CoOperRobot;
 
 CREATE TABLE tProcScriptID4CoOperRobot; (
-   JobID			TINYINT  NOT NULL,      -- sub job ID
-   SequenceNum             	TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
-   JobDescription      		NVARCHAR(256)           -- Script 내용
+   JobID            TINYINT  NOT NULL,      -- sub job ID
+   SequenceNum              TINYINT  NOT NULL,      -- 분석실에서 사용하는 robot script 일련번호
+   JobDescription           NVARCHAR(256)           -- Script 내용
 }  ON [Process];
    
 ALTER TABLE tMstScriptID4CoOperRobot 
@@ -1118,13 +1115,13 @@ INSERT INTO tProcScriptID4CoOperRobot VALUES (1, 1, 'Bottle 입출력기 관련 
 DROP TABLE tHisProcBotOper;
 
 CREATE TABLE tHisProcBotOper (
-   BottleID               	CHAR(15) NOT NULL,      -- Bottle ID
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군 ID 
-   OperID                 	CHAR(1) NOT NULL,       -- 작업 ID  
-   StartTime              	DATETIME NOT NULL,      -- 착공시간
-   EndTime                	DATETIME,               -- 완공시간
-   DispatchingPriority    	TINYINT,                -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
-   Position               	CHAR(4)                 -- Bottle 반출입기, Stocker에서 위치정보
+   BottleID                 CHAR(15) NOT NULL,      -- Bottle ID
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군 ID 
+   OperID                   CHAR(1) NOT NULL,       -- 작업 ID  
+   StartTime                DATETIME NOT NULL,      -- 착공시간
+   EndTime                  DATETIME,               -- 완공시간
+   DispatchingPriority      TINYINT,                -- 반송우선순위 (1:가장 낮음, 9:Hot Run)
+   Position                 CHAR(4)                 -- Bottle 반출입기, Stocker에서 위치정보
 ) ON [History];
 
 ALTER TABLE tHisProcBotOper
@@ -1151,11 +1148,11 @@ ALTER TABLE tHisProcBotOper
 DROP TABLE tHisChgEqpStatus;
 
 CREATE TABLE tHisChgEqpStatus (
-   EqpGroupID             	CHAR(1) NOT NULL,       -- 설비군ID
-   EqpSeqNo               	CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
-   EqpStatus              	NVARCHAR(10),           -- 장비상태(Run, Idle, Trouble, Maintenance)
-   StartTime              	DATETIME,               -- 시작시간
-   EndTime                	DATETIME                -- 종료시간
+   EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   EqpStatus                NVARCHAR(10),           -- 장비상태(Run, Idle, Trouble, Maintenance)
+   StartTime                DATETIME,               -- 시작시간
+   EndTime                  DATETIME                -- 종료시간
 ) ON [History];
 
 ALTER TABLE tHisChgEqpStatus
