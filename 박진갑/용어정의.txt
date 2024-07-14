@@ -6,14 +6,15 @@
     1) Analyzer 컨트롤러      Analyzer_Controller
 3. 스토커                    Stocker
     1) Stocker 컨트롤러      Stocker_Controller
-4. 세정,폐기/모사         CleaningDiscard
+4. 세정,폐기/모사         CleaningScrap
     1) Stocker 컨트롤러      Cleaning_Controller
-5. DB 메니져               DB_Manager
-6. UI
-7. AIMS
+5. MOMA
+6. DB 메니져               DB_Manager
+7. UI			UI_Manager
+8. AIMS
     1) AIMS 컨트롤러      AIMS_Controller
-8. Dispatcher
-9. Validation
+9. Dispatcher
+10. Validation
 
 
 

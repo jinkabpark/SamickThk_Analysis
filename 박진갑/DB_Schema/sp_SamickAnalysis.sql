@@ -92,6 +92,266 @@ E23.  CleanupOldRecordsOfTbl          tDailyEqpStatus, tHisProcBotOper, tHisChgE
 -- }
 ============================================================================ 
 
+-- GPT prompt
+-- 1. 입력 파라메터가
+--   'InOutBottle' 이면 '1'
+--   'Stocker' 이면 '2'
+--   'Analyzer' 이면 '3'
+--   'CleaningScrap' 이면 '4'
+--   'MOMA' 이면 '5'  그 이외는 '0'을 return 하는 stored function 를 만들어줘.
+-- 2. 결과값을 char로 변경해줘
+--
+DELIMITER //
+CREATE FUNCTION fGetEqpGroupID_FmParameterValue(input_param VARCHAR(20)) 
+RETURNS CHAR(1)
+BEGIN
+    DECLARE return_value CHAR(1) DEFAULT '0';
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- 예외 발생 시 return_value를 '0'으로 설정
+        SET return_value = '0';
+    END;
+
+    -- 입력 파라미터에 따른 반환 값 설정
+    IF input_param = 'InOutBottle' THEN
+        SET return_value = '1';
+    ELSEIF input_param = 'Stocker' THEN
+        SET return_value = '2';
+    ELSEIF input_param = 'Analyzer' THEN
+        SET return_value = '3';
+    ELSEIF input_param = 'CleaningScrap' THEN
+        SET return_value = '4';
+    ELSEIF input_param = 'MOMA' THEN
+        SET return_value = '5';
+    ELSE
+        SET return_value = '0';
+    END IF;
+
+    RETURN return_value;
+END //
+DELIMITER ;
+
+-- 101. 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
+-- GPT prompt
+-- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
+--      {
+--         "FmNode" : "InOutBottle"
+--         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+--         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+--      }
+--    입력 파라메터에 "EqpSeqNo" 정의되어 있지 않으면 '1' 세팅하고 있으면 그 값을 읽어줘.
+--    FmNode의 값 "InOutBottle"을 fGetEqpGroupID_FmParameterValue 입력값으로 함수를 실행해서 결과치를 받아줘.
+--    CREATE TABLE tMstEqp (
+--       EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+--       EqpSeqNo                 TINYINT NOT NULL,       -- 호기 (1부터 시작)
+--       ...
+--       EqpStatus                NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting)
+--    }
+--    EqpStatus 읽은 값을 이용하여 update 해줘.
+--       maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- 2. return_value 변수명을 eqp_group_id로 변경해줘.
+-- 3. Error table을 만들고 error 발생하면 관련내용을 insert해줘.
+-- 4. Error table에 stored procedure 이름도 추가해서 처리해줘.
+-- 5. table명을 tProcSqlError로 변경하고 error code로 추가해서 처리해줘.
+--
+DELIMITER //
+CREATE PROCEDURE spReportChangedEqpStatus(
+    IN json_param JSON
+)
+BEGIN
+    DECLARE eqp_group_id CHAR(1) DEFAULT '0';
+    DECLARE eqp_seq_no TINYINT DEFAULT 1;
+    DECLARE fm_node VARCHAR(20);
+    DECLARE eqp_status NVARCHAR(10);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- 예외 발생 시 에러 내용을 tProcSqlError 테이블에 삽입
+        DECLARE error_message VARCHAR(255);
+        DECLARE error_code INT;
+        GET DIAGNOSTICS CONDITION 1
+            error_message = MESSAGE_TEXT, 
+            error_code = MYSQL_ERRNO;
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) VALUES ('spReportChangedEqpStatus', error_code, error_message);
+    END;
+
+    -- JSON 파싱
+    SET fm_node = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.FmNode'));
+    SET eqp_status = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpStatus'));
+    
+    -- EqpSeqNo 존재 여부 확인 및 설정
+    IF JSON_CONTAINS_PATH(json_param, 'one', '$.EqpSeqNo') THEN
+        SET eqp_seq_no = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpSeqNo'));
+    END IF;
+    
+    -- FmNode 값을 기반으로 EqpGroupID 설정
+    SET eqp_group_id = fGetEqpGroupID_FmParameterValue(fm_node);
+    
+    -- EqpStatus 업데이트
+    UPDATE tMstEqp
+    SET EqpStatus = eqp_status
+    WHERE EqpGroupID = eqp_group_id AND EqpSeqNo = eqp_seq_no;
+END //
+DELIMITER ;
+
+-- 102. 반출입기 장비상태를 변경. 컨트롤러 통신하면서 통신이 안될때는 Trouble로 상태변경 요청한다. 사용자 화면에서 설비상태 변경할때 사용.
+-- GPT prompt
+-- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "FmNode" : "Dispatcher" Or "UI_Manager"
+--          "ToNode" : "DB_Manager"
+--          "EqpGroupID" : 1,
+--          "EqpSeqNo" : 1,
+--          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+--       }
+-- 입력 파라메터에 "EqpSeqNo" 정의되어 있지 않으면 '1' 세팅하고 있으면 그 값을 읽어줘.
+-- tMstEqp table의 EqpStatus를 update하는 stored procedure 만들어줘.
+-- Return  json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,			// sql error code
+--          "sender_controller" : "DB_Manager"	// 송신메세지의 ToNode값
+--          "error_msg" : "None"
+--       }
+-- 2. eqp_group_id는 입력파라메터에서 읽어줘.
+DELIMITER //
+CREATE PROCEDURE spChangeEqpStatus(
+    IN json_param JSON,
+    OUT result JSON
+)
+BEGIN
+    DECLARE eqp_group_id CHAR(1);
+    DECLARE eqp_seq_no TINYINT DEFAULT 1;
+    DECLARE fm_node VARCHAR(20);
+    DECLARE to_node VARCHAR(20);
+    DECLARE eqp_status NVARCHAR(10);
+    DECLARE error_message VARCHAR(255) DEFAULT 'None';
+    DECLARE error_code INT DEFAULT 200;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- 예외 발생 시 에러 내용을 tProcSqlError 테이블에 삽입하고 JSON 결과 설정
+        GET DIAGNOSTICS CONDITION 1
+            error_message = MESSAGE_TEXT, 
+            error_code = MYSQL_ERRNO;
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) VALUES ('spChangeEqpStatus', error_code, error_message);
+        SET result = JSON_OBJECT(
+            'status_code', error_code,
+            'sender_controller', JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.ToNode')),
+            'error_msg', error_message
+        );
+    END;
+
+    -- JSON 파싱
+    SET fm_node = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.FmNode'));
+    SET to_node = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.ToNode'));
+    SET eqp_group_id = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpGroupID'));
+    SET eqp_status = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpStatus'));
+    
+    -- EqpSeqNo 존재 여부 확인 및 설정
+    IF JSON_CONTAINS_PATH(json_param, 'one', '$.EqpSeqNo') THEN
+        SET eqp_seq_no = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpSeqNo'));
+    END IF;
+    
+    -- EqpStatus 업데이트
+    UPDATE tMstEqp
+    SET EqpStatus = eqp_status
+    WHERE EqpGroupID = eqp_group_id AND EqpSeqNo = eqp_seq_no;
+
+    -- 성공 시 JSON 결과 설정
+    SET result = JSON_OBJECT(
+        'status_code', error_code,
+        'sender_controller', to_node,
+        'error_msg', error_message
+    );
+END //
+DELIMITER ;
+
+-- 103. 반출입기 설비상태를 요청한다.(sync방식)
+-- GPT prompt
+-- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "FmNode" : "Dispatcher" Or "UI_Manager"
+--          "ToNode" : "DB_Manager"
+--          "EqpSeqNo" : 1,
+--          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+--       }
+-- Return  json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,			// sql error code
+--          "sender_controller" : "DB_Manager"	// 송신메세지의 ToNode값
+--          "EqpGroupID" : 1,
+--          "EqpSeqNo" : 1,
+--          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+--          "error_msg" : "None"
+--       }
+-- 입력 파라메터에 "EqpSeqNo" 정의되어 있지 않으면 '1' 세팅하고 있으면 그 값을 읽어줘.
+-- tMstEqp table의 EqpStatus를 읽고 eqp_status값으로 return 하는 stored procedure 만들어줘.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- 2. 예외 발생 시 에러 내용을 tProcSqlError 테이블에 삽입 추가해줘
+DELIMITER //
+CREATE PROCEDURE spRequestStatus(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpSeqNo INT DEFAULT 1;
+    DECLARE v_EqpGroupID INT;
+    DECLARE v_FmNode VARCHAR(50);
+    DECLARE v_ToNode VARCHAR(50);
+    DECLARE v_EqpStatus VARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spRequestStatus', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_ToNode,
+            'eqp_status', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_FmNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.FmNode'));
+    SET v_ToNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ToNode'));
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+    END IF;
+
+    -- Query the equipment status
+    SELECT EqpStatus INTO v_EqpStatus
+    FROM tMstEqp
+    WHERE EqpGroupID = v_EqpGroupID AND EqpSeqNo = v_EqpSeqNo;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_ToNode,
+        'eqp_status', v_EqpStatus,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 104-2. 반출입기 설비상태요청에 응답한다.
+spRequestStatus stored procedure와 동일함.
+
+
+
+
 -- 201. Stocker 설비상태를 요청한다.
 -- GPT prompt
 --     - 기존에 만들어진 spRequestStatusAtEquipment 저장 프로시저를 호출하여 EqpGroupID = '2' 및 EqpSeqNo = '1' 값을 전달하는 새로운 저장 프로시저를 작성해줘.

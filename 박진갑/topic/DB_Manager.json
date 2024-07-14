@@ -8,6 +8,8 @@ desc
    3.    2024-07-10 반출입기 topic 전체적 수정
    4.    2024-07-11 stocker, 분석기, MOMA topic 전체적 수정
    5.    2024-07-12 async message 추가
+   6.    2024-07-14 동일 message를 sync, async message 2개로 분리작성
+                    RequestEqpStatusBySync, RequestEqpStatusByAsync
 
 message 송수신 방식
    1. async방식
@@ -23,11 +25,13 @@ message 송수신 방식
 
 관련 Topic List
 ---------------------
-101. ReportChangedEqpStatus                         반출입기 장비상태변경시 보고
+101-0. ReportChangedEqpStatus                         반출입기 장비상태변경시 보고
+101-1. ReportChangedEqpStatus                         반출입기 장비상태변경시 보고
+101-2. ReplyChangedEqpStatus                         반출입기 장비상태변경시 보고
 102. ChangeEqpStatus                                반출입기 장비상태를 변경
 103. RequestEqpStatusBySync                         반출입기 설비상태를 요청한다.(sync방식)
 104. RequestEqpStatusByAsync                        반출입기 설비상태를 요청한다.(async방식)
-105. ReplyEqpStatusByAsync                          반출입기 설비상태요청에 응답한다.
+104-2 ReplyEqpStatusByAsync                          반출입기 설비상태요청에 응답한다.
 111. EmptyBottleLoadReqAtWorkingArea(L1 Port)       반출입기 L1(입고) Port에서 빈병 입고요청메세지
 112. EmptyBottleLoadCompAtWorkingArea(L1 Port)      반출입기 L1(입고) Port에서 빈병 도착완료메세지
 113. EmptyBottleUnloadReqAtWorkingArea(L1 Port)     반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
@@ -69,7 +73,7 @@ message 송수신 방식
 202. ChangeEqpStatus                                Stocker 장비상태를 변경
 203. RequestEqpStatusBySync                         Stocker 설비상태를 요청한다.(sync방식)
 204. RequestEqpStatusByAsync                        Stocker 설비상태를 요청한다.(async방식)
-205. ReplyEqpStatusByAsync                          Stocker 설비상태요청에 응답한다.
+204-2 ReplyEqpStatusByAsync                          Stocker 설비상태요청에 응답한다.
 206. ExtractProperBottlePackCount                   Stocker에서 추출할 우선순위별 Bottle Pack 수량요청 ----- Suitable => Proper
      --> Target 위치가 분석기 Or 폐기.모사
 207. ExtractProperBottlePackInfo                    Stocker에서 추출할 적정 Bottle Pack 정보요청
@@ -102,7 +106,7 @@ message 송수신 방식
 241. CompareEqpBottleInfo2DB_BottleInfo             Stocker에 있는 재공재고정보와 DB에 있는 정보를 비교한다
 271. ReportChangedDoorStatus                        Stocker Door 상태변경시 Event 보고
 272. RequestDoorStatusBySync                        Stocker Door 상태요청(sync방식)
-273. RequestDoorStatusByAsync                       Stocker Door 상태요청(async방식)
+272-2 RequestDoorStatusByAsync                       Stocker Door 상태요청(async방식)
 274. ReplyDoorStatus                                Stocker Door 상태응답
 281. SetUsageStatus4Hole                            Hole 사용여부 정의한다
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
@@ -116,7 +120,7 @@ message 송수신 방식
      4) Idle    : bottle 이재가 완료되면
 303. RequestEqpStatusBySync                         분석기 설비상태를 요청한다.(sync방식)
 304. RequestEqpStatusByAsync                        분석기 설비상태를 요청한다.(async방식)
-305. ReplyEqpStatusByAsync                          분석기 설비상태요청에 응답한다.
+304-2 ReplyEqpStatusByAsync                          분석기 설비상태요청에 응답한다.
 306. CheckAvailability                              분석기가 작업가능여부 사전 확인한다 ----- RunableStatus => Availability
      --> RequestEqpStatusBySync, RequestEqpStatusByAsync 대치
 311. LoadReq                                        분석기에서 입고요청메세지
@@ -145,7 +149,7 @@ message 송수신 방식
 334. RequestBottleInfoByHole                        분석기에 Hole 존재하는 bottle정보요청
 371. ReportChangedDoorStatus                        분석기 Door 상태변경시 Event 보고
 372. RequestDoorStatusBySync                        분석기 Door 상태요청(sync방식)
-373. RequestDoorStatusByAsync                       분석기 Door 상태요청(async방식)
+372-2 RequestDoorStatusByAsync                       분석기 Door 상태요청(async방식)
 374. ReplyDoorStatus                                분석기 Door 상태응답
 381. SetUsageStatus4Hole                            Hole 사용여부 정의한다
      --> 특정 Hole 오염또는 문제로 사용 불가한 경우
@@ -155,7 +159,7 @@ message 송수신 방식
 402. ChangeEqpStatus                                세정,폐기/모사 장비상태를 변경. 컨트롤러 통신하면서 통신이 안될때는 Trouble로 상태변경 요청한다. 사용자 화면에서 설비상태 변경할때도 사용.
 403. RequestEqpStatusBySync                         세정,폐기/모사 설비상태를 요청한다.(sync방식)
 404. RequestEqpStatusByAsync                        세정,폐기/모사 설비상태를 요청한다.(async방식)
-405. ReplyEqpStatusByAsync                          세정,폐기/모사 설비상태요청에 응답한다.
+404-2 ReplyEqpStatusByAsync                          세정,폐기/모사 설비상태요청에 응답한다.
 
 ---------------------
 501. ReportChangedEqpStatus                         MOMA 장비상태변경시 보고
@@ -166,7 +170,7 @@ message 송수신 방식
      4) Idle    : bottle 이재가 완료되면
 503. RequestEqpStatusBySync                         MOMA 설비상태를 요청한다.(sync방식)
 504. RequestEqpStatusByAsync                        MOMA 설비상태를 요청한다.(async방식)
-505. ReplyEqpStatusByAsync                          MOMA 설비상태요청에 응답한다.
+504-2 ReplyEqpStatusByAsync                          MOMA 설비상태요청에 응답한다.
 503. CheckAvailabilityStatus                        MOMA 작업가능여부 사전 확인한다 ----- Runable => Availability
      --> RequestEqpStatusBySync, RequestEqpStatusByAsync 대치
 521. LoadComp4Bottle                                MOMA 작업시작메세지(#41 공정시작)
@@ -247,7 +251,7 @@ Normal Sequence Flow
 
 ============================================================================
 
-101. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
+101-0. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
    1) Topic Subject : ReportChangedEqpStatus
    2) 메세지 송수신방식 : sync
    3) 송신메세지
@@ -262,9 +266,38 @@ Normal Sequence Flow
    7) 응답메세지
       {
          "status_code" : 200,
-         "sender_controller" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "sender_controller" : "DB_Manager" Or "Dispatcher" Or "UI_Manager" // 입력파라메터의 ToNode값
          "error_msg" : "None"
       }
+101-1. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
+   1) Topic Subject : ReportChangedEqpStatus
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : yes or no
+   3) 송신메세지
+      {
+         "FmNode" : "InOutBottle"
+         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+      }
+   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReportChangedEqpStatus
+   7) 응답메세지
+101-2. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
+   1) Topic Subject : ReplyChangedEqpStatus
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : no
+   3) 송신메세지
+      {
+         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "FmNode" : "InOutBottle"
+         "status_code" : 200,
+         "error_msg" : "None"
+      }
+   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyChangedEqpStatus
+   7) 응답메세지
 
 102. 반출입기 장비상태를 변경. 컨트롤러 통신하면서 통신이 안될때는 Trouble로 상태변경 요청한다. 사용자 화면에서 설비상태 변경할때 사용.
    1) Topic Subject : ChangeEqpStatus
@@ -273,16 +306,17 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 1,              // 반출입기
          "EqpSeqNo" : 1,
-         "eqp_status" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 InOutBottle EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : spChangeEqpStatus
    7) Return
       {
-         "status_code" : 200,
-         "sender_controller" : "DB_Manager"
+         "status_code" : 200,           // sql error code
+         "sender_controller" : "DB_Manager" // 입력파라메터의 ToNode값
          "error_msg" : "None"
       }
 
@@ -294,6 +328,7 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
+         "EqpGroupID" : 1               // 반출입기
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -301,7 +336,9 @@ Normal Sequence Flow
    7) 응답메세지
       {
          "status_code" : 200,
-         "sender_controller" : "InOutBottle" or "DB_Manager"
+         "sender_controller" : "InOutBottle" or "DB_Manager"    // 입력파라메터의 ToNode값
+         "EqpGroupID" : 1               // 반출입기
+         "EqpSeqNo" : 1,
          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
@@ -315,24 +352,28 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
-      }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusByAsync
-   7) 응답메세지
-
-105. 반출입기 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
-   3) 송신메세지
-      {
-         "FmNode" : "InOutBottle" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "EqpGroupID" : 1               // 반출입기
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : -
+   7) 응답메세지
+
+104-2. 반출입기 설비상태요청에 응답한다.
+   1) Topic Subject : ReplyEqpStatusByAsync
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : No
+   3) 송신메세지
+      {
+         "FmNode" : "InOutBottle" Or "DB_Manager"
+         "ToNode" : "Dispatcher" Or "UI_Manager"
+         "EqpGroupID" : 1               // 반출입기
+         "EqpSeqNo" : 1,
+         "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+      }
+   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
    7) 응답메세지
 
 111. L1(입고) Port에서 반출입기 빈병 입고요청메세지
@@ -349,7 +390,7 @@ Normal Sequence Flow
    7) Return
       {
          "status_code" : 200,
-         "sender_controller" : "Dispatcher" and "DB_Manager"
+         "sender_controller" : "Dispatcher" and "DB_Manager"    // 입력파라메터의 ToNode값
          "error_msg" : "None"
       }
 
@@ -862,8 +903,6 @@ Normal Sequence Flow
       }
 
 
-
-
 201. Stocker 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
    1) Topic Subject : ReportChangedEqpStatus
    2) 메세지 송수신방식 : sync
@@ -871,6 +910,7 @@ Normal Sequence Flow
       {
          "FmNode" : "Stocker"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "EqpSeqNo" : 1
          "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
@@ -890,8 +930,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 1,       
          "EqpSeqNo" : 1,
-         "eqp_status" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -911,6 +952,7 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Stocker"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
+         "EqpGroupID" : 2               // Stocker
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -919,6 +961,8 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "Stocker" or "DB_Manager"
+         "EqpGroupID" : 2               // Stocker
+         "EqpSeqNo" : 1,
          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
@@ -932,24 +976,28 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Stocker"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
-      }
-   4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusByAsync
-   7) 응답메세지
-
-205. Stocker 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
-   3) 송신메세지
-      {
-         "FmNode" : "Stocker" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "EqpGroupID" : 2               // Stocker
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : -
+   7) 응답메세지
+
+204-2. Stocker 설비상태요청에 응답한다.
+   1) Topic Subject : ReplyEqpStatusByAsync
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : No
+   3) 송신메세지
+      {
+         "FmNode" : "Stocker" Or "DB_Manager"
+         "ToNode" : "Dispatcher" Or "UI_Manager"
+         "EqpGroupID" : 2               // Stocker
+         "EqpSeqNo" : 1,         
+         "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+      }
+   4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
    7) 응답메세지
 
 206. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
@@ -1304,7 +1352,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }
 
-273. Stocker Door async 상태요청
+272-2. Stocker Door async 상태요청
    1) Topic Subject : RequestDoorStatusByAsync
    2) 메세지 송수신방식 : async
       - 응답 메세지 : Yes
@@ -1363,6 +1411,7 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "EqpSeqNo" : 1
          "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
@@ -1382,8 +1431,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 1,       
          "EqpSeqNo" : 1,
-         "eqp_status" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1403,6 +1453,7 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Analyzer"      --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
+         "EqpGroupID" : 3               // 분석기
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1411,6 +1462,8 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "Analyzer" or "DB_Manager"
+         "EqpGroupID" : 3               // 분석기
+         "EqpSeqNo" : 1,
          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
@@ -1424,24 +1477,28 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Analyzer"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
-      }
-   4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusByAsync
-   7) 응답메세지
-
-305. 분석기 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
-   3) 송신메세지
-      {
-         "FmNode" : "Analyzer" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "EqpGroupID" : 3               // 분석기
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : -
+   7) 응답메세지
+
+304-2. 분석기 설비상태요청에 응답한다.
+   1) Topic Subject : ReplyEqpStatusByAsync
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : No
+   3) 송신메세지
+      {
+         "FmNode" : "Analyzer" Or "DB_Manager"
+         "ToNode" : "Dispatcher" Or "UI_Manager"
+         "EqpGroupID" : 3               // 분석기
+         "EqpSeqNo" : 1,
+         "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+      }
+   4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
    7) 응답메세지
 
 311. 분석기에 입고요청메세지
@@ -1674,7 +1731,7 @@ Normal Sequence Flow
          "error_msg" : "None"
       }
 
-373. 분석기 Door async 상태요청
+372-2. 분석기 Door async 상태요청
    1) Topic Subject : RequestDoorStatusByAsync
    2) 메세지 송수신방식 : async
       - 응답 메세지 : Yes
@@ -1732,6 +1789,7 @@ Normal Sequence Flow
       {
          "FmNode" : "CleaningScrap"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+         "EqpSeqNo" : 1
          "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1751,8 +1809,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 1,       
          "EqpSeqNo" : 1,
-         "eqp_status" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1772,6 +1831,7 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
+         "EqpGroupID" : 4               // 세정,폐기/모사 설비
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1780,6 +1840,8 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "CleaningScrap" or "DB_Manager"
+         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpSeqNo" : 1,
          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
@@ -1793,24 +1855,28 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-      }
-   4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusByAsync
-   7) 응답메세지
-
-405. 세정,폐기/모사 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
-   3) 송신메세지
-      {
-         "FmNode" : "CleaningScrap" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "EqpGroupID" : 4               // 세정,폐기/모사 설비
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : -
+   7) 응답메세지
+
+404-2. 세정,폐기/모사 설비상태요청에 응답한다.
+   1) Topic Subject : ReplyEqpStatusByAsync
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : No
+   3) 송신메세지
+      {
+         "FmNode" : "CleaningScrap" Or "DB_Manager"
+         "ToNode" : "Dispatcher" Or "UI_Manager"
+         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpSeqNo" : 1,
+         "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+      }
+   4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
    7) 응답메세지
 
 
@@ -1840,15 +1906,16 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 1,       
          "EqpSeqNo" : 1,
-         "eqp_status" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : spChangeEqpStatus
    7) Return
       {
-         "status_code" : 200,
+         "status_code" : 200,           // sql error code
          "sender_controller" : "DB_Manager"
          "error_msg" : "None"
       }
@@ -1861,6 +1928,7 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "MOMA"              --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
+         "EqpGroupID" : 5               // MOMA
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1869,6 +1937,8 @@ Normal Sequence Flow
       {
          "status_code" : 200,
          "sender_controller" : "MOMA" or "DB_Manager"
+         "EqpGroupID" : 5               // MOMA
+         "EqpSeqNo" : 1,
          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
          "error_msg" : "None"
       }
@@ -1882,24 +1952,28 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "MOMA"              --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-      }
-   4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusByAsync
-   7) 응답메세지
-
-505. MOMA 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
-   3) 송신메세지
-      {
-         "FmNode" : "MOMA" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+         "EqpGroupID" : 5               // MOMA
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
    6) 관련 Stored Procedure : -
+   7) 응답메세지
+
+504-2. MOMA 설비상태요청에 응답한다.
+   1) Topic Subject : ReplyEqpStatusByAsync
+   2) 메세지 송수신방식 : async
+      - 응답 메세지 : No
+   3) 송신메세지
+      {
+         "FmNode" : "MOMA" Or "DB_Manager"
+         "ToNode" : "Dispatcher" Or "UI_Manager"
+         "EqpGroupID" : 5               // MOMA
+         "EqpSeqNo" : 1,
+         "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
+      }
+   4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
+   5) Return Message 길이 : 1K 이내
+   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
    7) 응답메세지
 
 521. MOMA에 입고완료메세지(#21 공정시작)
