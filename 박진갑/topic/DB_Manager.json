@@ -258,7 +258,9 @@ Normal Sequence Flow
       {
          "FmNode" : "InOutBottle"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"     	// PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -277,7 +279,9 @@ Normal Sequence Flow
       {
          "FmNode" : "InOutBottle"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"       	// PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -306,8 +310,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,              // 반출입기
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 InOutBottle EqpStatus(장비상태) 참조
@@ -329,6 +333,7 @@ Normal Sequence Flow
          "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
          "EqpGroupID" : 1               // 반출입기
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -353,6 +358,7 @@ Normal Sequence Flow
          "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
          "EqpGroupID" : 1               // 반출입기
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -368,7 +374,7 @@ Normal Sequence Flow
          "FmNode" : "InOutBottle" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
          "EqpGroupID" : 1               // 반출입기
-         "EqpSeqNo" : 1,
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
@@ -383,10 +389,13 @@ Normal Sequence Flow
       {
          "FmNode" : "InOutBottle",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+		 "PortEvent" : "LoadReq"
       }
    4) Function : 반출입기 L1 Port에 병이 없을때(Port가 비어있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadReqAtWorkingArea
+   6) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleLoadReqAtWorkingArea
    7) Return
       {
          "status_code" : 200,
@@ -403,10 +412,13 @@ Normal Sequence Flow
          "FmNode" : "InOutBottle",
          "ToNode" : "DB_Manager",
          "BottleID" : "ID_001"
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+		 "PortEvent" : "LoadComp"
       }
    4) Function : 반출입기 L1 Port에 빈병도착했을때(Port에 병이 있을때) 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadCompAtWorkingArea
+   6) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleLoadCompAtWorkingArea
    7) Return
 
 113. L1(입고) Port에서 반출입기 빈병 출하요청(UnloadReq)메세지
@@ -418,10 +430,13 @@ Normal Sequence Flow
          "FmNode" : "InOutBottle",
          "ToNode" : "DB_Manager",
          "BottleID" : "ID_001"
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+		 "PortEvent" : "UnloadReq"
       }
    4) Function : 반출입기 L1 Port에 빈병도착했을때(병 있을때) 빈병Zone에 투입을 요청하는 Event message
    5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleUnloadReqAtWorkingArea
+   6) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleUnloadReqAtWorkingArea
    7) Return
 
 114. L1(입고) Port에서 입고완료후 반출입기 공병Zone에 공병을 hole에 내려놓았을때. 빈병 입고완료 했을때 (#11 공정시작)
@@ -433,6 +448,9 @@ Normal Sequence Flow
          "ToNode" : "DB_Manager",
          "BottleID" : "ID_001",
          "Position" : "2111"
+         "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "UnloadComp"
       }
    4) Function : 장비내 반송. 반출입기에서 Dispatcher와 무관하게 자체적으로 bottle 이동한다.
                 반출입기 공병Zone에 빈병도착했을때(병 있을때) 요청하는 Event message
@@ -910,8 +928,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Stocker"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"       	// PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -930,9 +949,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
-         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "Reserve"       	// Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -991,8 +1010,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Stocker" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 2               // Stocker
-         "EqpSeqNo" : 1,         
+         "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
@@ -1411,8 +1430,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"       	// PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1431,8 +1451,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
@@ -1453,7 +1473,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Analyzer"      --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
-         "EqpGroupID" : 3               // 분석기
+         "EqpGroupID" :3,               // 분석기
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1478,6 +1499,7 @@ Normal Sequence Flow
          "ToNode" : "Analyzer"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
          "EqpGroupID" : 3               // 분석기
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1492,8 +1514,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 3               // 분석기
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
@@ -1508,6 +1530,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : 분석작업 완료후 bottle 끄집어낸다. 새로운 작업을 요청하는 event.
    5) Return Message 길이 : 1K 이내
@@ -1527,6 +1551,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : MOMA에서 분석기로 bottle pack 입고가 완료된후 발생하는 event
    5) Return Message 길이 : 1K 이내
@@ -1540,6 +1566,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : Analyzer에서 모든 분석작업을 완료했을때 인출을 요구하는 Event message
    5) Return Message 길이 : 1K 이내
@@ -1559,6 +1587,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : Analyzer에서 MOMA bottle 이동했을때 event
    5) Return Message 길이 : 1K 이내
@@ -1572,6 +1602,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
@@ -1592,6 +1624,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
@@ -1612,7 +1646,7 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher",
          "ToNode" : "Analyzer" or "DB_Manager"
-         "EqpSeqNo" : 1
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
    5) Return Message 길이 : 1K 이내
@@ -1789,7 +1823,8 @@ Normal Sequence Flow
       {
          "FmNode" : "CleaningScrap"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1809,8 +1844,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1831,7 +1866,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1855,7 +1891,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1870,8 +1907,8 @@ Normal Sequence Flow
       {
          "FmNode" : "CleaningScrap" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1887,7 +1924,9 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"       	// PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1906,9 +1945,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
-         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "Reserve"       	// Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1953,6 +1992,7 @@ Normal Sequence Flow
          "ToNode" : "MOMA"              --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
          "EqpGroupID" : 5               // MOMA
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1967,8 +2007,8 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 5               // MOMA
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
@@ -1983,6 +2023,8 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,				// 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
