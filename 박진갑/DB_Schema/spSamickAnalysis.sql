@@ -39,8 +39,8 @@ token관련 stored procedure
 
 이벤트 스케줄러관련 stored procedure
 E01.  AggregateDailyEqpStatus         AggregateDailyEqpStatusEvent event scheduler에서 호출
-									일일가동률 확인을 위해 일일단위로 설비상태정보 집계한다
-E02.  MoveOldEqpStatus				MoveOldRecordOfEqp2History event scheduler에서 호출
+                                    일일가동률 확인을 위해 일일단위로 설비상태정보 집계한다
+E02.  MoveOldEqpStatus              MoveOldRecordOfEqp2History event scheduler에서 호출
 
 이벤트 스케줄러 생성
 E21.  AggregateDailyEqpStatusEvent    장비상태를 1일 단위 집계하여 summary table(tDailyEqpStatus) 저장한다.
@@ -92,45 +92,6 @@ E23.  CleanupOldRecordsOfTbl          tDailyEqpStatus, tHisProcBotOper, tHisChgE
 -- }
 ============================================================================ 
 
--- GPT prompt
--- 1. 입력 파라메터가
---   'InOutBottle' 이면 '1'
---   'Stocker' 이면 '2'
---   'Analyzer' 이면 '3'
---   'CleaningScrap' 이면 '4'
---   'MOMA' 이면 '5'  그 이외는 '0'을 return 하는 stored function 를 만들어줘.
--- 2. 결과값을 char로 변경해줘
---
-DELIMITER //
-CREATE FUNCTION fGetEqpGroupID_FmParameterValue(input_param VARCHAR(20)) 
-RETURNS CHAR(1)
-BEGIN
-    DECLARE return_value CHAR(1) DEFAULT '0';
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        -- 예외 발생 시 return_value를 '0'으로 설정
-        SET return_value = '0';
-    END;
-
-    -- 입력 파라미터에 따른 반환 값 설정
-    IF input_param = 'InOutBottle' THEN
-        SET return_value = '1';
-    ELSEIF input_param = 'Stocker' THEN
-        SET return_value = '2';
-    ELSEIF input_param = 'Analyzer' THEN
-        SET return_value = '3';
-    ELSEIF input_param = 'CleaningScrap' THEN
-        SET return_value = '4';
-    ELSEIF input_param = 'MOMA' THEN
-        SET return_value = '5';
-    ELSE
-        SET return_value = '0';
-    END IF;
-
-    RETURN return_value;
-END //
-DELIMITER ;
-
 -- 101. 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
 -- GPT prompt
 -- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
@@ -171,7 +132,8 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1
             error_message = MESSAGE_TEXT, 
             error_code = MYSQL_ERRNO;
-        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) VALUES ('spReportChangedEqpStatus', error_code, error_message);
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReportChangedEqpStatus', error_code, error_message);
     END;
 
     -- JSON 파싱
@@ -186,10 +148,8 @@ BEGIN
     -- FmNode 값을 기반으로 EqpGroupID 설정
     SET eqp_group_id = fGetEqpGroupID_FmParameterValue(fm_node);
     
-    -- EqpStatus 업데이트
-    UPDATE tMstEqp
-    SET EqpStatus = eqp_status
-    WHERE EqpGroupID = eqp_group_id AND EqpSeqNo = eqp_seq_no;
+    -- 서브 프로시저를 호출하여 EqpStatus 업데이트
+    CALL spUpdateEqpStatus_MstEqp(eqp_group_id, eqp_seq_no, eqp_status);
 END //
 DELIMITER ;
 
@@ -207,8 +167,8 @@ DELIMITER ;
 -- tMstEqp table의 EqpStatus를 update하는 stored procedure 만들어줘.
 -- Return  json type. 내용은 아래와 같음.
 --       {
---          "status_code" : 200,			// sql error code
---          "sender_controller" : "DB_Manager"	// 송신메세지의 ToNode값
+--          "status_code" : 200,            // sql error code
+--          "sender_controller" : "DB_Manager"  // 송신메세지의 ToNode값
 --          "error_msg" : "None"
 --       }
 -- 2. eqp_group_id는 입력파라메터에서 읽어줘.
@@ -250,10 +210,8 @@ BEGIN
         SET eqp_seq_no = JSON_UNQUOTE(JSON_EXTRACT(json_param, '$.EqpSeqNo'));
     END IF;
     
-    -- EqpStatus 업데이트
-    UPDATE tMstEqp
-    SET EqpStatus = eqp_status
-    WHERE EqpGroupID = eqp_group_id AND EqpSeqNo = eqp_seq_no;
+    -- 서브 프로시저를 호출하여 EqpStatus 업데이트
+    CALL spUpdateEqpStatus_MstEqp(eqp_group_id, eqp_seq_no, eqp_status);
 
     -- 성공 시 JSON 결과 설정
     SET result = JSON_OBJECT(
@@ -275,8 +233,8 @@ DELIMITER ;
 --       }
 -- Return  json type. 내용은 아래와 같음.
 --       {
---          "status_code" : 200,			// sql error code
---          "sender_controller" : "DB_Manager"	// 송신메세지의 ToNode값
+--          "status_code" : 200,            // sql error code
+--          "sender_controller" : "DB_Manager"  // 송신메세지의 ToNode값
 --          "EqpGroupID" : 1,
 --          "EqpSeqNo" : 1,
 --          "eqp_status" : "PowerOn"       // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
@@ -350,7 +308,9 @@ DELIMITER ;
 spRequestStatus stored procedure와 동일함.
 
 
--- 111. L1(입고) Port에서 반출입기 빈병 입고요청메세지
+-- 111. EmptyBottleLoadReqAtWorkingAreaL1(입고)           Port에서 반출입기 빈병 입고요청메세지
+-- 112. EmptyBottlePortEventAtWorkingArea(L1 Port)      반출입기 L1(입고) Port에서 빈병 도착완료메세지
+-- 113. EmptyBottlePortEventAtWorkingArea(L1 Port)      반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
 -- GPT prompt
 -- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
 --       {
@@ -359,7 +319,7 @@ spRequestStatus stored procedure와 동일함.
 --       }
 -- Return  json type. 내용은 아래와 같음.
 --       {
---          "status_code" : 200,			// sql error code
+--          "status_code" : 200,            // sql error code
 --          "sender_controller" : "Dispatcher" and "DB_Manager"    // 입력파라메터의 ToNode값
 --          "error_msg" : "None"
 --       }
@@ -417,13 +377,11 @@ BEGIN
 
     -- Check if EqpSeqNo is provided, if not set to default 1
     IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
-        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
     END IF;
 
-    -- Update the tMstEqp table
-    UPDATE tMstEqp
-    SET LoadPort_1 = v_PortEvent
-    WHERE EqpGroupID = v_EqpGroupID AND EqpSeqNo = v_EqpSeqNo;
+    -- Call the stored procedure to update the tMstEqp table
+    CALL spUpdatePortEvent_MstEqp(v_EqpGroupID, v_EqpSeqNo, v_PortEvent, 'LoadPort_1');
 
     -- Set the JSON output
     SET jsonOutput = JSON_OBJECT(
@@ -497,9 +455,168 @@ DELIMITER ;
 --      AND CurrOperID = p_CurrOperID
 --    LIMIT 1;
 -- NextEqpGroupID, NextOperID 읽고 tProcBottle table에 NextEqpGroupID, NextOperID 같이 update 해줘
---
+-- 4. 업데이트하는 함수를 만들고, 해당 함수를 호출하도록 프로시저를 수정하려면 다음과 같이 할 수 있습니다:
 DELIMITER //
 CREATE PROCEDURE spEmptyBottleUnloadCompAtWorkingArea(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_FmNode VARCHAR(50);
+    DECLARE v_ToNode VARCHAR(255);
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_Position CHAR(4);
+    DECLARE v_PortEvent VARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spEmptyBottleUnloadCompAtWorkingArea', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_ToNode,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_FmNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.FmNode'));
+    SET v_ToNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ToNode'));
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.BottleID'));
+    SET v_Position = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.Position'));
+    SET v_PortEvent = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.PortEvent'));
+
+    -- Check if EqpGroupID is provided, if not use FmNode value with f_GetEqpGroupID_FmParameterValue function
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpGroupID') THEN
+        SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+    ELSE
+        SET v_EqpGroupID = f_GetEqpGroupID_FmParameterValue(v_FmNode);
+    END IF;
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+    END IF;
+
+    -- Update the tMstEqp table
+    CALL sp_UpdatePortEvent_MstEqp(v_EqpGroupID, v_EqpSeqNo, v_PortEvent, 'LoadPort_1');
+
+    -- Update the tBottleInfoOfHoleAtInOutBottle table
+    CALL sp_UpdatePosition_BottleInfoOfHoleAtInOutBottle(v_BottleID);
+
+    -- Get NextEqpGroupID and NextOperID from tMstRouteOper table
+    CALL sp_GetNextEqpGroupIDAndOperID_MstRouteOper(v_EqpGroupID, '1', v_NextEqpGroupID, v_NextOperID);
+
+    -- Update the tProcBottle table
+    CALL sp_Update_ProcBottle(v_BottleID, v_EqpGroupID, v_EqpSeqNo);
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_ToNode,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 115. FilledBottleLoadReqAtWorkingArea(U1 Port)      반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
+-- 116. FilledBottleLoadCompAtWorkingArea(U1 Port)     반출입기 U1(출하) Port에서 실병 도착완료(LoadComp)메세지
+-- 117. FilledBottleUnloadReqAtWorkingArea(U1 Port)    반출입기 U1(출하) Port에서 실병 출하요청(UnloadReq)메세지
+--
+DELIMITER //
+CREATE PROCEDURE spEmptyBottlePortEventAtWorkingArea(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpSeqNo INT DEFAULT 1;
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_FmNode VARCHAR(50);
+    DECLARE v_ToNode VARCHAR(255);
+    DECLARE v_PortEvent VARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spEmptyBottlePortEventAtWorkingArea', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_ToNode,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_FmNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.FmNode'));
+    SET v_ToNode = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ToNode'));
+    SET v_PortEvent = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.PortEvent'));
+
+    -- Check if EqpGroupID is provided, if not use FmNode value with fGetEqpGroupID_FmParameterValue function
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpGroupID') THEN
+        SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+    ELSE
+        SET v_EqpGroupID = fGetEqpGroupID_FmParameterValue(v_FmNode);
+    END IF;
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+    END IF;
+
+    -- Update the tMstEqp table
+    UPDATE tMstEqp
+    SET UnloadPort_1 = v_PortEvent
+    WHERE EqpGroupID = v_EqpGroupID AND EqpSeqNo = v_EqpSeqNo;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_ToNode,
+        'EqpGroupID', v_EqpGroupID,
+        'EqpSeqNo', v_EqpSeqNo,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 118. FilledBottleUnloadCompAtWorkingArea(U1 Port)   반출입기 U1(출하) Port에서 실병 출하완료(UnloadComp)메세지(#13 공정
+--       {
+--          "FmNode" : "InOutBottle",
+--          "ToNode" : "Dispatcher" and "DB_Manager",
+--          "EqpGroupID" : 1               // FmNode 추정가능. 생략가능
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--          "PortEvent" : "UnloadComp"
+--          "BottleID" : "ID_001"
+--       }
+--
+DELIMITER //
+CREATE PROCEDURE spFilledBottleUnloadCompAtWorkingArea(IN jsonInput JSON, OUT jsonOutput JSON)
 BEGIN
     DECLARE v_EqpGroupID CHAR(1);
     DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
@@ -554,34 +671,14 @@ BEGIN
         SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
     END IF;
 
-    -- Update the tMstEqp table
-    UPDATE tMstEqp
-    SET LoadPort_1 = v_PortEvent
-    WHERE EqpGroupID = v_EqpGroupID AND EqpSeqNo = v_EqpSeqNo;
+    -- Call the function to update the tMstEqp table
+    CALL UpdateMstEqp(v_EqpGroupID, v_EqpSeqNo, v_PortEvent);
 
-    -- Update the tBottleInfoOfHoleAtInOutBottle table
-    UPDATE tBottleInfoOfHoleAtInOutBottle
-    SET ZoneName = 'Empty',
-        EventTime = CURRENT_TIMESTAMP,
-        BottleID = v_BottleID
-    WHERE EqpSeqNo = v_EqpSeqNo AND Position = v_Position;
+    -- Call the function to update the tBottleInfoOfHoleAtInOutBottle table
+    CALL UpdateBottleInfoOfHoleAtInOutBottle(v_BottleID);
 
-    -- Get NextEqpGroupID and NextOperID from tMstRouteOper table
-    SELECT NextEqpGroupID, NextOperID
-    INTO v_NextEqpGroupID, v_NextOperID
-    FROM tMstRouteOper
-    WHERE CurrEqpGroupID = v_EqpGroupID
-      AND CurrOperID = '1' -- Assuming the current operation ID is '1'
-    LIMIT 1;
-
-    -- Update the tProcBottle table
-    UPDATE tProcBottle
-    SET CurrEqpGroupID = v_EqpGroupID,
-        CurrEqpSeqNo = v_EqpSeqNo,
-        CurrOperID = '1',
-        NextEqpGroupID = v_NextEqpGroupID,
-        NextOperID = v_NextOperID
-    WHERE BottleID = v_BottleID;
+    -- Call the function to update the tProcBottle table
+    CALL UpdateProcBottle(v_BottleID, v_EqpGroupID, v_EqpSeqNo);
 
     -- Set the JSON output
     SET jsonOutput = JSON_OBJECT(
@@ -592,6 +689,1193 @@ BEGIN
 
 END //
 DELIMITER ;
+
+-- 121. 반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
+-- 122. L2(입고) Port에서 반출입기 실병 도착완료(LoadComp)메세지(#13 공정시작)
+-- 123. U2(출하) Port에서 반출입기 빈병 입고요청(LoadReq)메세지
+-- GPT prompt
+-- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--          "PortName" : "L2",
+--          "PortEvent" : "UnloadComp"             
+--       }
+-- 입력 파라메터에서 PortName이 정의되어 있지 않으면 "ProcessStatus"
+-- "PortName" : "L1" 이면  "LoadPort_1"
+-- "PortName" : "U1" 이면 "UnloadPort_1"
+-- "PortName" : "L2" 이면 "LoadPort_2"
+-- "PortName" : "U2" 이면 "UnloadPort_2"  
+-- return 하는 함수를 만들고 
+-- 관련 DB Table
+-- CREATE TABLE tMstEqp (
+--        EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+--        EqpSeqNo                 TINYINT NOT NULL,       -- 호기 (1부터 시작)
+--        ...
+--        EqpStatus                NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting)
+--    ProcessStatus            NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve), 반출입기 이외 장
+--    LoadPort_1               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+--    LoadPort_2               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+--    UnloadPort_1             NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+--    UnloadPort_2             NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve    }
+-- PortName 에서 가져온 DB field 명에 PortEvent 값을 update 하는 stored procedure 만들어줘.
+--  maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert해줘.
+-- 2. 입력값에 BottleID, Position 정보가 있으면 데이터 값을 읽고 sp_UpdatePosition_BottleInfoOfHoleAtInOutBottle 호출해줘.
+DELIMITER //
+CREATE PROCEDURE spUpdatePortEventAtInOutBottle(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo INT DEFAULT 1;
+    DECLARE v_PortName VARCHAR(12) DEFAULT 'ProcessStatus';
+    DECLARE v_PortEvent VARCHAR(50);
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_Position VARCHAR(50);
+    DECLARE v_ZoneName VARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_FieldName VARCHAR(20);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spUpdatePortEventAtWorkingArea', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+    SET v_PortEvent = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.PortEvent'));
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.BottleID'));
+    SET v_Position = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.Position'));
+    SET v_ZoneName = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ZoneName'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Check if PortName is provided, if not set to 'ProcessStatus'
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.PortName') THEN
+        SET v_PortName = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.PortName'));
+    END IF;
+
+    -- Determine the field name based on the PortName value
+    CASE v_PortName
+        WHEN 'L1' THEN SET v_FieldName = 'LoadPort_1';
+        WHEN 'U1' THEN SET v_FieldName = 'UnloadPort_1';
+        WHEN 'L2' THEN SET v_FieldName = 'LoadPort_2';
+        WHEN 'U2' THEN SET v_FieldName = 'UnloadPort_2';
+        ELSE SET v_FieldName = 'ProcessStatus';
+    END CASE;
+
+    -- Update the corresponding field in the tMstEqp table using sp_UpdatePortEvent_MstEqp
+    CALL sp_UpdatePortEvent_MstEqp(v_EqpGroupID, v_EqpSeqNo, v_PortEvent, v_FieldName);
+
+    -- Call sp_UpdatePosition_BottleInfoOfHoleAtInOutBottle if BottleID, Position, and ZoneName are provided
+    IF v_BottleID IS NOT NULL AND v_Position IS NOT NULL AND v_ZoneName IS NOT NULL THEN
+        CALL sp_UpdatePosition_BottleInfoOfHoleAtInOutBottle(v_BottleID, v_Position, v_ZoneName);
+    END IF;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'EqpGroupID', v_EqpGroupID,
+        'EqpSeqNo', v_EqpSeqNo,
+        'PortName', v_PortName,
+        'PortEvent', v_PortEvent,
+        'BottleID', v_BottleID,
+        'Position', v_Position,
+        'ZoneName', v_ZoneName,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 124. U2(출하) Port에서 반출입기 빈병 도착완료(LoadComp)메세지 (#11 공정완료)
+-- GPT prompt
+-- 1. spFilledBottleUnloadCompAtWorkingArea procedure에서
+-- Position 파라메터가 입력되지 않았으면 default 값을 null로 처리해줘.
+-- ZoneName 파라메터 추가해줘.
+DELIMITER //
+CREATE PROCEDURE spFilledBottleUnloadCompAtWorkingArea(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_Position CHAR(4) DEFAULT NULL;
+    DECLARE v_ZoneName VARCHAR(50);
+    DECLARE v_PortEvent VARCHAR(50);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_NextEqpGroupID CHAR(1);
+    DECLARE v_NextOperID CHAR(1);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spFilledBottleUnloadCompAtWorkingArea', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+    SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.BottleID'));
+    SET v_Position = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.Position'));
+    SET v_ZoneName = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ZoneName'));
+    SET v_PortEvent = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.PortEvent'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+    END IF;
+
+    -- Check if Position is provided, if not set to NULL
+    IF NOT JSON_CONTAINS_PATH(jsonInput, 'one', '$.Position') THEN
+        SET v_Position = NULL;
+    END IF;
+
+    -- Call the function to update the tMstEqp table
+    CALL sp_UpdatePortEvent_MstEqp(v_EqpGroupID, v_EqpSeqNo, v_PortEvent, 'ProcessStatus');
+
+    -- Call the function to update the tBottleInfoOfHoleAtInOutBottle table
+    CALL sp_UpdatePosition_BottleInfoOfHoleAtInOutBottle(v_BottleID, v_Position, v_ZoneName);
+
+    -- Call the function to update the tProcBottle table
+    CALL sp_Update_ProcBottle(v_BottleID, v_EqpGroupID, v_EqpSeqNo);
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 131. 반출입기 hole capacity(Bottle 총 적재가능수량)
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "InOutBottle" or "DB_Manager"
+--          "empty_bottle_zone_capacity" : 48,
+--          "filled_bottle_zone_capacity" : 48,
+--          "error_msg" : "None"
+--       }
+-- CREATE TABLE tMstEqp (
+--    EqpGroupID               CHAR(1) NOT NULL,       -- 설비군ID
+--    EqpSeqNo                 TINYINT NOT NULL,       -- 호기 (1부터 시작)
+--    EqpName                  NVARCHAR(30),           -- 설비명
+--    CapacityOfHole           TINYINT,                -- 분석기 설비 hole(병을 처리할수 있는) 케파
+--    CapacityOfEmptyZone      TINYINT,                -- 반출입기 설비 hole(병을 처리할수 있는) 케파
+--    CapacityOfFilledZone     TINYINT,                -- 반출입기 설비 hole(병을 처리할수 있는) 케파
+--    CapacityOfLeftZone       TINYINT,                -- Stocker 설비 hole(병을 처리할수 있는) 케파
+--    CapacityOfRightZone      TINYINT,                -- Stocker 설비 hole(병을 처리할수 있는) 케파
+--   ....
+-- tMstEqp table의 CapacityOfEmptyZone, CapacityOfFilledZone 값을 일고 출력 파라메터에 assign후 return 한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spGetBottleCapacityAtInOutBottle(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo TINYINT DEFAULT 1;
+    DECLARE v_CapacityOfEmptyZone TINYINT;
+    DECLARE v_CapacityOfFilledZone TINYINT;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadBottleZoneCapacity', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'empty_bottle_zone_capacity', NULL,
+            'filled_bottle_zone_capacity', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Read CapacityOfEmptyZone and CapacityOfFilledZone from tMstEqp table
+    SELECT CapacityOfEmptyZone, CapacityOfFilledZone
+    INTO v_CapacityOfEmptyZone, v_CapacityOfFilledZone
+    FROM tMstEqp
+    WHERE EqpGroupID = v_EqpGroupID AND EqpSeqNo = v_EqpSeqNo;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'empty_bottle_zone_capacity', v_CapacityOfEmptyZone,
+        'filled_bottle_zone_capacity', v_CapacityOfFilledZone,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 132. RequestNumberOfSpareHole                       반출입기에 bottle 적재할 Empty hole 수량요청
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "InOutBottle" or "DB_Manager"
+--          "num_of_empty_bottle_in_empty_bottle_zone" : 10,
+--          "num_of_empty_bottle_in_filled_bottle_zone" : 15,
+--          "error_msg" : "None"
+--       }
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 ZoneName이 'Empty'일때 BottleID값이 null인 record 갯수를  num_of_empty_bottle_in_empty_bottle_zone assign한다.
+-- ZoneName이 'Filled'일때 BottleID값이 null인 record 갯수를  num_of_empty_bottle_in_filled_bottle_zone assign한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spReadBottleZoneInfo(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_NumOfEmptyBottleInEmptyZone INT;
+    DECLARE v_NumOfEmptyBottleInFilledZone INT;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadBottleZoneInfo', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'num_of_empty_bottle_in_empty_bottle_zone', NULL,
+            'num_of_empty_bottle_in_filled_bottle_zone', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Count the number of empty bottles in empty bottle zone
+    SELECT COUNT(*)
+    INTO v_NumOfEmptyBottleInEmptyZone
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Empty' AND EqpSeqNo = v_EqpSeqNo AND BottleID IS NULL;
+
+    -- Count the number of empty bottles in filled bottle zone
+    SELECT COUNT(*)
+    INTO v_NumOfEmptyBottleInFilledZone
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Filled' AND EqpSeqNo = v_EqpSeqNo AND BottleID IS NULL;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'num_of_empty_bottle_in_empty_bottle_zone', v_NumOfEmptyBottleInEmptyZone,
+        'num_of_empty_bottle_in_filled_bottle_zone', v_NumOfEmptyBottleInFilledZone,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 133. RequestInfoOfSpareHoles                        반출입기에 bottle투입하기 위한 Empty hole 정보요청
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "InOutBottle" or "DB_Manager"
+--          "position_in_empty_bottle_zone" : "1111, 1114, 1115",
+--          "position_in_filled_bottle_zone" : "2111, 2114, 2115",
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- ZoneName이 'Empty'일때 BottleID값이 null인 Position 정보를  position_in_empty_bottle_zone assign한다.
+-- ZoneName이 'Filled'일때 BottleID값이 null인 Position 정보를  position_in_filled_bottle_zone assign한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spReadBottleZonePositions(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_PositionsInEmptyZone TEXT;
+    DECLARE v_PositionsInFilledZone TEXT;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadBottleZonePositions', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'position_in_empty_bottle_zone', NULL,
+            'position_in_filled_bottle_zone', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Get positions of empty bottles in empty bottle zone
+    SELECT GROUP_CONCAT(Position)
+    INTO v_PositionsInEmptyZone
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Empty' AND EqpSeqNo = v_EqpSeqNo AND BottleID IS NULL;
+
+    -- Get positions of empty bottles in filled bottle zone
+    SELECT GROUP_CONCAT(Position)
+    INTO v_PositionsInFilledZone
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Filled' AND EqpSeqNo = v_EqpSeqNo AND BottleID IS NULL;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'position_in_empty_bottle_zone', v_PositionsInEmptyZone,
+        'position_in_filled_bottle_zone', v_PositionsInFilledZone,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 134. RequestBottleInfoByHole                        반출입기 Hole 존재하는 bottle정보요청
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "InOutBottle" or "DB_Manager"
+--          "empty_bottle_zone" : [
+--             {"1011" : "bot_0136"},
+--                 ...
+--             {"1035" : "bot_0136"}
+--          ],
+--          "filled_bottle_zone" : [
+--             {"2011" : "bot_2136"},
+--                 ...
+--             {"2035" : "bot_2136"}
+--          ],
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- ZoneName이 'Empty'일때 BottleID값이 null아닌 record의 Position 정보와 BottleID를  empty_bottle_zone assign한다.
+-- ZoneName이 'Filled'일때 BottleID값이 null아닌 record의 Position 정보와 BottleID를  filled_bottle_zone assign한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spReadBottleZoneDetails(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_EmptyBottleZone JSON;
+    DECLARE v_FilledBottleZone JSON;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadBottleZoneDetails', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'empty_bottle_zone', NULL,
+            'filled_bottle_zone', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo'));
+    END IF;
+
+    -- Get positions and BottleIDs of empty bottles in empty bottle zone
+    SET v_EmptyBottleZone = (
+        SELECT JSON_ARRAYAGG(JSON_OBJECT(Position, BottleID))
+        FROM tBottleInfoOfHoleAtInOutBottle
+        WHERE ZoneName = 'Empty' AND BottleID IS NOT NULL AND EqpSeqNo = v_EqpSeqNo
+    );
+
+    -- Get positions and BottleIDs of empty bottles in filled bottle zone
+    SET v_FilledBottleZone = (
+        SELECT JSON_ARRAYAGG(JSON_OBJECT(Position, BottleID))
+        FROM tBottleInfoOfHoleAtInOutBottle
+        WHERE ZoneName = 'Filled' AND BottleID IS NOT NULL AND EqpSeqNo = v_EqpSeqNo
+    );
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'empty_bottle_zone', v_EmptyBottleZone,
+        'filled_bottle_zone', v_FilledBottleZone,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 141. CompareEqpBottleInfo2DB_BottleInfo             반출입기에 있는 재공재고정보와 DB에 있는 정보를 비교한다
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--          "empty_bottle_zone" : [
+--             {"1011" : "bot_0136"},
+--                 ...
+--             {"1035" : "bot_0136"}
+--          ],
+--          "filled_bottle_zone" : [
+--             {"2011" : "bot_2136"},
+--                 ...
+--             {"2035" : "bot_2136"}
+--          ],
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "DB_Manager",    //
+--          "TotCountOfBottles" : 70,
+--          "NormalCountOfBottles" : 68,
+--          "AbnormalCountOfBottles" : 2,
+--          "BottleInfo" : [
+--             {
+--                 "BottleID" : "ID_001",
+--                 "PositionOfInputParameter" : "1021",
+--                 "PositionOfDB" : "2021"
+--             },
+--             {
+--                 "BottleID" : "ID_002",
+--                 "PositionOfInputParameter" : "1022",
+--                 "PositionOfDB" : null
+--             },
+--          ],
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- 입력파라메터에서 입력된 Postion과 Bottle정보와 DB에 정보를 비교해서 출력파라메터를 완성해줘
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spCompareBottleInfo(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+    DECLARE v_TotCountOfBottles INT DEFAULT 0;
+    DECLARE v_NormalCountOfBottles INT DEFAULT 0;
+    DECLARE v_AbnormalCountOfBottles INT DEFAULT 0;
+    DECLARE v_BottleInfo JSON;
+    DECLARE v_JsonRow JSON;
+    DECLARE v_Position VARCHAR(4);
+    DECLARE v_BottleID CHAR(15);
+    DECLARE v_DBPosition VARCHAR(4);
+    DECLARE v_DB_BottleID CHAR(15);
+    DECLARE v_CurrentIndex INT DEFAULT 0;
+    DECLARE v_TotalItems INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spCompareBottleInfo', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'TotCountOfBottles', NULL,
+            'NormalCountOfBottles', NULL,
+            'AbnormalCountOfBottles', NULL,
+            'BottleInfo', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Process empty_bottle_zone
+    SET v_TotalItems = JSON_LENGTH(JSON_EXTRACT(jsonInput, '$.empty_bottle_zone'));
+    WHILE v_CurrentIndex < v_TotalItems DO
+        SET v_JsonRow = JSON_EXTRACT(jsonInput, CONCAT('$.empty_bottle_zone[', v_CurrentIndex, ']'));
+        SET v_Position = JSON_UNQUOTE(JSON_KEYS(v_JsonRow));
+        SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(v_JsonRow, CONCAT('$."', v_Position, '"')));
+
+        -- Query to find the BottleID in the database
+        SELECT Position, BottleID
+        INTO v_DBPosition, v_DB_BottleID
+        FROM tBottleInfoOfHoleAtInOutBottle
+        WHERE EqpSeqNo = v_EqpSeqNo AND ZoneName = 'Empty' AND Position = v_Position;
+
+        IF v_DB_BottleID = v_BottleID THEN
+            SET v_NormalCountOfBottles = v_NormalCountOfBottles + 1;
+        ELSE
+            SET v_AbnormalCountOfBottles = v_AbnormalCountOfBottles + 1;
+        END IF;
+
+        SET v_TotCountOfBottles = v_TotCountOfBottles + 1;
+
+        SET v_BottleInfo = JSON_ARRAY_APPEND(
+            v_BottleInfo, '$', 
+            JSON_OBJECT(
+                'BottleID', v_BottleID,
+                'PositionOfInputParameter', v_Position,
+                'PositionOfDB', v_DBPosition
+            )
+        );
+
+        SET v_CurrentIndex = v_CurrentIndex + 1;
+    END WHILE;
+
+    -- Process filled_bottle_zone
+    SET v_CurrentIndex = 0;
+    SET v_TotalItems = JSON_LENGTH(JSON_EXTRACT(jsonInput, '$.filled_bottle_zone'));
+    WHILE v_CurrentIndex < v_TotalItems DO
+        SET v_JsonRow = JSON_EXTRACT(jsonInput, CONCAT('$.filled_bottle_zone[', v_CurrentIndex, ']'));
+        SET v_Position = JSON_UNQUOTE(JSON_KEYS(v_JsonRow));
+        SET v_BottleID = JSON_UNQUOTE(JSON_EXTRACT(v_JsonRow, CONCAT('$."', v_Position, '"')));
+
+        -- Query to find the BottleID in the database
+        SELECT Position, BottleID
+        INTO v_DBPosition, v_DB_BottleID
+        FROM tBottleInfoOfHoleAtInOutBottle
+        WHERE EqpSeqNo = v_EqpSeqNo AND ZoneName = 'Filled' AND Position = v_Position;
+
+        IF v_DB_BottleID = v_BottleID THEN
+            SET v_NormalCountOfBottles = v_NormalCountOfBottles + 1;
+        ELSE
+            SET v_AbnormalCountOfBottles = v_AbnormalCountOfBottles + 1;
+        END IF;
+
+        SET v_TotCountOfBottles = v_TotCountOfBottles + 1;
+
+        SET v_BottleInfo = JSON_ARRAY_APPEND(
+            v_BottleInfo, '$', 
+            JSON_OBJECT(
+                'BottleID', v_BottleID,
+                'PositionOfInputParameter', v_Position,
+                'PositionOfDB', v_DBPosition
+            )
+        );
+
+        SET v_CurrentIndex = v_CurrentIndex + 1;
+    END WHILE;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'TotCountOfBottles', v_TotCountOfBottles,
+        'NormalCountOfBottles', v_NormalCountOfBottles,
+        'AbnormalCountOfBottles', v_AbnormalCountOfBottles,
+        'BottleInfo', v_BottleInfo,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 151. RequestNumberOfEmptyBottle                     반출입기에서 추출가능한 빈병수량요청
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--  		"sender_controller" : "InOutBottle" or "DB_Manager",
+--			"NumberOfEmptyBottle" : 20,
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- ZoneName이 'Empty'일때 BottleID값이 null아닌 record의 수치를  NumberOfEmptyBottle assign한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spReadNumberOfEmptyBottles(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_NumberOfEmptyBottle INT;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'InOutBottle';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadNumberOfEmptyBottles', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'NumberOfEmptyBottle', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Count the number of empty bottles in the empty bottle zone
+    SELECT COUNT(*)
+    INTO v_NumberOfEmptyBottle
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Empty' AND EqpSeqNo = v_EqpSeqNo AND BottleID IS NOT NULL;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'NumberOfEmptyBottle', v_NumberOfEmptyBottle,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 152. RequestNumberOfFilledBottle                    반출입기에서 추출가능한 실병수량요청
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--  		"sender_controller" : "InOutBottle" or "DB_Manager",
+--			"NumberOfFilledBottle" : 20,
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- ZoneName이 'Empty'일때 BottleID값이 null아닌 record의 수치를  NumberOfFilledBottle assign한다.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spReadNumberOfFilledBottles(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_NumberOfFilledBottle INT;
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'InOutBottle';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = 500;
+        SET v_ErrorMsg = 'Database error';
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spReadNumberOfFilledBottles', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'NumberOfFilledBottle', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Count the number of filled bottles in the filled bottle zone
+    SELECT COUNT(*)
+    INTO v_NumberOfFilledBottle
+    FROM tBottleInfoOfHoleAtInOutBottle
+    WHERE ZoneName = 'Filled' AND BottleID IS NOT NULL AND EqpSeqNo = v_EqpSeqNo;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'NumberOfFilledBottle', v_NumberOfFilledBottle,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 153. ExtractProperEmptyBottle                       반출입기에서 적정(실험의뢰자에 의해 생성된정보) 빈병정보를 요청후 빈병을 추출한다 ----- Suitable => Proper
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" :  '1',           // 설비군 (InOutBottle)
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--          "Employee_ID" : "13579",
+--          "ProjectNum" : "prj97531"
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--          "sender_controller" : "DB_Manager",    //
+--          "TotCountOfEmptyBottlePack" : 5
+--          "EmptyBottleInfo" : [
+-- 		       {"1011" : "bot_0132"},
+--                 ...
+--             {"1015" : "bot_0136"}
+--          ],
+--          "error_msg" : "None"
+--       }	  
+-- Employee_ID는 vBottleInfoWithPosition 의 ExperimentRequestID
+-- ProjectNum는 vBottleInfoWithPosition 의 ProjectNum record 에서 position, bottle ID를 찾아서 출력파라메터를 완성해줘.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+DELIMITER //
+CREATE PROCEDURE spGetEmptyBottlePackInfo(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_EmployeeID NVARCHAR(10);
+    DECLARE v_ProjectNum NVARCHAR(10);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+    DECLARE v_TotCountOfEmptyBottlePack INT DEFAULT 0;
+    DECLARE v_EmptyBottleInfo JSON;
+    DECLARE v_Position VARCHAR(4);
+    DECLARE v_BottleID CHAR(15);
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = v_ErrorCode;
+        SET v_ErrorMsg = v_ErrorText;
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spGetEmptyBottlePackInfo', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'TotCountOfEmptyBottlePack', NULL,
+            'EmptyBottleInfo', NULL,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+    SET v_EmployeeID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.Employee_ID'));
+    SET v_ProjectNum = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.ProjectNum'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Get empty bottle information
+    SELECT COUNT(*)
+    INTO v_TotCountOfEmptyBottlePack
+    FROM vBottleInfoWithPosition
+    WHERE ExperimentRequestID = v_EmployeeID 
+      AND ProjectNum = v_ProjectNum
+      AND ZoneName = 'Empty';
+
+    SELECT JSON_ARRAYAGG(JSON_OBJECT(Position, BottleID))
+    INTO v_EmptyBottleInfo
+    FROM vBottleInfoWithPosition
+    WHERE ExperimentRequestID = v_EmployeeID 
+      AND ProjectNum = v_ProjectNum
+      AND ZoneName = 'Empty';
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'TotCountOfEmptyBottlePack', v_TotCountOfEmptyBottlePack,
+        'EmptyBottleInfo', v_EmptyBottleInfo,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+-- 154. RequestProperFillledBottle                     반출입기에서 적정(실험의뢰자에 의해 채취한 실병정보) 실병정보를 요청한다.
+-- GPT prompt
+-- 1. 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--
+--          "error_msg" : "None"
+--       }	  
+--
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+
+-- 155. ExtractProperFillledBottle                     반출입기에서 적정 Real Bottle을 추출한다 ----- RealBottle => FilledBottle
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--          "UsedPosition" : "1011, 1021", // Option, 입력되지 않을수 있음
+--          "NotUsedPosition" : "2021"     // Option, 입력되지 않을수 있음
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+-- 			"sender_controller" : "InOutBottle" and "DB_Manager".
+--          "error_msg" : "None"
+--       }	  
+--
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+
+-- 181. SetUsageStatus4Hole                            Hole 사용여부 정의한다
+-- GPT prompt
+-- 입력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "EqpGroupID" : 1               // 설비군
+--          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+--       }
+-- 출력 파라메터는 json type. 내용은 아래와 같음.
+--       {
+--          "status_code" : 200,
+--
+--          "error_msg" : "None"
+--       }	  
+-- CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+--    EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+--    ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+--    Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+--    UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+--    AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+--    EventTime                DATETIME,               -- Event Time
+--    BottleID                 CHAR(15)                -- Bottle ID
+-- ) ON [Process];
+-- tBottleInfoOfHoleAtInOutBottle table의 
+-- 입력파라메터에서 입력된 UsedPosition 값이 있으면 UsageFlag값을 'O' update해줘.
+-- 입력파라메터에서 입력된 NotUsedPosition 값이 있으면 UsageFlag값을 'X' update해줘.
+-- maria db를 사용하고 있고, 예외 처리를 위한 DECLARE ... HANDLER 구문추가해줘.
+-- Error  발생하면 관련내용을 insert하는 stored procedure 만들어줘.
+-- 2. UsedPosition, NotUsedPosition에 여러개의 position값이 들어올수 있음.
+--
+DELIMITER //
+CREATE PROCEDURE spUpdateUsageFlag(IN jsonInput JSON, OUT jsonOutput JSON)
+BEGIN
+    DECLARE v_EqpGroupID CHAR(1);
+    DECLARE v_EqpSeqNo CHAR(1) DEFAULT '1';
+    DECLARE v_UsedPosition VARCHAR(255);
+    DECLARE v_NotUsedPosition VARCHAR(255);
+    DECLARE v_StatusCode INT DEFAULT 200;
+    DECLARE v_ErrorMsg VARCHAR(255) DEFAULT 'None';
+    DECLARE v_ErrorText VARCHAR(255);
+    DECLARE v_ErrorCode INT;
+    DECLARE v_SenderController VARCHAR(50) DEFAULT 'DB_Manager';
+    DECLARE v_Position VARCHAR(4);
+    DECLARE v_PosIndex INT DEFAULT 1;
+    DECLARE v_PosCount INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_ErrorText = MESSAGE_TEXT;
+        GET DIAGNOSTICS CONDITION 1 v_ErrorCode = MYSQL_ERRNO;
+
+        SET v_StatusCode = v_ErrorCode;
+        SET v_ErrorMsg = v_ErrorText;
+
+        -- Insert error details into tProcSqlError table
+        INSERT INTO tProcSqlError (ProcedureName, ErrorCode, ErrorMessage) 
+        VALUES ('spUpdateUsageFlag', v_ErrorCode, v_ErrorText);
+
+        SET jsonOutput = JSON_OBJECT(
+            'status_code', v_StatusCode,
+            'sender_controller', v_SenderController,
+            'error_msg', v_ErrorMsg
+        );
+        ROLLBACK;
+    END;
+
+    -- Extract values from JSON input
+    SET v_EqpGroupID = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpGroupID'));
+
+    -- Check if EqpSeqNo is provided, if not set to default 1
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.EqpSeqNo') THEN
+        SET v_EqpSeqNo = CAST(JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.EqpSeqNo')) AS UNSIGNED);
+    END IF;
+
+    -- Update UsedPosition
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.UsedPosition') THEN
+        SET v_UsedPosition = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.UsedPosition'));
+        SET v_PosCount = JSON_LENGTH(JSON_ARRAYAGG(v_UsedPosition));
+
+        WHILE v_PosIndex <= v_PosCount DO
+            SET v_Position = SUBSTRING_INDEX(SUBSTRING_INDEX(v_UsedPosition, ',', v_PosIndex), ',', -1);
+            UPDATE tBottleInfoOfHoleAtInOutBottle
+            SET UsageFlag = 'O'
+            WHERE Position = v_Position
+            AND EqpSeqNo = v_EqpSeqNo;
+            SET v_PosIndex = v_PosIndex + 1;
+        END WHILE;
+    END IF;
+
+    -- Update NotUsedPosition
+    SET v_PosIndex = 1; -- Reset the index for the next loop
+    IF JSON_CONTAINS_PATH(jsonInput, 'one', '$.NotUsedPosition') THEN
+        SET v_NotUsedPosition = JSON_UNQUOTE(JSON_EXTRACT(jsonInput, '$.NotUsedPosition'));
+        SET v_PosCount = JSON_LENGTH(JSON_ARRAYAGG(v_NotUsedPosition));
+
+        WHILE v_PosIndex <= v_PosCount DO
+            SET v_Position = SUBSTRING_INDEX(SUBSTRING_INDEX(v_NotUsedPosition, ',', v_PosIndex), ',', -1);
+            UPDATE tBottleInfoOfHoleAtInOutBottle
+            SET UsageFlag = 'X'
+            WHERE Position = v_Position
+            AND EqpSeqNo = v_EqpSeqNo;
+            SET v_PosIndex = v_PosIndex + 1;
+        END WHILE;
+    END IF;
+
+    -- Set the JSON output
+    SET jsonOutput = JSON_OBJECT(
+        'status_code', v_StatusCode,
+        'sender_controller', v_SenderController,
+        'error_msg', v_ErrorMsg
+    );
+
+END //
+DELIMITER ;
+
+
 
 
 -- 201. Stocker 설비상태를 요청한다.
@@ -1640,14 +2924,14 @@ BEGIN
         -- LoadComp Event 발생하지 않아 Next 공정정보를 수정해준다.
         -- Empty Bottle 반출을 Event 기준으로 함
         -- tProcBottle 테이블의 NextEqpGroupID, NextOperID, StartTime, EndTime 업데이트
-		
-		-- tMstRouteOper 테이블에서 NextEqpGroupID와 NextOperID를 가져옴
-		SELECT NextEqpGroupID, NextOperID
-		INTO v_NextEqpGroupID, v_NextOperID
-		FROM tMstRouteOper
-		WHERE CurrEqpGroupID = v_CurrEqpGroupID
-		  AND CurrOperID = v_CurrOperID
-		LIMIT 1;
+        
+        -- tMstRouteOper 테이블에서 NextEqpGroupID와 NextOperID를 가져옴
+        SELECT NextEqpGroupID, NextOperID
+        INTO v_NextEqpGroupID, v_NextOperID
+        FROM tMstRouteOper
+        WHERE CurrEqpGroupID = v_CurrEqpGroupID
+          AND CurrOperID = v_CurrOperID
+        LIMIT 1;
 
         UPDATE tProcBottle
         SET NextEqpGroupID = v_NextEqpGroupID,
@@ -2832,22 +4116,22 @@ DELIMITER ;
 -- {
 --    "status_code": 200,
 --    "sender_controller": "DB_Manager",
---	  "TotCountOfBottlePack" : 5,
---	  "BottleInfo" : [
---		{ 
---			"BottleID_1" : "ID_001",
---			"Position_1" : "1021"
---		},
---		{ 
---			"BottleID_2" : "ID_002",
---			"Position_2" : "1022"
---		},
---		...
---		{ 
---			"BottleID_5" : "ID_005",
---			"Position_5" : "1025"
---		}
---	 ],    
+--    "TotCountOfBottlePack" : 5,
+--    "BottleInfo" : [
+--      { 
+--          "BottleID_1" : "ID_001",
+--          "Position_1" : "1021"
+--      },
+--      { 
+--          "BottleID_2" : "ID_002",
+--          "Position_2" : "1022"
+--      },
+--      ...
+--      { 
+--          "BottleID_5" : "ID_005",
+--          "Position_5" : "1025"
+--      }
+--   ],    
 --    "error_msg": "None"
 -- }
 DELIMITER //
@@ -3011,18 +4295,18 @@ DELIMITER ;
 --    CALL GetTopPriorityBottle('3', '1', '2', '1');
 -- RETURN
 --    정상적으로 병 정보를 조회한 경우
--- 	  {
---    	"status_code": 200,
---    	"sender_controller": "DB_Manager",
---    	"top_priority_of_bottle": 9,
---    	"bottle_id": "bot_001"
--- 	  }
+--    {
+--      "status_code": 200,
+--      "sender_controller": "DB_Manager",
+--      "top_priority_of_bottle": 9,
+--      "bottle_id": "bot_001"
+--    }
 --    병 정보를 찾지 못했을 때
 --    {
---    	"status_code": 404,
---    	"sender_controller": "DB_Manager",
---    	"top_priority_of_bottle": null,
---    	"bottle_id": null
+--      "status_code": 404,
+--      "sender_controller": "DB_Manager",
+--      "top_priority_of_bottle": null,
+--      "bottle_id": null
 --    }
 DELIMITER //
 CREATE PROCEDURE GetTopPriorityBottle (
