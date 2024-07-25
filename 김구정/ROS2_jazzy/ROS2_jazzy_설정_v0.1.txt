@@ -1,0 +1,80 @@
+# ROS2 개발환경 설정 
+
+# 수정이력
+    2024-07-26, v0.1, 김구정, 최초작성
+
+# v0.1
+
+
+[목차]
+1. ROS2-jazzy 설치 for Ubuntu by source
+
+
+
+1. ROS2-jazzy 설치 for Ubuntu by source
+    1> locale
+        locale  # check for UTF-8
+
+        sudo apt update && sudo apt install locales
+        sudo locale-gen en_US en_US.UTF-8
+        sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+        export LANG=en_US.UTF-8
+
+        locale  # verify settings
+
+    2> setup repo
+        sudo apt install software-properties-common
+        sudo add-apt-repository universe
+
+        sudo apt update && sudo apt install curl -y
+        sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+        
+    3> dev ros tools
+        sudo apt update && sudo apt install -y \
+        python3-flake8-blind-except \
+        python3-flake8-class-newline \
+        python3-flake8-deprecated \
+        python3-mypy \
+        python3-pip \
+        python3-pytest \
+        python3-pytest-cov \
+        python3-pytest-mock \
+        python3-pytest-repeat \
+        python3-pytest-rerunfailures \
+        python3-pytest-runner \
+        python3-pytest-timeout \
+        ros-dev-tools
+
+    4> download source 
+        sudo apt upgrade
+        sudo rosdep init
+        rosdep update
+        rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
+
+    5> build dependency 
+        sudo apt upgrade
+        sudo rosdep init
+        rosdep update
+        rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-5.3.1 urdfdom_headers"
+
+    6> build script
+        cd ~/ros2_jazzy/
+        colcon build --symlink-install
+
+    7> add bash.rc 
+        # Replace ".bash" with your shell if you're not using bash
+        # Possible values are: setup.bash, setup.sh, setup.zsh
+        . ~/ros2_jazzy/install/local_setup.bash
+
+    8> environment var
+        # 같은 도메인끼리만 통신 된다.
+        echo "export ROS_DOMAIN_ID=<your_domain_id>" >> ~/.bashrc
+        # 멀티 호스트를 지원한다.
+        echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
+
+    9> ros2 test 
+        ros2 run demo_nodes_py listener
+        ros2 run demo_nodes_cpp talker
+
