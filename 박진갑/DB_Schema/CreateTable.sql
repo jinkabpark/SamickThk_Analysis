@@ -27,7 +27,7 @@ desc
 --          9   tMstScript4CoOperRobot     1 K
 --          10  tMstScriptID4CoOperRobot   1 K
 --          11  tMstScriptBody4CoOperRobot 1 K
---          12  tMstToken                  1 K
+--          12  tMstTopic                  1 K
 -- ============================================================================
 -- Table Space 명   : Process
 -- 내 용            : 공정관련 table을 관리하는 table space
@@ -40,11 +40,12 @@ desc
 --          3   tProcBotOper
 --          4   tChgEqpStatus
 --          5   tDailyEqpStatus
---          6   tBottleInfoOfHoleAtStocker
---          7   tBottleInfoOfHoleAtAnalyzer
---          8   tBottleInfoOfHoleAtMOMA
---          9   tProcScriptID4CoOperRobot
---          10  tProcSqlError
+--          6   tBottleInfoOfHoleAtInOutBottle
+--          7   tBottleInfoOfHoleAtStocker
+--          8   tBottleInfoOfHoleAtAnalyzer
+--          9   tBottleInfoOfHoleAtMOMA
+--          10  tProcScriptID4CoOperRobot
+--          11  tProcSqlError
 -- ============================================================================
 -- Table Space 명   : History
 -- 내 용            : 공정관련 table을 관리하는 table space
@@ -173,7 +174,7 @@ CREATE TABLE tMstEqp (
    CapacityOfFilledZone     TINYINT,                -- 반출입기 설비 hole(병을 처리할수 있는) 케파
    CapacityOfLeftZone       TINYINT,                -- Stocker 설비 hole(병을 처리할수 있는) 케파
    CapacityOfRightZone      TINYINT,                -- Stocker 설비 hole(병을 처리할수 있는) 케파
-   EqpStatus                NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting)
+   EqpStatus                NVARCHAR(10),           -- 장비상태 (PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Disconnect, Trouble:통신불가, Maintenance, Waiting)
                                                     -- 1) 반출입기 상태 : PowerOn, Trouble, Maintenance
                                                     -- 2) Stocker 상태 : PowerOn, Trouble, Maintenance
                                                     -- 3) 분석기 상태 : PowerOn, Trouble, Maintenance, Reserve, Run, Waiting, Idle
@@ -186,10 +187,10 @@ CREATE TABLE tMstEqp (
                                                     --     LoadComp, UnLoadComp event가 장비아닌 bottle단위로 발생됨
                                                     -- 따라서, stocker, 분석기, MOMA에서는 장비상태 변경이 불필요
    // 반출입기에서는 Process status를 port별로 관리
-   LoadPort_1               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
-   LoadPort_2               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, Reserve)
-   UnloadPort_1             NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
-   UnloadPort_2             NVARCHAR(12),           -- 진행 상태(UnLoadReq, UnLoadComp, Reserve)
+   LoadPort_1               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+   LoadPort_2               NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+   UnloadPort_1             NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
+   UnloadPort_2             NVARCHAR(12),           -- 진행 상태(LoadReq, LoadComp, UnLoadReq, UnLoadComp, Reserve)
    EventTime                DATETIME,               -- Event Time
    EqpTimeWriteLog          INT default 0           -- 장비 내부 LOG 저장 시간
 ) ON [Master];
@@ -558,7 +559,7 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 4, '{"Body"
 
 -- ========================================================================================
 --   Table No             : 12
---   Table 명              : tMstToken
+--   Table 명              : tMstTopic
 --   내  용                : token 호출 Event를 UI화면에 실시간 표시.
 --                          모든 token event를 표시할수도 있고 선택된 token event를 표시도 가능하도록 UI 구성
 --   성  격                : Master
@@ -568,22 +569,42 @@ INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "UR",  3, 4, '{"Body"
 --   Record size          : 31
 --   Total size           : 155 = 5 * 31
 --   관리화면 유/무           : 유
---   P.K                  : EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody
+--   P.K                  : TopicName
 --   관련 Table            :
 --   이 력
 --          1.2024-06-16 : 최초 생성
 --
 -- ========================================================================================
-DROP TABLE tMstToken;
+DROP TABLE tMstTopic;
 
-CREATE TABLE tMstToken; (
-   TokenName                NVARCHAR(50) NOT NULL,  -- 대상설비 (Bottle 반출입기, Stocker, 분석기, 폐기모사)
-   SelectedFlag             CHAR(1) default NULL,   -- Loading, Unloading
-   TokenDescription         NVARCHAR(256)           -- Token 내용
+CREATE TABLE tMstTopic; (
+   PublisherEqpGroupID      CHAR(1) NOT NULL,       -- Publisher 설비군ID
+   TopicFullName            NVARCHAR(50) NOT NULL,  -- /InOutBottle/ReportChangedEqpStatus
+   TopicOnlyName            NVARCHAR(50) NOT NULL,  -- ReportChangedEqpStatus
+   SubscriberEqpGroupID     CHAR(1) NOT NULL,       -- Subscriber 설비군ID
+   SelectedFlag             CHAR(1) default NULL,   -- 선택적으로 보고싶을때 사용('O':화면표시, 'X':화면 표시하지 않음)
+   TopicDescription         NVARCHAR(256)           -- Token 내용
 }  ON [Master];
 
-ALTER TABLE tMstToken
-      ADD CONSTRAINT tMstToken_PK PRIMARY KEY (TokenName) ON [MasterIdx];
+ALTER TABLE tMstTopic
+      ADD CONSTRAINT tMstTopic_PK PRIMARY KEY (PublisherEqpGroupID, TopicFullName) ON [MasterIdx];
+
+-- tMstSubscriberEqpGroup 테이블 생성
+CREATE TABLE tMstSubscriberEqpGroup (
+    EqpGroupID CHAR(1) NOT NULL                   -- Subscriber 설비군ID
+);
+ALTER TABLE tMstTopic
+      ADD CONSTRAINT tMstTopic_PK PRIMARY KEY (EqpGroupID) ON [MasterIdx];
+
+-- tMstTopicSubscriber 테이블 생성 (토픽과 구독자 그룹 간의 관계)
+CREATE TABLE tMstTopicSubscriber (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    PublisherEqpGroupID CHAR(1) NOT NULL,
+    TopicFullName NVARCHAR(50) NOT NULL,
+    SubscriberEqpGroupID CHAR(1) NOT NULL,
+    FOREIGN KEY (PublisherEqpGroupID, TopicFullName) REFERENCES tMstTopic(PublisherEqpGroupID, TopicFullName),
+    FOREIGN KEY (SubscriberEqpGroupID) REFERENCES tMstSubscriberEqpGroup(EqpGroupID)
+);
 
 -- ========================================================================================
 --   Table No             : 1
@@ -599,7 +620,7 @@ ALTER TABLE tMstToken
 --   Record size          : 47
 --   Total size           : 180 = 5 * 36
 --   관리화면 유/무           : 유
---   P.K                  : UserID, ProjectNo, BottleSeqNoOfDemand
+--   P.K                  : UserID, ProjectNum, BottleSeqNoOfDemand
 --   관련 Table            :
 --   이 력
 --          1. 2024-06-22 : 최초 생성
@@ -610,7 +631,7 @@ DROP TABLE tLaboratoryDemandInfo;
 
 CREATE TABLE tLaboratoryDemandInfo (
    UserID                   NVARCHAR(30) NOT NULL,  -- 사용자ID (사번)
-   ProjectNo                NVARCHAR(10) NOT NULL,  -- Project No
+   ProjectNum               NVARCHAR(10) NOT NULL,  -- Project Num
    BottleDemandTotCount     TINYINT,                -- Bottle 전체요청수량
    BottleSeqNoOfDemand      TINYINT,                -- Bottle 전체요청수량에서의 순번
    LiquidCharacter          NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
@@ -619,7 +640,7 @@ CREATE TABLE tLaboratoryDemandInfo (
 } ON [Process];
 
 ALTER TABLE tLaboratoryDemandInfo
-       ADD  CONSTRAINT tLaboratoryDemandInfo_PK PRIMARY KEY (UserID, ProjectNo, BottleSeqNoOfDemand) ON [ProcessIdx];
+       ADD  CONSTRAINT tLaboratoryDemandInfo_PK PRIMARY KEY (UserID, ProjectNum, BottleSeqNoOfDemand) ON [ProcessIdx];
 ALTER TABLE tLaboratoryDemandInfo
       ADD CONSTRAINT tLaboratoryDemandInfo_FK FOREIGN KEY (UserID) REFERENCES tMstUser(UserID) ON [ProcessIdx];
 
@@ -665,8 +686,8 @@ ALTER TABLE tLaboratoryDemandInfo
 --          2. 2024-06-19 : field 추가 (RequestTotCnt, RequestRealCnt, RequestSeqNo, MemberOfBottlePack)
 --          3. 2024-07-06 : field 추가 (AnalyzerCompletedTm)
 --                          field 추가, 데이터 관리 편이성위하여 추가함 (PackID)
---                          pack id를 ProjectNo or RequestDate 사용.
---                          ProjectNo unique하면 ProjectNo 사용, unique하지 않으면 RequestDate 사용, 또는 2개 Merge해서 사용
+--                          pack id를 ProjectNum or RequestDate 사용.
+--                          ProjectNum unique하면 ProjectNum 사용, unique하지 않으면 RequestDate 사용, 또는 2개 Merge해서 사용
 --
 -- ========================================================================================
 DROP TABLE tProcBottle;
@@ -681,12 +702,12 @@ CREATE TABLE tProcBottle (
    NextEqpGroupID           CHAR(1) NOT NULL,       -- 차기 설비군 ID
    NextOperID               CHAR(1) NOT NULL,       -- 현재 작업 ID
    --
-   ProjectNo                NVARCHAR(10),           -- Project No, 빈병일 경우 Null (특히 반출입기)
+   ProjectNum               NVARCHAR(10),           -- Project Num, 빈병일 경우 Null (특히 반출입기)
    PackID                   NVARCHAR(10),           -- Project No or RequestDate or Project No+RequestDate
    AnalyzerCompletedTm      DATETIME,               -- 실험분석완료 시간
    JudgeLimitTm             DATETIME,               -- 실험분석완료후 지정된 시간 경과후, 분석완료후 작업의뢰자 응답이 없는 경우 자동 폐기 처리
    JudgeOfResearcher        NVARCHAR(10),           -- 실험의뢰자 판단. (Discard, Cleaning)
-   ExperimentRequestName    NVARCHAR(10),           -- 실험의뢰자
+   ExperimentRequestID      NVARCHAR(10),           -- 실험의뢰자 ID
    CurrLiquid               NVARCHAR(10),           -- 용액종료 (Acid:산, Base:염기, Organic:유기)
    RequestDate              DATETIME,               -- 요청의뢰일시 (YYYYmmdd hhmmss), 초단위 관리 필요, 의뢰단위 구분
                                                     -- AIMS 의뢰사간정보 Or AIMS에서 수신한 시간 Or LIMS UI에서 의뢰요청시각
@@ -700,7 +721,7 @@ CREATE TABLE tProcBottle (
    RequestSeqNo             TINYINT,                -- 일련번호. 의뢰자가 중간에 임의 제거한 경우 SeqNo 다시 부여하여야 함
                                                     -- RequestRealCnt와 RequestSeqNo 일치할때 반송시작, 작업의뢰단위
    MemberOfBottlePack       TINYINT default 0,      -- Pack 단위로 작업수행. Pack에 첫번째 Bottle 반송이 일어날 경우 나머지 Bottle을 set하여 reserve 한다.
-   Position                 CHAR(4),                -- Bottle 반출입기, Stocker에서 위치정보, 분석기에서 위치정보
+   --Position                 CHAR(4),                -- Bottle 반출입기, Stocker에서 위치정보, 분석기에서 위치정보
                                                     -- '0000'인 경우 반출 또는 이동중인 Bottle
    StartTime                DATETIME,               -- 착공시간
    EndTime                  DATETIME,               -- 완공시간
@@ -832,6 +853,55 @@ ALTER TABLE tDailyEqpStatus
 
 -- ========================================================================================
 --   Table No             : 6
+--   Table 명             : tBottleInfoOfHoleAtInOutBottle
+--   내  용                : 반출입기에서 hole position별 Bottle 정보를 관리한다
+--                         1. Position(Bottle 반출입기) : Zone(1자리) + Tower(1자리) + Layer(1자리) + Slot(1자리)
+--                            1) Zone -> 실병Zone:'1', 빈병Zone:'2', Bottle 투입Zone:'0'
+--                            2) Tower
+--                               (1) 실병Zone, 빈병Zone -> 싫험실내 기준 가까운쪽:'1',  싫험실내 기준 먼쪽:'3'
+--                               (2) Bottle 투입Zone -> '0'
+--                            3) Layer
+--                               (1) 실병Zone, 빈병Zone -> 최상단:'1',  최하단:'5'
+--                               (2) Bottle 투입Zone -> 상단:'1',  하단:'5'
+--                            4) Slot
+--                               (1) 실병Zone, 빈병Zone ->  1 ~ 6
+--                               (2) Bottle 투입Zone ->  1 ~ 8
+--                          좌우 48개 hole 존재. hole갯수만큼 recode를 사전에 만들고 프로그램에서는 update만 수행
+--
+--   성  격               : Process
+--   보존기간              : 무관
+--   Record 발생건수(1일)   : -
+--   Total Record 수      : 96개
+--   Record size          : 20
+--   Total size           : 180 = 5 * 36
+--   관리화면 유/무           : 유
+--   P.K                  : EqpSeqNo, Position
+--   관련 Table            :
+--   이 력
+--          1. 2024-07-07 : 최초 생성
+--          2. 2024-07-14 : field 추가 (AllocationPriority, EventTime), bottle 투입하는 방법처리하기 위함
+--             1) Position 기준으로 sorting 하는 방법
+--             2) EventTime 기준으로 sorting 하는 방법 (순서적으로 순환하면서 hole 사용하는 방안)
+--             3) AllocationPriority 기준으로 sorting 하는 방법. (hole 우선순위 정해서 사용하는 방안)
+--
+-- ========================================================================================
+DROP TABLE tBottleInfoOfHoleAtInOutBottle;
+
+CREATE TABLE tBottleInfoOfHoleAtInOutBottle (
+   EqpSeqNo                 CHAR(1) NOT NULL,       -- 호기 (1부터 시작)
+   ZoneName                 CHAR(7),                -- 좌:Empty, 우:Filled
+   Position                 CHAR(4) NOT NULL,       -- Stocker에서 위치정보
+   UsageFlag                CHAR(1) default 'O',    -- 'O':사용가능, 'X':사용불가
+   AllocationPriority       TINYINT default 1,      -- 1 부터 시작
+   EventTime                DATETIME,               -- Event Time
+   BottleID                 CHAR(15)                -- Bottle ID
+) ON [Process];
+
+ALTER TABLE tBottleInfoOfHoleAtInOutBottle
+       ADD  CONSTRAINT tBottleInfoOfHoleAtInOutBottle_PK PRIMARY KEY (EqpSeqNo, Position) ON [ProcessIdx];
+
+-- ========================================================================================
+--   Table No             : 7
 --   Table 명             : tBottleInfoOfHoleAtStocker
 --   내  용                : Analyzer에서 hole position별 Bottle 정보를 관리한다
 --                          좌우 48개 hole 존재. hole갯수만큼 recode를 사전에 만들고 프로그램에서는 update만 수행
@@ -970,7 +1040,7 @@ INSERT INTO tBottleInfoOfHoleAtStocker VALUES ('2', 'Right', '2085', 'O', null);
 INSERT INTO tBottleInfoOfHoleAtStocker VALUES ('2', 'Right', '2086', 'O', null);
 
 -- ========================================================================================
---   Table No             : 7
+--   Table No             : 8
 --   Table 명             : tBottleInfoOfHoleAtAnalyzer
 --   내  용                : Analyzer에서 hole position별 Bottle 정보를 관리한다
 --                          24개 hole 존재. hole갯수만큼 recode를 사전에 만들고 프로그램에서는 update만 수행
@@ -1034,7 +1104,7 @@ INSERT INTO tBottleInfoOfHoleAtAnalyzer VALUES ('1', '1201', 'O', null);
 INSERT INTO tBottleInfoOfHoleAtAnalyzer VALUES ('1', '1202', 'O', null);
 
 -- ========================================================================================
---   Table No             : 8
+--   Table No             : 9
 --   Table 명             : tBottleInfoOfHoleAtMOMA
 --   내  용                : MOMA에서 hole position별 Bottle 정보를 관리한다
 --                          24개 hole 존재. hole갯수만큼 recode를 recode를 사전에 만들고 프로그램에서는 update만 수행
@@ -1100,7 +1170,7 @@ INSERT INTO tBottleInfoOfHoleAtMOMA VALUES ('1102', 'O', null);
 INSERT INTO tBottleInfoOfHoleAtMOMA VALUES ('1202', 'O', null);
 
 -- ========================================================================================
---   Table No             : 9
+--   Table No             : 10
 --   Table 명              : tProcScriptID4CoOperRobot
 --   내  용                : tMstScriptID4CoOperRobot중 특정 동작을 별도 sub job으로 정의할때 사용
 --   성  격                : Process
@@ -1129,7 +1199,7 @@ ALTER TABLE tMstScriptID4CoOperRobot
 INSERT INTO tProcScriptID4CoOperRobot VALUES (1, 1, 'Bottle 입출력기 관련 Sub Job');                    --
 
 -- ========================================================================================
---   Table No             : 10
+--   Table No             : 11
 --   Table 명              : tProcSqlError
 --   내  용                : stored procedure 실행중 발생한 error 저장
 --   성  격                : Process
@@ -1217,3 +1287,42 @@ CREATE TABLE tHisChgEqpStatus (
 
 ALTER TABLE tHisChgEqpStatus
       ADD  CONSTRAINT tHisChgEqpStatus_PK PRIMARY KEY (EqpGroupID, EqpSeqNo, EqpStatus,StartTime) ON [HistoryIdx];
+	  
+-- GPT prompt
+-- tProcBottle에서 tBottleInfoOfHoleAtInOutBottle 의 Position 정보를 가져올수 있는  join table 만들어줘.
+-- tProcBottle와 tBottleInfoOfHoleAtInOutBottle를 조인하는 뷰 생성
+CREATE VIEW vBottleInfoWithPosition AS
+SELECT
+    pb.BottleID,
+    pb.CurrEqpGroupID,
+    pb.CurrEqpSeqNo,
+    pb.CurrOperID,
+    pb.NextEqpGroupID,
+    pb.NextOperID,
+    pb.ProjectNum,
+    pb.PackID,
+    pb.AnalyzerCompletedTm,
+    pb.JudgeLimitTm,
+    pb.JudgeOfResearcher,
+    pb.ExperimentRequestID,
+    pb.CurrLiquid,
+    pb.RequestDate,
+    pb.RequestTotCnt,
+    pb.RequestRealCnt,
+    pb.RequestSeqNo,
+    pb.MemberOfBottlePack,
+    pb.StartTime,
+    pb.EndTime,
+    pb.DispatchingPriority,
+    pb.EventTime,
+    pb.PrevLiquid,
+    bih.ZoneName,
+    bih.Position,
+    bih.UsageFlag,
+    bih.AllocationPriority,
+    bih.EventTime AS BottleInfoEventTime
+FROM
+    tProcBottle pb
+LEFT JOIN
+    tBottleInfoOfHoleAtInOutBottle bih ON pb.BottleID = bih.BottleID;
+	  

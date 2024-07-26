@@ -10,7 +10,8 @@ desc
    5.    2024-07-12 async message 추가
    6.    2024-07-14 동일 message를 sync, async message 2개로 분리작성
                     RequestEqpStatusBySync, RequestEqpStatusByAsync
-
+   7.	 2024-07-21 Publisher, Subscriber Node 추가
+   
 message 송수신 방식
    1. async방식
       1) 응답메세지가 있는 경우
@@ -32,9 +33,9 @@ message 송수신 방식
 103. RequestEqpStatusBySync                         반출입기 설비상태를 요청한다.(sync방식)
 104. RequestEqpStatusByAsync                        반출입기 설비상태를 요청한다.(async방식)
 104-2 ReplyEqpStatusByAsync                          반출입기 설비상태요청에 응답한다.
-111. EmptyBottleLoadReqAtWorkingArea(L1 Port)       반출입기 L1(입고) Port에서 빈병 입고요청메세지
-112. EmptyBottleLoadCompAtWorkingArea(L1 Port)      반출입기 L1(입고) Port에서 빈병 도착완료메세지
-113. EmptyBottleUnloadReqAtWorkingArea(L1 Port)     반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
+111. EmptyBottlePortEventAtWorkingArea(L1 Port)       반출입기 L1(입고) Port에서 빈병 입고요청메세지
+112. EmptyBottlePortEventAtWorkingArea(L1 Port)      반출입기 L1(입고) Port에서 빈병 도착완료메세지
+113. EmptyBottlePortEventAtWorkingArea(L1 Port)     반출입기 L1(입고) Port에서 빈병 출하요청(UnloadReq)메세지
      --> 112번 한개만 사용해도 가능할 수 있음. 검토필요
 114. EmptyBottleUnloadCompAtWorkingArea(L1 Port)    반출입기 공병Zone에 공병을 hole에 내려놓았을때.빈병 입고완료 했을때(#11 공정시작)
      PutEmptyBottleAtEmptyHoleOfWorkingArea
@@ -46,7 +47,7 @@ message 송수신 방식
 118. FilledBottleUnloadCompAtWorkingArea(U1 Port)   반출입기 U1(출하) Port에서 실병 출하완료(UnloadComp)메세지(#13 공정완료)
 121. FilledBottleLoadReqAtOutArea(L2 Port)          반출입기 L2(입고) Port에서 실병 입고요청(LoadReq)메세지
      --> 필요한지 확인필요
-122. FilledBottleLoadCompAtOutArea(L2 Port)         반출입기 L2(입고) Port에서 실병 도착완료(LoadComp)메세지(#13 공정시작)
+122. FilledBottleLoadCompAtOutArea(L2 Port)         반출입기 L2(입고) Port에서 실병 도착후 실병Zone hole에 bottle 이동완료했을때(LoadComp)메세지(#13 공정시작)
 123. EmptyBottleLoadReqAtOutArea(U2 Port)           반출입기 U2(출하) Port에서 빈병 입고요청(LoadReq)메세지
      --> 필요한지 확인필요
 124. EmptyBottleLoadCompAtOutArea(U2 Port)          반출입기 U2(출하) Port에서 빈병 도착완료(LoadComp)메세지 (#11 공정완료)
@@ -252,68 +253,74 @@ Normal Sequence Flow
 ============================================================================
 
 101-0. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
-   1) Topic Subject : ReportChangedEqpStatus
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/ReportChangedEqpStatus
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle"
-         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
-      }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spReportChangedEqpStatus
-   7) 응답메세지
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "FmEqpSeqNo" : 1,              // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
+      }   
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spReportChangedEqpStatus
+   9) 응답메세지
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager" Or "Dispatcher" Or "UI_Manager" // 입력파라메터의 ToNode값
          "error_msg" : "None"
       }
 101-1. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
-   1) Topic Subject : ReportChangedEqpStatus
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/ReportChangedEqpStatus
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : yes or no
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle"
-         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spReportChangedEqpStatus
-   7) 응답메세지
-101-2. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
-   1) Topic Subject : ReplyChangedEqpStatus
-   2) 메세지 송수신방식 : async
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spReportChangedEqpStatus
+   9) 응답메세지
+101-2. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고응답
+   1) Topic Subject : /InOutBottle/ReplyChangedEqpStatus
+   2) Publisher Node : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+   3) Subscriber Node : "InOutBottle"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : no
-   3) 송신메세지
+   5) 송신메세지
       {
-         "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "FmNode" : "InOutBottle"
+         "EqpGroupID" : '6',
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "status_code" : 200,
          "error_msg" : "None"
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spReplyChangedEqpStatus
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spReplyChangedEqpStatus
+   9) 응답메세지
 
 102. 반출입기 장비상태를 변경. 컨트롤러 통신하면서 통신이 안될때는 Trouble로 상태변경 요청한다. 사용자 화면에서 설비상태 변경할때 사용.
-   1) Topic Subject : ChangeEqpStatus
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/ChangeEqpStatus
+   2) Publisher Node : "InOutBottle" Or "UI_Manager"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,              // 반출입기
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
       }
-   4) Function : tMstEqp table의 InOutBottle EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spChangeEqpStatus
-   7) Return
+   6) Function : tMstEqp table의 InOutBottle EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spChangeEqpStatus
+   9) Return
       {
          "status_code" : 200,           // sql error code
          "sender_controller" : "DB_Manager" // 입력파라메터의 ToNode값
@@ -321,19 +328,20 @@ Normal Sequence Flow
       }
 
 103. 반출입기 설비상태를 요청한다.(sync방식)
-   1) Topic Subject : RequestEqpStatusBySync
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestEqpStatusBySync
+   2) Publisher Node : "Dispatcher" Or "UI_Manager"
+   3) Subscriber Node : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
+						"DB_Manager"    --> UI에서 호출할때 사용
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-                    "DB_Manager"    --> UI에서 호출할때 사용
-         "EqpGroupID" : 1               // 반출입기
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestEqpStatusBySync
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestEqpStatusBySync
+   9) 응답메세지
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"    // 입력파라메터의 ToNode값
@@ -344,50 +352,54 @@ Normal Sequence Flow
       }
 
 104. 반출입기 설비상태를 요청한다.(async방식)
-   1) Topic Subject : RequestEqpStatusByAsync
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/RequestEqpStatusByAsync
+   2) Publisher Node : "Dispatcher" Or "UI_Manager"
+   3) Subscriber Node : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
+						"DB_Manager"    --> UI에서 호출할때 사용
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : Yes
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher" Or "UI_Manager"
-         "ToNode" : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-                    "DB_Manager"    --> UI에서 호출할때 사용
-         "EqpGroupID" : 1               // 반출입기
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : -
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : -
+   9) 응답메세지
 
 104-2. 반출입기 설비상태요청에 응답한다.
-   1) Topic Subject : ReplyEqpStatusByAsync
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/ReplyEqpStatusByAsync
+   2) Publisher Node : "InOutBottle" Or "DB_Manager"
+   3) Subscriber Node : "Dispatcher" Or "UI_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle" Or "DB_Manager"
-         "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 1               // 반출입기
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spReplyEqpStatusByAsync
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 참조
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spReplyEqpStatusByAsync
+   9) 응답메세지
 
 111. L1(입고) Port에서 반출입기 빈병 입고요청메세지
-   1) Topic Subject : EmptyBottleLoadReqAtWorkingArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/EmptyBottleLoadReqAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "Dispatcher" and "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "LoadReq"
       }
-   4) Function : 반출입기 L1 Port에 병이 없을때(Port가 비어있을때) 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadReqAtWorkingArea
-   7) Return
+   6) Function : 반출입기 L1 Port에 병이 없을때(Port가 비어있을때) 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleLoadReqAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "Dispatcher" and "DB_Manager"    // 입력파라메터의 ToNode값
@@ -395,50 +407,59 @@ Normal Sequence Flow
       }
 
 112. L1(입고) Port에서 반출입기 빈병 도착완료메세지
-   1) Topic Subject : EmptyBottleLoadCompAtWorkingArea
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/EmptyBottleLoadCompAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "LoadComp"
          "BottleID" : "ID_001"
       }
-   4) Function : 반출입기 L1 Port에 빈병도착했을때(Port에 병이 있을때) 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadCompAtWorkingArea
-   7) Return
+   6) Function : 반출입기 L1 Port에 빈병도착했을때(Port에 병이 있을때) 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleLoadCompAtWorkingArea
+   9) Return
 
 113. L1(입고) Port에서 반출입기 빈병 출하요청(UnloadReq)메세지
-   1) Topic Subject : EmptyBottleUnloadReqAtWorkingArea
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/EmptyBottleUnloadReqAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "UnloadReq"
          "BottleID" : "ID_001"
       }
-   4) Function : 반출입기 L1 Port에 빈병도착했을때(병 있을때) 빈병Zone에 투입을 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleUnloadReqAtWorkingArea
-   7) Return
+   6) Function : 반출입기 L1 Port에 빈병도착했을때(병 있을때) 빈병Zone에 투입을 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottlePortEventAtWorkingArea <-- spEmptyBottleUnloadReqAtWorkingArea
+   9) Return
 
 114. L1(입고) Port에서 입고완료후 반출입기 공병Zone에 공병을 hole에 내려놓았을때. 빈병 입고완료 했을때 (#11 공정시작)
-   1) Topic Subject : EmptyBottleUnloadCompAtWorkingArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/EmptyBottleUnloadCompAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "UnloadComp"
          "BottleID" : "ID_001",
          "Position" : "2111"
       }
-   4) Function : 장비내 반송. 반출입기에서 Dispatcher와 무관하게 자체적으로 bottle 이동한다.
+   6) Function : 장비내 반송. 반출입기에서 Dispatcher와 무관하게 자체적으로 bottle 이동한다.
                 반출입기 공병Zone에 빈병도착했을때(병 있을때) 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleUnloadCompAtWorkingArea
-   7) Return
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottleUnloadCompAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
@@ -446,17 +467,20 @@ Normal Sequence Flow
       }
 
 115. 반출입기 U1(출하) Port에서 실병 입고요청(LoadReq)메세지
-   1) Topic Subject : FilledBottleLoadReqAtWorkingArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/FilledBottleLoadReqAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "Dispatcher" and "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "LoadReq"
       }
-   4) Function : 반출입기 U1 Port에 병이 없을때(Port가 비어있을때) 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleLoadReqAtWorkingArea
-   7) Return
+   6) Function : 반출입기 U1 Port에 병이 없을때(Port가 비어있을때) 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spFilledBottlePortEventAtWorkingArea <-- spFilledBottleLoadReqAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "Dispatcher" and "DB_Manager"
@@ -464,19 +488,22 @@ Normal Sequence Flow
       }
 
 116. U1(출하) Port에서 반출입기 실병 도착완료(LoadComp)메세지
-   1) Topic Subject : FilledBottleLoadCompAtWorkingArea
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/FilledBottleLoadCompAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "LoadComp"
          "BottleID" : "ID_001"
       }
-   4) Function : 반출입기 U1 Port에 실병도착했을때(Port에 병이 있을때) 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleLoadCompAtWorkingArea
-   7) Return
+   6) Function : 반출입기 U1 Port에 실병도착했을때(Port에 병이 있을때) 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spFilledBottlePortEventAtWorkingArea <-- spFilledBottleLoadCompAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
@@ -484,18 +511,21 @@ Normal Sequence Flow
       }
 
 117. U1(출하) Port에서 반출입기 실병 출하요청(UnloadReq)메세지
-   1) Topic Subject : FilledBottleUnloadReqAtWorkingArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/FilledBottleUnloadReqAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "Dispatcher" and "DB_Manager",
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "Dispatcher" and "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "UnloadReq"
          "BottleID" : "ID_001"
       }
-   4) Function : 반출입기 U1 Port에 출하를 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleUnloadReqAtWorkingArea
-   7) Return
+   6) Function : 반출입기 U1 Port에 출하를 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spFilledBottlePortEventAtWorkingArea <-- spFilledBottleUnloadReqAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "Dispatcher" and "DB_Manager",
@@ -503,18 +533,21 @@ Normal Sequence Flow
       }
 
 118. U1(출하) Port에서 반출입기 실병 출하완료(UnloadComp)메세지(#13 공정완료)
-   1) Topic Subject : FilledBottleUnloadCompAtWorkingArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/FilledBottleUnloadCompAtWorkingArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "Dispatcher" and "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "Dispatcher" and "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "UnloadComp"
          "BottleID" : "ID_001"
       }
-   4) Function : 반출입기 공병Zone에 실병을 MOMA Shelf로 이동했을때 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleUnloadCompAtWorkingArea
-   7) Return
+   6) Function : 반출입기 공병Zone에 실병을 MOMA Shelf로 이동했을때 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spFilledBottleUnloadCompAtWorkingArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "Dispatcher" and "DB_Manager",
@@ -522,34 +555,43 @@ Normal Sequence Flow
       }
 
 121. L2(입고) Port에서 반출입기 실병 입고요청(LoadReq)메세지
-   1) Topic Subject : FilledBottleLoadReqAtOutArea
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/LoadReq
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortName" : "L2"              
+         "PortEvent" : "LoadReq"                
       }
-   4) Function : 반출입기 L2 Port에 시료채취후 실병 투입를 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleLoadReqAtOutArea
-   7) Return
+   6) Function : 반출입기 L2 Port에 시료채취후 실병 투입를 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spLoadReq
+   9) Return
 
 122. L2(입고) Port에서 반출입기 실병 도착완료(LoadComp)메세지(#13 공정시작)
-   1) Topic Subject : FilledBottleLoadCompAtOutArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/FilledBottleLoadCompAtOutArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortName" : "L2"              
+         "ZoneName" : "Filled",
+         "PortEvent" : "LoadReq"                
          "BottleID" : "ID_001",
          "Position" : "2111"
       }
-   4) Function : 장비내 반송. 반출입기에서 Dispatcher와 무관하게 자체적으로 bottle 이동한다.
+   6) Function : 장비내 반송. 반출입기에서 Dispatcher와 무관하게 자체적으로 bottle 이동한다.
                 반출입기 L2 Port에 시료채취후 실병을 투입후 hole에 내려놓았을때 발생하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spFilledBottleLoadCompAtOutArea
-   7) Return
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spFilledBottleLoadCompAtOutArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager"
@@ -557,32 +599,40 @@ Normal Sequence Flow
       }
 
 123. U2(출하) Port에서 반출입기 빈병 입고요청(LoadReq)메세지
-   1) Topic Subject : EmptyBottleLoadReqAtOutArea
-   2) 메세지 송수신방식 : async
+   1) Topic Subject : /InOutBottle/EmptyBottleLoadReqAtOutArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : async
       - 응답 메세지 : No
-   3) 송신메세지
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortName" : "U2"              
+         "PortEvent" : "LoadReq"                
       }
-   4) Function : 반출입기 U2 Port에 공병 출하를 요청하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadReqAtOutArea
-   7) Return
+   6) Function : 반출입기 U2 Port에 공병 출하를 요청하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottleLoadReqAtOutArea
+   9) Return
 
 124. U2(출하) Port에서 반출입기 빈병 도착완료(LoadComp)메세지 (#11 공정완료)
-   1) Topic Subject : EmptyBottleLoadCompAtOutArea
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/EmptyBottleLoadCompAtOutArea
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "PortEvent" : "LoadComp"                
+         "Position" : "2111",           // 위치정보 필요 (2024-07-20 추가)
          "BottleID" : "ID_001",
       }
-   4) Function : 반출입기 U2 Port에 시료채취를 위해 공병을 출하된 경우 발생하는 Event message
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spEmptyBottleLoadCompAtOutArea
-   7) Return
+   6) Function : 반출입기 U2 Port에 시료채취를 위해 공병을 출하된 경우 발생하는 Event message
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spEmptyBottleLoadCompAtOutArea
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager"
@@ -590,17 +640,19 @@ Normal Sequence Flow
       }
 
 131. 반출입기 hole capacity(Bottle 총 적재가능수량)
-   1) Topic Subject : GetBottleCapacity
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/GetBottleCapacityAtInOutBottle
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync or 양방향 async
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : 설비에서 응답
-   7) Return
+   6) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spGetBottleCapacityAtInOutBottle
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
@@ -610,17 +662,19 @@ Normal Sequence Flow
       }
 
 132. 반출입기에 bottle 적재할 Empty hole 수량요청
-   1) Topic Subject : RequestNumberOfSpareHole
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestNumberOfSpareHole
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) 총 수량
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : 설비에서 응답
-   7) Return
+   6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) 총 수량
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestNumberOfSpareHole
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
@@ -630,17 +684,19 @@ Normal Sequence Flow
       }
 
 133. 반출입기에 bottle투입하기 위한 Empty hole 정보요청
-   1) Topic Subject : RequestInfoOfSpareHoles
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestInfoOfSpareHoles
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) hole postion 정보요청
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : 설비에서 응답
-   7) Return
+   6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) hole postion 정보요청
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestInfoOfSpareHoles
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
@@ -650,17 +706,19 @@ Normal Sequence Flow
       }
 
 134. 반출입기 Hole 존재하는 bottle정보요청
-   1) Topic Subject : RequestBottleInfoByHole
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestBottleInfoByHole
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : 반출입기 빈병Zone과 실병Zone에서 hole별 bottle정보요청
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : 설비에서 응답
-   7) Return
+   6) Function : 반출입기 빈병Zone과 실병Zone에서 hole별 bottle정보요청
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestBottleInfoByHole
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager"
@@ -678,12 +736,14 @@ Normal Sequence Flow
       }
 
 141. 반출입기에서 Hole 존재하는 bottle정보와 DB에 있는 정보를 비교한다
-   1) Topic Subject : CompareEqpBottleInfo2DB_BottleInfo
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/CompareEqpBottleInfo2DB_BottleInfo
+   2) Publisher Node : "UI_Manager", "Validation"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "UI_Manager", "Validation"
-         "ToNode" : "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "empty_bottle_zone" : [
             {"1011" : "bot_0136"},
                 ...
@@ -695,10 +755,10 @@ Normal Sequence Flow
             {"2035" : "bot_2136"}
          ],
       }
-   4) Function : 설비에 있는 재공재고정보와 DB에 있는 정보를 비교한다
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spCompareEqpBottleInfo2DB_BottleInfo
-   7) Return 예제
+   6) Function : 설비에 있는 재공재고정보와 DB에 있는 정보를 비교한다
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spCompareEqpBottleInfo2DB_BottleInfo
+   9) Return 예제
       {
          "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
          "sender_controller" : "DB_Manager",    //
@@ -722,17 +782,19 @@ Normal Sequence Flow
       }
 
 151. 반출입기에서 추출가능한 빈병수량요청
-   1) Topic Subject : RequestNumberOfEmptyBottle
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestNumberOfEmptyBottle
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher"
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestStatus
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestStatus
+   9) 응답메세지
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager",
@@ -741,17 +803,19 @@ Normal Sequence Flow
       }
 
 152. 반출입기에서 추출가능한 실병수량요청
-   1) Topic Subject : RequestNumberOfFilledBottle
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestNumberOfFilledBottle
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher"
-         "ToNode" : "InOutBottle" or "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
-   4) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestStatus
-   7) 응답메세지
+   6) Function : tMstEqp table의 반출입기 EqpStatus(장비상태) 요청
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestStatus
+   9) 응답메세지
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" or "DB_Manager",
@@ -760,50 +824,50 @@ Normal Sequence Flow
       }
 
 153. 반출입기에서 적정(실험의뢰자에 의해 생성된정보) 빈병정보를 요청 및 추출한다.
-   1) Topic Subject : ExtractProperEmptyBottle
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/ExtractProperEmptyBottle
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "Employee_ID" : "13579",
          "ProjectNum" : "prj97531"
       }
-   4) Function : Bottle 반출입기 touch panel에서 Login후 project number 입력하고 출고요청하면 의뢰수량만큼 출고한다.
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
-   7) Return
+   6) Function : Bottle 반출입기 touch panel에서 Login후 project number 입력하고 출고요청하면 의뢰수량만큼 출고한다.
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : SelectProcLaboratoryRequest     ----- Demand => Request
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
          "TotCountOfEmptyBottlePack" : 5
          "EmptyBottleInfo" : [
-            { "BottleID" : "ID_001"
-            },
-            { "BottleID" : "ID_002"
-            },
-            ...
-            { "BottleID" : "ID_005"
-            }
+		    {"1011" : "bot_0132"},
+                ...
+            {"1015" : "bot_0136"}
          ],
          "error_msg" : "None"
       }
 
 153-1. 세팅된 실험의뢰정보를 가져온다. (사용안함, 104번에서 정보조회와 추출을 일괄처리 가능)
-   1) Topic Subject : GetLaboratoryDemandInformation
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/GetLaboratoryDemandInformation
+   2) Publisher Node : "InOutBottle"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "InOutBottle",
-         "ToNode" : "DB_Manager",
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "Employee_ID" : "13579",
          "ProjectNum" : "prj97531"
       }
-   4) Function : 빈병을 추출하기 위하여 설비에서 작업자가 Login 할때 Event.
+   6) Function : 빈병을 추출하기 위하여 설비에서 작업자가 Login 할때 Event.
                  저장된 실험의뢰자의 실험요청정보를 가져온다.
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : SelectLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
-   7) Return
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : SelectLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
@@ -825,40 +889,42 @@ Normal Sequence Flow
       }
 
 154. 반출입기에서 출고할 적정(실험의뢰자에 의해 채취한 실병정보) 실병정보를 요청한다.
-   1) Topic Subject : RequestProperFillledBottle
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/RequestProperFillledBottle
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "DB_Manager"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "Employee_ID" : "13579",
+         "ProjectNum" : "prj97531"		 
       }
-   4) Function : Dispatcher가 Bottle 반출입기 U1 Port에서 Load Request 신호를 수신. 출고할 Bottle정보 우선순위 Rule 적용하여 조회한다.
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestProperFillledBottle
-   7) Return
+   6) Function : Dispatcher가 Bottle 반출입기 U1 Port에서 Load Request 신호를 수신. 출고할 Bottle정보 우선순위 Rule 적용하여 조회한다.
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestProperFillledBottle
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "DB_Manager",    //
          "TotCountOfEmptyBottlePack" : 5
          "EmptyBottleInfo" : [
-            { "BottleID" : "ID_001"
-            },
-            { "BottleID" : "ID_002"
-            },
-            ...
-            { "BottleID" : "ID_005"
-            }
+		    {"1011" : "bot_0132"},
+                ...
+            {"1015" : "bot_0136"}
          ],
          "error_msg" : "None"
       }
 
 155. 반출입기에서 적정 Real Bottle을 추출한다
-   1) Topic Subject : ExtractProperFillledBottle
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/ExtractProperFillledBottle
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "InOutBottle"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "Dispatcher",
-         "ToNode" : "InOutBottle"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "TotCountOfEmptyBottlePack" : 5
          "EmptyBottleInfo" : [
             { "BottleID" : "ID_001"
@@ -870,11 +936,11 @@ Normal Sequence Flow
             }
          ],
       }
-   4) Function : Dispatcher가 출고이후 반송이 가능한 상태인지를 확인후, 출고지시 한다.
+   6) Function : Dispatcher가 출고이후 반송이 가능한 상태인지를 확인후, 출고지시 한다.
                 Dispatcher가 RequestProperFillledBottle 정보를 얻고 반출입기에 출고지시.
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spRequestProperFillledBottle
-   7) Return
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spRequestProperFillledBottle
+   9) Return
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle",    //
@@ -882,20 +948,22 @@ Normal Sequence Flow
       }
 
 181. 반출입기에서 Hole 사용여부 변경한다
-   1) Topic Subject : SetUsageStatus4Hole
-   2) 메세지 송수신방식 : sync
-   3) 송신메세지
+   1) Topic Subject : /InOutBottle/SetUsageStatus4Hole
+   2) Publisher Node : "UI_Manager"
+   3) Subscriber Node : "InOutBottle" and "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
       {
-         "FmNode" : "UI_Manager",
-         "ToNode" : "InOutBottle" and "DB_Manager"      //
-         "UsedPosition" : "1011, 1021"
-         "NotUsedPosition" : "2021"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "UsedPosition" : "1011, 1021", // Option, 입력되지 않을수 있음
+         "NotUsedPosition" : "2021"     // Option, 입력되지 않을수 있음
       }
-   4) Function : 특정 Hole 오염또는 문제(ex:barcode reader기 이상...)로 사용 불가한 경우, 수리를 마친경우 속성 변경
+   6) Function : 특정 Hole 오염또는 문제(ex:barcode reader기 이상...)로 사용 불가한 경우, 수리를 마친경우 속성 변경
                 반출입기는 설비내 반송을 직접함으로 설비에도 메세지를 송신하여 설비에서 hole에 대한 사용을 중지해야 한다.
-   5) Return Message 길이 : 1K 이내
-   6) 관련 Stored Procedure : spSetUsageStatus4Hole
-   7) Return 예제
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spSetUsageStatus4Hole
+   9) Return 예제
       {
          "status_code" : 200,
          "sender_controller" : "InOutBottle" and "DB_Manager"
@@ -910,8 +978,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Stocker"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : '1',            // 설비군 (Stocker)
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -930,9 +999,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
-         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -991,8 +1060,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Stocker" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 2               // Stocker
-         "EqpSeqNo" : 1,         
+         "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
@@ -1411,8 +1480,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1431,8 +1501,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
@@ -1453,7 +1523,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "Analyzer"      --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
-         "EqpGroupID" : 3               // 분석기
+         "EqpGroupID" :3,               // 분석기
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1478,6 +1549,7 @@ Normal Sequence Flow
          "ToNode" : "Analyzer"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"    --> UI에서 호출할때 사용
          "EqpGroupID" : 3               // 분석기
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1492,8 +1564,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 3               // 분석기
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 분석기 EqpStatus(장비상태) 참조
@@ -1508,6 +1580,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : 분석작업 완료후 bottle 끄집어낸다. 새로운 작업을 요청하는 event.
    5) Return Message 길이 : 1K 이내
@@ -1527,6 +1601,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : MOMA에서 분석기로 bottle pack 입고가 완료된후 발생하는 event
    5) Return Message 길이 : 1K 이내
@@ -1540,6 +1616,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : Analyzer에서 모든 분석작업을 완료했을때 인출을 요구하는 Event message
    5) Return Message 길이 : 1K 이내
@@ -1559,6 +1637,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "Dispatcher" and "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : Analyzer에서 MOMA bottle 이동했을때 event
    5) Return Message 길이 : 1K 이내
@@ -1572,6 +1652,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
@@ -1592,6 +1674,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Analyzer",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
@@ -1612,7 +1696,7 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher",
          "ToNode" : "Analyzer" or "DB_Manager"
-         "EqpSeqNo" : 1
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
    5) Return Message 길이 : 1K 이내
@@ -1789,7 +1873,8 @@ Normal Sequence Flow
       {
          "FmNode" : "CleaningScrap"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpSeqNo" : 1
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1809,8 +1894,8 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1831,7 +1916,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1855,7 +1941,8 @@ Normal Sequence Flow
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "CleaningScrap"     --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1870,8 +1957,8 @@ Normal Sequence Flow
       {
          "FmNode" : "CleaningScrap" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 4               // 세정,폐기/모사 설비
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 4               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 세정,폐기/모사 EqpStatus(장비상태) 참조
@@ -1887,7 +1974,9 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA"
          "ToNode" : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
-         "EqpStatus" : "PowerOn"       // PowerOn, Run, Idle, Maintenance
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1906,9 +1995,9 @@ Normal Sequence Flow
       {
          "FmNode" : "Dispatcher" Or "UI_Manager"
          "ToNode" : "DB_Manager"
-         "EqpGroupID" : 1,       
-         "EqpSeqNo" : 1,
-         "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1953,6 +2042,7 @@ Normal Sequence Flow
          "ToNode" : "MOMA"              --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
                     "DB_Manager"        --> UI에서 호출할때 사용
          "EqpGroupID" : 5               // MOMA
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
    5) Return Message 길이 : 1K 이내
@@ -1967,8 +2057,8 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA" Or "DB_Manager"
          "ToNode" : "Dispatcher" Or "UI_Manager"
-         "EqpGroupID" : 5               // MOMA
-         "EqpSeqNo" : 1,
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
       }
    4) Function : tMstEqp table의 MOMA EqpStatus(장비상태) 참조
@@ -1983,6 +2073,8 @@ Normal Sequence Flow
       {
          "FmNode" : "MOMA",
          "ToNode" : "DB_Manager"
+         "EqpGroupID" : 5               // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
          "Position" : "1011"
       }
