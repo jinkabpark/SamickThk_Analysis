@@ -1,0 +1,107 @@
+# ROS2 jazzy LIMS 구성안
+
+# 수정이력
+    1. 2024-07-28, v0.1, 김구정, 최초작성
+    2. 2024-07-28, v0.2, 김구정, 노드 구성 수정
+
+# 설명 
+    1. 2024-07-28, v0.1, 현재 '안 #1' 은 불완전 하다.
+
+    
+# v0.2
+
+
+[목차]
+1. 공통 형식
+2. 기본 노드를 이용한 구성안 #1
+
+
+
+1. 공통 형식 
+    1> 패키지 기본
+        - 파라미터
+        - 로깅 로그
+        - launch script
+
+    2> LIMS_interface 
+        - LIMS_interface 도 상속( 확장 ?? ) 이 가능하다.
+        - msg 구성
+        - srv 구성
+        - action 구성
+
+    3> LIMS_interface 를 이용한 기본 노드 src module 
+        - 파라미터 로 LIMS_interface 를 선택 실행 
+
+
+2. 기본 노드를 이용한 구성안 #1
+    1> PC node (토픽) 
+        - 이더넷통신(소켓 ??) function
+        - PC Ctl 토픽 구독자
+        
+    2> PLC node (토픽)
+        - PLC 통신(Wine ??) function
+        - PLC Ctl 토픽 구독자 
+
+    3> Validation node (서비스)
+        - Valid 서버스 서버  
+
+    4> Alarm node (서비스)
+        - Alarm 서비스 서버 
+        => 추가 설명 
+            .1> *주의* 실제 모든 노드를 
+                cancel 혹은 stop 시킬 수 있을지는 의문이다. 김구정
+
+    5> Dispatcher Logic node (액션)
+        - Dispatcher Logic functon 
+        - Valid 서버스 클라이언트 
+        - Alarm 서비스 클라이언트 
+        - tf2 ( Dispatcher -> LIMS_Ctl ) 브로드캐스터
+
+
+    6> 분석기 node (액션)
+        - PC Ctl 토픽 게시자
+        - 분석기 액션 서버 
+        - Dispatcher 액션 클라이언트
+
+    7> 폐기_모사 node (액션)
+        - PLC Ctl 토픽 게시자
+        - 페기_모사 액션 서버 
+        - Dispatcher 액션 클라이언트
+
+    8> 반출입기 node (액션)
+        - PLC Ctl 토픽 게시자
+        - 반출입기 액션 서버 
+        - Dispatcher 액션 클라이언트
+
+    9> Stocker node 
+        - PLC Ctl 토픽 게시자
+        - Stocker 액션 서버 
+        - Dispatcher 액션 클라이언트
+
+    11> Mir Ctl node  
+        - Mir 통신 ?? function 
+        - Mir Ctl 액션 서버 
+        - Dispatcher 액션 클라이언트
+
+    12> AIMS node (액션)
+        - SECS/GEM function 
+        - AIMS 액션 서버
+        - Dispatcher 액션 클라이언트
+
+    12> LIMS_Ctl component : *주의* 이 컴포넌트 부분이 애매함. 김구정
+        - tf2 ( Dispatcher -> LIMS_Ctl ) 리스터
+        - 분석기 액션 클라이언트 
+        - 페기_모사 액션 클라이언트 
+        - 반출입기 액션 클라이언트 
+        - Stocker 액션 클라이언트 
+        - Mir Ctl 액션 클라이언트 
+        - AIMS 액션 클라이언트 
+        
+        => LIMS_Ctl 부가설명
+            .1> LIMS_Ctl 액션은 LIMS_interface 수 만큼 복수이다.
+                '분석기 node (액션)' * 사용하는 LIMS_interface 수 = 분석기 node 수
+            .2> 만약 모든 액션에서 공통으로 사용하는 LIMS_interface 는
+                LIMS_interface 와 맞지 않을 수 있다. 
+                *주의* 이부분 애매함. 김구정
+
+

@@ -2,8 +2,9 @@
 
 # 수정이력
     2024-07-26, v0.1, 김구정, 최초작성
+    2024-07-28, v0.2, 김구정, 실 설치 후 수정
 
-# v0.1
+# v0.2
 
 
 [목차]
@@ -12,14 +13,14 @@
 
 
 1. ROS2-jazzy 설치 for Ubuntu by source
-    1> locale
+    1> locale - 안해도 설치는 가능하지만 개발서버는 하는거 추천.
         locale  # check for UTF-8
-
+        
         sudo apt update && sudo apt install locales
         sudo locale-gen en_US en_US.UTF-8
         sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
         export LANG=en_US.UTF-8
-
+        
         locale  # verify settings
 
     2> setup repo
@@ -48,25 +49,27 @@
         ros-dev-tools
 
     4> download source 
-        sudo apt upgrade
-        sudo rosdep init
-        rosdep update
-        rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
+        mkdir -p ~/ros2_jazzy/src
+        cd ~/ros2_jazzy
+        vcs import --input https://raw.githubusercontent.com/ros2/ros2/jazzy/ros2.repos src
+
 
     5> build dependency 
         sudo apt upgrade
         sudo rosdep init
         rosdep update
-        rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-5.3.1 urdfdom_headers"
+        rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
 
     6> build script
         cd ~/ros2_jazzy/
-        colcon build --symlink-install
+        colcon build
 
     7> add bash.rc 
         # Replace ".bash" with your shell if you're not using bash
         # Possible values are: setup.bash, setup.sh, setup.zsh
         . ~/ros2_jazzy/install/local_setup.bash
+        # 이 source 명령이 실패하면, ~/ros2_jazzy/ 폴더에서
+           install/ log/ 폴더를 삭제하고 재 빌드 한다.
 
     8> environment var
         # 같은 도메인끼리만 통신 된다.
