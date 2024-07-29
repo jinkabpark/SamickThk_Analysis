@@ -3,8 +3,9 @@
 # 수정이력
     2024-07-26, v0.1, 김구정, 최초작성
     2024-07-28, v0.2, 김구정, 실 설치 후 수정
+    2024-07-29, v0.3, 김구정, 빌드 중 에러 발생 시 대처 추가
 
-# v0.2
+# v0.3
 
 
 [목차]
@@ -62,14 +63,17 @@
 
     6> build script
         cd ~/ros2_jazzy/
-        colcon build
+        colcon build --symlink-install --packages-skip image_tools intra_process_demo
+        # 소스 빌드 에러시 대처: 예> rviz 에러 시 대처
+        # sudo apt remove ros-jazzy-rviz* 실행 후 재 빌드
+
 
     7> add bash.rc 
         # Replace ".bash" with your shell if you're not using bash
         # Possible values are: setup.bash, setup.sh, setup.zsh
         . ~/ros2_jazzy/install/local_setup.bash
         # 이 source 명령이 실패하면, ~/ros2_jazzy/ 폴더에서
-           install/ log/ 폴더를 삭제하고 재 빌드 한다.
+           install/ log/ build/ 폴더를 삭제하고 재 빌드 한다.
 
     8> environment var
         # 같은 도메인끼리만 통신 된다.
