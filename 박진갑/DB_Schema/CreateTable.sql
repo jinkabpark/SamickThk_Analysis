@@ -16,18 +16,19 @@ desc
 --
 --          No.   Table 명                   Size
 --         ----  -----------------         --------
---          1   tMstUser                   1 K
---          2   tMstEqpGroup               1 K
---          3   tMstEqp                    1 K
---          4   tMstOperation              1 K
---          5   tMstBottle                 1 K
---          6   tMstRouteOper              1 K
---          7   tMstScript4Manipulator     1 K
---          8   tMstScript4UR              1 K
---          9   tMstScript4CoOperRobot     1 K
---          10  tMstScriptID4CoOperRobot   1 K
---          11  tMstScriptBody4CoOperRobot 1 K
---          12  tMstTopic                  1 K
+--          1   tMstUser                   	1 K
+--          2   tMstEqpGroup               	1 K
+--          3   tMstEqp                    	1 K
+--          4   tMstOperation              	1 K
+--          5   tMstBottle                 	1 K
+--          6   tMstRouteOper              	1 K
+--          7   tMstRecipe4Analyzer     	1 K
+--          7   tMstScript4Manipulator     	1 K
+--          8   tMstScript4UR              	1 K
+--          9   tMstScript4CoOperRobot     	1 K
+--          10  tMstScriptID4CoOperRobot   	1 K
+--          11  tMstScriptBody4CoOperRobot 	1 K
+--          12  tMstTopic                  	1 K
 -- ============================================================================
 -- Table Space 명   : Process
 -- 내 용            : 공정관련 table을 관리하는 table space
@@ -198,7 +199,7 @@ CREATE TABLE tMstEqp (
 ALTER TABLE tMstEqp
       ADD CONSTRAINT tMstEqp_PK PRIMARY KEY (EqpGroupID, EqpSeqNo) ON [MasterIdx];
 ALTER TABLE tMstEqp
-      ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
+      ADD CONSTRAINT tMstEqp_FK_EqpGroupID FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 ALTER TABLE tMstEqp
       ADD CONSTRAINT tMstEqp_CHK CHECK (EqpStatus in ("PowerOn", "PowerOff", "Run", "Waiting", "Idle", "Trouble", "Maintenance")) ON [MasterIdx];
 
@@ -244,7 +245,7 @@ CREATE TABLE tMstOperation (
 ALTER TABLE tMstOperation
       ADD CONSTRAINT tMstOperation_PK PRIMARY KEY (EqpTypeID, OperID) ON [MasterIdx];
 ALTER TABLE tMstOperation
-      ADD CONSTRAINT tMstEqp_FK FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
+      ADD CONSTRAINT tMstOperation_FK_EqpGroupID FOREIGN KEY (EqpGroupID) REFERENCES tMstEqpGroup(EqpGroupID) ON [MasterIdx];
 
 INSERT INTO tMstOperation VALUES ('1', '1', N'공병Zone 대기');      -- 세정후 공병투입(세정후 재사용을 위하여 투입)
 INSERT INTO tMstOperation VALUES ('1', '2', N'시료채취중');              -- 작업의뢰자가 시료채취
@@ -332,6 +333,32 @@ INSERT INTO tMstRouteOper VALUES ('R1', '2', '1', '3', '2');     -- 분석 작�
 INSERT INTO tMstRouteOper VALUES ('R1', '3', '2', '4', '1');     -- 분석후 Stocker 입고
 INSERT INTO tMstRouteOper VALUES ('R1', '4', '1', '1', '1');     -- 폐기설비 작업중
 
+-- ========================================================================================
+--   Table No             : 7
+--   Table 명             : tMstRecipe4Analyzer
+--   내  용                : 분석기에 Recipe 관리하는 Table
+--   성  격               : Master
+--   보존기간              : 영구
+--   Record 발생건수(1일)   :
+--   Total Record 수      : 5
+--   Record size          : 5
+--   Total size           : 180 = 5 * 36
+--   관리화면 유/무           : 유
+--   P.K                  : BottleID
+--   관련 Table            :
+--   이 력
+--          1. 2024-06-01 : 최초 생성
+--
+-- ========================================================================================
+DROP TABLE tMstRecipe4Analyzer;
+
+CREATE TABLE tMstRecipe4Analyzer (
+   RecipeID                 CHAR(5) NOT NULL,       -- Recipe ID
+   Description              NVARCHAR(30)            -- Description
+) ON [Master];
+
+ALTER TABLE tMstRecipe4Analyzer
+       ADD CONSTRAINT tMstRecipe4Analyzer_PK PRIMARY KEY (RecipeID) ON [MasterIdx];
 
 -- ========================================================================================
 --   Table No             : 7
@@ -543,7 +570,7 @@ ALTER TABLE tMstScriptBody4CoOperRobot
       ADD CONSTRAINT tMstScriptBody4CoOperRobot_PK PRIMARY KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
 
 ALTER TABLE tMstScriptID4CoOperRobot
-      ADD CONSTRAINT tMstScriptBody4CoOperRobot_FK FOREIGN KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody)
+      ADD CONSTRAINT tMstScriptBody4CoOperRobot_FK_EqpGroupID_ProcessStatus FOREIGN KEY (EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody)
       REFERENCES tMstEqpGroup(EqpGroupID, ProcessStatus, ObjectOfCoOperRobot, ScriptID, ScriptSeqNoOfBody) ON [MasterIdx];
 
 INSERT INTO tMstScript4CoOperRobot VALUES ('1', 'Loading', "MIR", 3, 1, '{"X":"1.0", "Y":"2.0", "Orientation":"1.57"}', "MIR 로봇을 지정된 위치로 이동");
@@ -642,7 +669,7 @@ CREATE TABLE tLaboratoryDemandInfo (
 ALTER TABLE tLaboratoryDemandInfo
        ADD  CONSTRAINT tLaboratoryDemandInfo_PK PRIMARY KEY (UserID, ProjectNum, BottleSeqNoOfDemand) ON [ProcessIdx];
 ALTER TABLE tLaboratoryDemandInfo
-      ADD CONSTRAINT tLaboratoryDemandInfo_FK FOREIGN KEY (UserID) REFERENCES tMstUser(UserID) ON [ProcessIdx];
+      ADD CONSTRAINT tLaboratoryDemandInfo_FK_UserID FOREIGN KEY (UserID) REFERENCES tMstUser(UserID) ON [ProcessIdx];
 
 
 -- ========================================================================================
@@ -688,6 +715,7 @@ ALTER TABLE tLaboratoryDemandInfo
 --                          field 추가, 데이터 관리 편이성위하여 추가함 (PackID)
 --                          pack id를 ProjectNum or RequestDate 사용.
 --                          ProjectNum unique하면 ProjectNum 사용, unique하지 않으면 RequestDate 사용, 또는 2개 Merge해서 사용
+--          4. 2024-07-06 : field 추가 (RecipeID)
 --
 -- ========================================================================================
 DROP TABLE tProcBottle;
@@ -704,6 +732,7 @@ CREATE TABLE tProcBottle (
    --
    ProjectNum               NVARCHAR(10),           -- Project Num, 빈병일 경우 Null (특히 반출입기)
    PackID                   NVARCHAR(10),           -- Project No or RequestDate or Project No+RequestDate
+   RecipeID                 CHAR(5) NOT NULL,       -- 분석기 Recipe ID
    AnalyzerCompletedTm      DATETIME,               -- 실험분석완료 시간
    JudgeLimitTm             DATETIME,               -- 실험분석완료후 지정된 시간 경과후, 분석완료후 작업의뢰자 응답이 없는 경우 자동 폐기 처리
    JudgeOfResearcher        NVARCHAR(10),           -- 실험의뢰자 판단. (Discard, Cleaning)
@@ -733,7 +762,9 @@ CREATE TABLE tProcBottle (
 ALTER TABLE tProcBottle
        ADD  CONSTRAINT tProcBottle_PK PRIMARY KEY (BottleID) ON [ProcessIdx];
 ALTER TABLE tProcBottle
-      ADD CONSTRAINT tProcBottle_FK FOREIGN KEY (BottleID) REFERENCES tMstEqpGroup(BottleID) ON [ProcessIdx];
+      ADD CONSTRAINT tProcBottle_FK_BottleID FOREIGN KEY (BottleID) REFERENCES tMstEqpGroup(BottleID) ON [ProcessIdx];
+ALTER TABLE tProcBottle
+      ADD CONSTRAINT tProcBottle_FK_RecipeID FOREIGN KEY (RecipeID) REFERENCES tMstRecipe4Analyzer(RecipeID) ON [ProcessIdx];
 
 -- ========================================================================================
 --   Table No             : 3
@@ -811,7 +842,7 @@ CREATE TABLE tChgEqpStatus (
 ALTER TABLE tChgEqpStatus
        ADD  CONSTRAINT tChgEqpStatus_PK PRIMARY KEY (EqpGroupID, EqpSeqNo, EqpStatus, StartTime) ON [ProcessIdx];
 ALTER TABLE tChgEqpStatus
-      ADD CONSTRAINT tChgEqpStatus_FK FOREIGN KEY (EqpGroupID, EqpSeqNo) REFERENCES tMstEqpGroup(EqpGroupID, EqpSeqNo) ON [ProcessIdx];
+      ADD CONSTRAINT tChgEqpStatus_FK_EqpGroupIDEqpSeqNo FOREIGN KEY (EqpGroupID, EqpSeqNo) REFERENCES tMstEqpGroup(EqpGroupID, EqpSeqNo) ON [ProcessIdx];
 
 -- ========================================================================================
 --   Table No             : 5
@@ -845,7 +876,7 @@ CREATE TABLE tDailyEqpStatus (
 ALTER TABLE tDailyEqpStatus
        ADD  CONSTRAINT tDailyEqpStatus_PK PRIMARY KEY (EqpGroupID, EqpSeqNo, SummaryDate, EqpStatus) ON [ProcessIdx];
 ALTER TABLE tDailyEqpStatus
-      ADD CONSTRAINT tDailyEqpStatus_FK FOREIGN KEY (EqpGroupID, EqpSeqNo) REFERENCES tMstEqpGroup(EqpGroupID, EqpSeqNo) ON [ProcessIdx];
+      ADD CONSTRAINT tDailyEqpStatus_FK_EqpGroupID_EqpSeqNo FOREIGN KEY (EqpGroupID, EqpSeqNo) REFERENCES tMstEqpGroup(EqpGroupID, EqpSeqNo) ON [ProcessIdx];
 ALTER TABLE tDailyEqpStatus
       ADD CONSTRAINT tDailyEqpStatus_CHK_status CHECK (EqpStatus IN ('Run', 'Idle', 'Trouble', 'Maintenance')) ON [ProcessIdx];
 ALTER TABLE tDailyEqpStatus

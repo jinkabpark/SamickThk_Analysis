@@ -1,0 +1,148 @@
+# ROS2 jazzy 개발정리
+
+# 수정이력
+    1. 2024-07-27, v0.1, 김구정, 최촞작성
+
+
+# v0.1
+
+
+[목차]
+1. colcon 개발환경 구축
+2. 샘플 제작
+3. 사용자 정의 msg 및 srv 파일 만들기
+4. 액션 제작
+
+
+
+1. colcon 개발환경 구축
+    1> 설치 
+        sudo apt install python3-colcon-common-extensions
+
+    2> 작업 폴더 생생
+        mkdir -p ~/ros2_ws/src
+        cd ~/ros2_ws
+
+    3> 예제 깃 다운로드
+        cd ~/ros2_ws/src
+        git clone https://github.com/ros/ros_tutorials.git -b jazzy
+
+    3.1> 종속설 해결
+        # cd if you're still in the ``src`` directory with the ``ros_tutorials`` clone
+        cd ..
+        rosdep install -i --from-path src --rosdistro jazzy -y
+
+    4> 빌드
+        colcon build --event-handlers console_direct+
+
+    5> 오버레이 소스 실행
+        source /opt/ros/jazzy/setup.bash
+        cd ~/ros2_ws
+        source install/local_setup.bash
+
+    6> 패키지 생성
+        cd ~/ros2_ws/src
+        # ros2 pkg create --build-type ament_cmake --license Apache-2.0 <package_name>
+        ros2 pkg create --build-type ament_cmake --license Apache-2.0 --node-name my_node my_package
+
+    7> 패키지 빌드
+        cd ~/ros2_ws
+        colcon build --packages-select my_package
+
+    #6> colcon_cd : 쉘의 현재 작업 디렉토리를 패키지 디렉토리로 빠르게 변경
+    #    colcon_cd some_ros_package ~/ros2_ws/src/some_ros_package
+    #
+    #    echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
+    #    echo "export _colcon_cd_root=/opt/ros/jazzy/" >> ~/.bashrc 
+    #
+    #7> 패키지 팁
+    #    .1> 특정 패키지를 빌드하고 싶지 않으면 COLCON_IGNORE디렉토리에 이름이 있는 빈 파일을 넣으면 인덱싱되지 않습니다.   
+    #    .2> 패키지에서 특정 테스트 하나만 실행하려면:
+    #        colcon test --packages-select YOUR_PKG_NAME --ctest-args -R YOUR_TEST_IN_PKG
+
+
+2. 샘플 제작
+    1> cpp_pubsub
+        ros2 pkg create --build-type ament_cmake --license Apache-2.0 cpp_pubsub
+
+    2> cpp_srvcli
+        ros2 pkg create --build-type ament_cmake --license Apache-2.0 cpp_srvcli --dependencies rclcpp example_interfaces    
+
+    3> 종속성 인스톨
+        rosdep install -i --from-path src --rosdistro jazzy -y
+
+    4> my package 빌드
+        colcon build --packages-select cpp_srvcli
+
+
+3. 사용자 정의 msg 및 srv 파일 만들기
+    1> tutorial_interfaces
+        ros2 pkg create --build-type ament_cmake --license Apache-2.0 tutorial_interfaces
+
+    2> mkdir
+        cd ~/ros2_ws/src/tutorial_interfaces
+        mkdir msg srv 
+
+    3> my_msg.msg 파일 생성
+        cd ros2_ws/src/tutorial_interfaces/msg 
+        my_msg.msg 파일 생성
+            ex> int64 num
+
+    4> my_srv.srv 파일 생성
+        cd ros2_ws/src/tutorial_interfaces/srv 
+        my_srv.msg 파일 생성
+            ex> int64 a
+                int64 b 
+                int64 c 
+                ---
+                int64 sum 
+
+    5> CMakeLists.txt 에 추가 
+        find_package(geometry_msgs REQUIRED)
+        find_package(rosidl_default_generators REQUIRED)
+
+        rosidl_generate_interfaces(${PROJECT_NAME}
+            "msg/my_msg.msg"
+            # "msg/Sphere.msg"
+            "srv/my_srv.srv"
+            ## DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+        )
+
+    6> build 
+        colcon build --packages-select tutorial_interfaces
+
+    7> interface 확인
+        ros2 interface show tutorial_interfaces/msg/my_msg
+        ros2 interface show tutorial_interfaces/srv/my_srv 
+
+    8> 사용하는 package.xml 
+        <depend>tutorial_interfaces</depend>
+
+    9> more_interfaces 
+        ros2 pkg create --build-type ament_cmake --license Apache-2.0 more_interfaces
+        mkdir more_interfaces/msg    
+
+
+4. 액션 제작
+    1> 액션 서버에는 6가지가 필요합니다.
+        - 템플릿화된 작업 유형 이름: Fibonacci.
+        - 작업을 추가할 ROS 2 노드: this.
+        - 작업 이름: 'fibonacci'.
+        - 목표를 처리하기 위한 콜백 함수:handle_goal
+        - 취소를 처리하기 위한 콜백 함수: handle_cancel.
+        - 목표 수락을 처리하기 위한 콜백 함수: handle_accept.
+
+    2> 액션 클라이언트에는 3가지가 필요합니다.
+        - 템플릿화된 작업 유형 이름: Fibonacci.
+        - 액션 클라이언트를 추가할 ROS 2 노드: this.
+        - 작업 이름: 'fibonacci'
+
+
+5. tf2(transform-broadcasting)
+
+
+
+
+
+
+
