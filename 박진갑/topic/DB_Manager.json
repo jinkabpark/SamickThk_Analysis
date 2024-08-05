@@ -2356,6 +2356,78 @@ Normal Sequence Flow
          "error_msg" : "None"
       }
 
+591. LIMS에서 MOMA에 Job을 하달 / 대상 설비로의 이동 Job이다. - Sync
+     LIMS에서 MOMA에 Job을 하달 / 대상 설비에서 Bottle을 Get, Put하는 Job이다
+   561 MoveBottleSrc2Tgt MOMA Bottle  --> SR_JobReqExportGetPutJobOfMOMA
+
+   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/SR_JobReqExportMoveJobOfMOMA" 
+   2) Fm Node(Publisher, Server) : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
+   3) Tm Node(Subscriber, Client) : "MOMA",   
+   4) 송신메세지
+      {
+         "Subject" : "SR_JobReqExportMoveJobOfMOMA     //생략가능
+         "EqpGroupID" : 5,              // FmNode 추정가능. 생략가능
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "TargetPosition" : 1,            // 1 - 반출입기, 2 - 스토커, 3 - 분석기, 4 - 폐기, 10 - 대기위치, 11 - 충전위치
+      }
+	  -->
+      {
+         "Subject" : "SR_JobReqExportMoveJobOfMOMA     //생략가능
+         "EqpGroupID" : 5,              // 
+         "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
+         "JobID" : 1,            // 1 - 반출입기, 2 - 스토커, 3 - 분석기, 4 - 폐기, 10 - 대기위치, 11 - 충전위치
+      }
+
+   591-1 GetFmToJob Fm위치, To위치의 Job ID를 가져온다
+   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/SR_GetFmToJob" 
+   2) Fm Node(Publisher, Server) : "Dispatcher"
+   3) Tm Node(Subscriber, Client) : "DB_Manager",   
+   4) 송신메세지
+      {
+         "Subject" : "SR_GetFmToJob     //생략가능
+         "FmEqpGroupID" : 1,            // 출발지점 Eqp Group
+         "FmEqpSeqNo" : 1,              // 출발지점 설비호기정보
+         "FmPortName" : "U1",           // 출발지점 Port명
+         "ToEqpGroupID" : 2,            // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "ToEqpSeqNo" : 1,              // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "ToPortName" : "Left",         // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+      }
+   5) Function : 
+   6) Return Message 길이 : 1K 이내
+   7) 관련 Stored Procedure : 
+   8) 응답메세지
+      {
+         "status_code" : 200,
+		 "FmJob" : "0x03",
+		 "ToJob" : "0x01",
+         "error_msg" : "None"
+      }
+
+   591-2 GetFmToSubJob Fm위치, To위치의 SubJob ID를 가져온다
+   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/SR_GetFmToJob" 
+   2) Fm Node(Publisher, Server) : "Dispatcher"
+   3) Tm Node(Subscriber, Client) : "DB_Manager",   
+   4) 송신메세지
+      {
+         "Subject" : "SR_GetFmToJob     //생략가능
+         "FmEqpGroupID" : 1,            // 출발지점 Eqp Group
+         "FmEqpSeqNo" : 1,              // 출발지점 설비호기정보
+         "FmPortName" : "U1",           // 출발지점 Port명
+         "ToEqpGroupID" : 2,            // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "ToEqpSeqNo" : 1,              // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "ToPortName" : "Left",         // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+      }
+   5) Function : 
+   6) Return Message 길이 : 1K 이내
+   7) 관련 Stored Procedure : 
+   8) 응답메세지
+      {
+         "status_code" : 200,
+		 "FmJob" : "0x03",
+		 "ToJob" : "0x01",
+         "error_msg" : "None"
+      }
+
 601. 실험의뢰정보를 세팅한다
    1) Token : SetLaboratoryRequestInfo     ----- DemandInformation => RequestInfo
    2) 관련 controller : DBMgr

@@ -17,6 +17,9 @@
 10. Validation
 
 
+Working Area : 분석실 공간중 사람이 없이 MOMA로 움직이는 공간
+User Area : 분석실 공간중 사람이 움직이는 공간
+
 
 
 역활
