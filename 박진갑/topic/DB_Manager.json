@@ -10,7 +10,7 @@ desc
    5.    2024-07-12 async message 추가
    6.    2024-07-14 동일 message를 sync, async message 2개로 분리작성
                     RequestEqpStatusBySync, RequestEqpStatusByAsync
-   7.	 2024-07-21 Publisher, Subscriber Node 추가
+   7.    2024-07-21 Publisher, Subscriber Node 추가
    
 message 송수신 방식
    1. async방식
@@ -21,7 +21,7 @@ message 송수신 방식
          - UI_Manager 보낼때, 중요하지 않은 message...
    2. sync 방식
 
-본 소스는 (주)유비샘 자산입니다. 허락없이 무단 사용을 금합니다.
+본 자료는 (주)유비샘 자산입니다. 허락없이 무단 사용을 금합니다.
 ============================================================================
 
 관련 Topic List
@@ -75,10 +75,6 @@ message 송수신 방식
 203. RequestEqpStatusBySync                         Stocker 설비상태를 요청한다.(sync방식)
 204. RequestEqpStatusByAsync                        Stocker 설비상태를 요청한다.(async방식)
 204-2 ReplyEqpStatusByAsync                          Stocker 설비상태요청에 응답한다.
-206. ExtractProperBottlePackCount                   Stocker에서 추출할 우선순위별 Bottle Pack 수량요청 ----- Suitable => Proper
-     --> Target 위치가 분석기 Or 폐기.모사
-207. ExtractProperBottlePackInfo                    Stocker에서 추출할 적정 Bottle Pack 정보요청
-     --> Target 위치가 분석기 Or 폐기.모사
 211. LoadReq                                        Stocker에 입고요청메세지
      --> 장비단위 event. Dispatch에서 반송요청 처리를 위해서 필요한 event.
      --> bottle pack출하가 모두 완료된후 발생하는 event
@@ -105,6 +101,10 @@ message 송수신 방식
 233. RequestInfoOfSpareHoles                        Stocker에 bottle투입하기 위한 Empty hole 정보요청
 234. RequestBottleInfoByHole                        Stocker에서 Hole 존재하는 bottle정보요청
 241. CompareEqpBottleInfo2DB_BottleInfo             Stocker에 있는 재공재고정보와 DB에 있는 정보를 비교한다
+251. ExtractProperBottlePackCount                   Stocker에서 추출할 우선순위별 Bottle Pack 수량요청 ----- Suitable => Proper
+     --> Target 위치가 분석기 Or 폐기.모사
+252. ExtractProperBottlePackInfo                    Stocker에서 추출할 적정 Bottle Pack 정보요청
+     --> Target 위치가 분석기 Or 폐기.모사
 271. ReportChangedDoorStatus                        Stocker Door 상태변경시 Event 보고
 272. RequestDoorStatusBySync                        Stocker Door 상태요청(sync방식)
 272-2 RequestDoorStatusByAsync                       Stocker Door 상태요청(async방식)
@@ -260,7 +260,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
    4) 송신메세지
       {
-		 "Subject" : "ReportChangedEqpStatus"
+         "Subject" : "ReportChangedEqpStatus"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "FmEqpSeqNo" : 1,              // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
@@ -274,7 +274,7 @@ Normal Sequence Flow
          "sender_controller" : "DB_Manager" Or "Dispatcher" Or "UI_Manager" // 입력파라메터의 ToNode값
          "error_msg" : "None"
       }
-	  
+      
 101-1. 반출입기 장비상태변경시 보고. 장비자체에서 발생하는 Event 보고
    1) Node간 통신방식(topic RO/RR, service, action) : topic RequestResponse
       - Topic : /InOutBottle/RequestChangedEqpStatus <-- ReportChangedEqpStatus
@@ -282,7 +282,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager" Or "Dispatcher" Or "UI_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestChangedEqpStatus"
+         "Subject" : "RequestChangedEqpStatus"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
@@ -299,7 +299,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle"
    4) 송신메세지
       {
-		 "Subject" : "ReplyChangedEqpStatus"
+         "Subject" : "ReplyChangedEqpStatus"
          "EqpGroupID" : '6',
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "status_code" : 200,
@@ -317,7 +317,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "ChangeEqpStatus"
+         "Subject" : "ChangeEqpStatus"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
@@ -337,10 +337,10 @@ Normal Sequence Flow
       - Topic : /InOutBottle/RequestEqpStatusBySync
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusBySync"
+         "Subject" : "RequestEqpStatusBySync"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -362,10 +362,10 @@ Normal Sequence Flow
       - Topic : /InOutBottle/RequestEqpStatusByAsync
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "InOutBottle"   --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusByAsync"
+         "Subject" : "RequestEqpStatusByAsync"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -381,7 +381,7 @@ Normal Sequence Flow
    3) Subscriber Node : "Dispatcher" Or "UI_Manager"
    4) 송신메세지
       {
-		 "Subject" : "ReplyEqpStatusByAsync"
+         "Subject" : "ReplyEqpStatusByAsync"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
@@ -398,7 +398,7 @@ Normal Sequence Flow
    3) Subscriber Node : "Dispatcher" and "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleLoadReqAtWorkingArea"
+         "Subject" : "EmptyBottleLoadReqAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "LoadReq"
@@ -420,7 +420,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleLoadCompAtWorkingArea"
+         "Subject" : "EmptyBottleLoadCompAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "LoadComp"
@@ -438,7 +438,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleUnloadReqAtWorkingArea"
+         "Subject" : "EmptyBottleUnloadReqAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "UnloadReq"
@@ -456,7 +456,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleUnloadCompAtWorkingArea"
+         "Subject" : "EmptyBottleUnloadCompAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "UnloadComp"
@@ -481,7 +481,7 @@ Normal Sequence Flow
    3) Subscriber Node : "Dispatcher" and "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "FilledBottleLoadReqAtWorkingArea"
+         "Subject" : "FilledBottleLoadReqAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "LoadReq"
@@ -503,7 +503,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "FilledBottleLoadCompAtWorkingArea"
+         "Subject" : "FilledBottleLoadCompAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "LoadComp"
@@ -526,7 +526,7 @@ Normal Sequence Flow
    3) Subscriber Node : "Dispatcher" and "DB_Manager",
    4) 송신메세지
       {
-		 "Subject" : "FilledBottleUnloadReqAtWorkingArea"
+         "Subject" : "FilledBottleUnloadReqAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "UnloadReq"
@@ -549,7 +549,7 @@ Normal Sequence Flow
    3) Subscriber Node : "Dispatcher" and "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "FilledBottleUnloadCompAtWorkingArea"
+         "Subject" : "FilledBottleUnloadCompAtWorkingArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "UnloadComp"
@@ -572,7 +572,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "LoadReq"
+         "Subject" : "LoadReq"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortName" : "L2"              
@@ -590,7 +590,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "FilledBottleLoadCompAtOutArea"
+         "Subject" : "FilledBottleLoadCompAtOutArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortName" : "L2"              
@@ -617,7 +617,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleLoadReqAtOutArea"
+         "Subject" : "EmptyBottleLoadReqAtOutArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortName" : "U2"              
@@ -635,7 +635,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "EmptyBottleLoadCompAtOutArea"
+         "Subject" : "EmptyBottleLoadCompAtOutArea"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "PortEvent" : "LoadComp"                
@@ -659,7 +659,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "GetBottleCapacityAtInOutBottle"
+         "Subject" : "GetBottleCapacityAtInOutBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -682,7 +682,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestNumberOfSpareHole"
+         "Subject" : "RequestNumberOfSpareHole"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -705,7 +705,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestInfoOfSpareHoles"
+         "Subject" : "RequestInfoOfSpareHoles"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -728,7 +728,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestBottleInfoByHole"
+         "Subject" : "RequestBottleInfoByHole"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -759,7 +759,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "CompareEqpBottleInfo2DB_BottleInfo"
+         "Subject" : "CompareEqpBottleInfo2DB_BottleInfo"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "empty_bottle_zone" : [
@@ -806,7 +806,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestNumberOfEmptyBottle"
+         "Subject" : "RequestNumberOfEmptyBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -828,7 +828,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" or "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestNumberOfFilledBottle"
+         "Subject" : "RequestNumberOfFilledBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -850,7 +850,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "ExtractProperEmptyBottle"
+         "Subject" : "ExtractProperEmptyBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "Employee_ID" : "13579",
@@ -865,7 +865,7 @@ Normal Sequence Flow
          "sender_controller" : "DB_Manager",    //
          "TotCountOfEmptyBottlePack" : 5
          "EmptyBottleInfo" : [
-		    {"1011" : "bot_0132"},
+            {"1011" : "bot_0132"},
                 ...
             {"1015" : "bot_0136"}
          ],
@@ -879,7 +879,7 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "GetLaboratoryDemandInformation"
+         "Subject" : "GetLaboratoryDemandInformation"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "Employee_ID" : "13579",
@@ -917,11 +917,11 @@ Normal Sequence Flow
    3) Subscriber Node : "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "RequestProperFillledBottle"
+         "Subject" : "RequestProperFillledBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "Employee_ID" : "13579",
-         "ProjectNum" : "prj97531"		 
+         "ProjectNum" : "prj97531"       
       }
    5) Function : Dispatcher가 Bottle 반출입기 U1 Port에서 Load Request 신호를 수신. 출고할 Bottle정보 우선순위 Rule 적용하여 조회한다.
    6) Return Message 길이 : 1K 이내
@@ -932,7 +932,7 @@ Normal Sequence Flow
          "sender_controller" : "DB_Manager",    //
          "TotCountOfEmptyBottlePack" : 5
          "EmptyBottleInfo" : [
-		    {"1011" : "bot_0132"},
+            {"1011" : "bot_0132"},
                 ...
             {"1015" : "bot_0136"}
          ],
@@ -946,7 +946,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle"
    4) 송신메세지
       {
-		 "Subject" : "ExtractProperFillledBottle"
+         "Subject" : "ExtractProperFillledBottle"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "TotCountOfEmptyBottlePack" : 5
@@ -978,7 +978,7 @@ Normal Sequence Flow
    3) Subscriber Node : "InOutBottle" and "DB_Manager"
    4) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
          "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "UsedPosition" : "1011, 1021", // Option, 입력되지 않을수 있음
@@ -1003,7 +1003,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReportChangedEqpStatus"
+         "Subject" : "ReportChangedEqpStatus"
          "EqpGroupID" : '1',            // 설비군 (Stocker)
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
@@ -1025,7 +1025,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ChangeEqpStatus"
+         "Subject" : "ChangeEqpStatus"
          "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"        // Reserve, Trouble, Maintenance
@@ -1044,11 +1044,11 @@ Normal Sequence Flow
    1) Topic : Stocker
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "Stocker"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusBySync"
+         "Subject" : "RequestEqpStatusBySync"
          "EqpGroupID" : 2               // Stocker
       }
    6) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
@@ -1068,11 +1068,11 @@ Normal Sequence Flow
    1) Topic : Stocker
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "Stocker"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusByAsync"
+         "Subject" : "RequestEqpStatusByAsync"
          "EqpGroupID" : 2               // Stocker
       }
    6) Function : tMstEqp table의 Stocker EqpStatus(장비상태) 참조
@@ -1087,7 +1087,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReplyEqpStatusByAsync"
+         "Subject" : "ReplyEqpStatusByAsync"
          "EqpGroupID" : 2               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
@@ -1097,81 +1097,6 @@ Normal Sequence Flow
    8) 관련 Stored Procedure : spReplyEqpStatusByAsync
    9) 응답메세지
 
-206. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
-   1) Topic : Stocker
-   2) Publisher Node : "Dispatcher"
-   3) Subscriber Node : "Stocker" or "DB_Manager"
-   4) 메세지 송수신방식 : sync
-   5) 송신메세지
-      {
-		 "Subject" : "ExtractProperBottlePackCount"
-         "FmNode" : "Dispatcher"
-         "ToNode" : "Stocker" or "DB_Manager"
-      }
-   6) Function : Stocker에서 Bottle을 Pack 단위로 출고한다. 우선순위 Bottle선택후 해당영역에서 우선순위별 최대 5개 Pack 수량 산출한다.
-   7) Return Message 길이 : 1K 이내
-   8) 관련 Stored Procedure : spExtractProperBottlePackCount                    ----- Suitable => Proper
-   9) Return 예제
-      {
-         "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
-         "sender_controller" : "Stocker" or "DB_Manager"
-         "TotCountOfBottlePack" : 5,
-         "Zone" : "Left",  or "Right"
-         "BottleInfo" : [
-            {
-                "PackID" : "Pack_001",
-                "TotalBottleCountOfPack" : 5
-            },
-            {
-                "PackID" : "Pack_002",
-                "TotalBottleCountOfPack" : 3
-            },
-            ...
-            {
-                "PackID" : "Pack_005",
-                "TotalBottleCountOfPack" : 1
-            }
-         ],
-         "error_msg" : "None"
-      }
-
-207. Stocker에서 추출할 적정 Bottle Pack 정보요청
-   1) Topic : Stocker
-   2) Publisher Node : "Dispatcher"
-   3) Subscriber Node : "Stocker" or "DB_Manager"
-   4) 메세지 송수신방식 : sync
-   5) 송신메세지
-      {
-		 "Subject" : "ExtractProperBottlePackInfo"
-         "FmNode" : "Dispatcher"
-         "ToNode" : "Stocker" or "DB_Manager"
-         "PackID" : "Pack_001"
-      }
-   6) Function : Stocker에서 Bottle을 Pack 단위로 출고한다
-   7) Return Message 길이 : 1K 이내
-   8) 관련 Stored Procedure : spExtractProperBottlePackInfo                    ----- Suitable => Proper
-   9) Return 예제
-      {
-         "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
-         "sender_controller" : "Stocker" or "DB_Manager"
-         "TotCountOfBottlePack" : 5,
-         "BottleInfo" : [
-            {
-                "BottleID" : "ID_001",
-                "Position" : "1021"
-            },
-            {
-                "BottleID" : "ID_002",
-                "Position" : "1022"
-            },
-            ...
-            {
-                "BottleID" : "ID_005",
-                "Position" : "1025"
-            }
-         ],
-         "error_msg" : "None"
-      }
 
 211. Stocker에 입고요청메세지
    1) Topic : Stocker
@@ -1180,7 +1105,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "LoadReq"
+         "Subject" : "LoadReq"
          "FmNode" : "Stocker",
          "ToNode" : "Dispatcher" and "DB_Manager"
       }
@@ -1201,7 +1126,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "LoadComp"
+         "Subject" : "LoadComp"
          "BottleID" : "ID_001"
       }
    6) Function : bottle pack 입고가 완료된후 발생하는 event
@@ -1216,7 +1141,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "UnoadReq"
+         "Subject" : "UnoadReq"
       }
    6) Function : bottle pack 출하가 완료된후 발생하는 event
    7) Return Message 길이 : 1K 이내
@@ -1235,7 +1160,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "UnloadComp"
+         "Subject" : "UnloadComp"
          "BottleID" : "ID_001"
       }
    6) Function : Stocker에서 실병을 인출했을때 Event message
@@ -1250,7 +1175,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "LoadComp4Bottle"
+         "Subject" : "LoadComp4Bottle"
          "BottleID" : "ID_001",
          "Position" : "2111"
       }
@@ -1271,7 +1196,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "UnloadComp4Bottle"
+         "Subject" : "UnloadComp4Bottle"
          "BottleID" : "ID_001",
          "Position" : "2111"
       }
@@ -1292,7 +1217,8 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "GetBottleCapacity"
+         "Subject" : "GetBottleCapacity"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
          "EqpSeqNo" : 1
       }
    6) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
@@ -1314,11 +1240,13 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestNumberOfSpareHole"
+         "Subject" : "RequestNumberOfSpareHole"
+         "EqpGroupID" : '1',            // 설비군 (InOutBottle)
+         "FmEqpSeqNo" : 1,              // 정의하지 않으면 1로 추정함. 생략가능
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) 총 수량
    7) Return Message 길이 : 1K 이내
-   8) 관련 Stored Procedure : 설비에서 응답
+   8) 관련 Stored Procedure : spRequestNumberOfSpareHole
    9) Return
       {
          "status_code" : 200,
@@ -1335,17 +1263,20 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestInfoOfSpareHoles"
+         "Subject" : "RequestInfoOfSpareHoles",
+         "EqpGroupID" : '2',            // 설비군 (InOutBottle)
+         "FmEqpSeqNo" : 1,              // 정의하지 않으면 1로 추정함. 생략가능
+         "Zone" : "Left" or "Right",
+         "PackTotalCnt" : 5             -- Pack의 수량
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) hole postion 정보요청
    7) Return Message 길이 : 1K 이내
-   8) 관련 Stored Procedure : 설비에서 응답
+   8) 관련 Stored Procedure : spRequestInfoOfSpareHoles
    9) Return
       {
          "status_code" : 200,
          "sender_controller" : "Stocker" or "DB_Manager"
-         "position_in_left_zone" : "1111, 1114, 1115",
-         "position_in_right_zone" : "2111, 2114, 2115",
+         "position_moma" : "1,3,5,7,9",
          "error_msg" : "None"
       }
 
@@ -1356,7 +1287,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestBottleInfoByHole"
+         "Subject" : "RequestBottleInfoByHole"
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 hole별 bottle정보요청
    7) Return Message 길이 : 1K 이내
@@ -1385,7 +1316,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "CompareEqpBottleInfo2DB_BottleInfo"
+         "Subject" : "CompareEqpBottleInfo2DB_BottleInfo"
          "LeftZone" : [
             {"1011" : "bot_0136"},
                 ...
@@ -1422,6 +1353,88 @@ Normal Sequence Flow
          ],
          "error_msg" : "None"
       }
+	  
+251. Stocker에서 추출할 우선순위별 Bottle Pack 수량요청
+   1) Topic : Stocker
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "Stocker" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
+      {
+         "Subject" : "ExtractProperBottlePackCount"
+         "EqpGroupID" : '2',            // 설비군 (InOutBottle)
+         "FmEqpSeqNo" : 1,              // 정의하지 않으면 1로 추정함. 생략가능
+      }
+   6) Function : Stocker에서 Bottle을 Pack 단위로 출고한다. 우선순위 Bottle선택후 해당영역에서 우선순위별 최대 5개 Pack 수량 산출한다.
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spExtractProperBottlePackCount                    ----- Suitable => Proper
+   9) Return 예제
+      {
+         "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
+         "sender_controller" : "Stocker" or "DB_Manager"
+         "TotCountOfBottlePack" : 5,
+         "BottleInfo" : [
+            {
+				"Zone" : "Left",  or "Right",
+                "PackID" : "Pack_001",
+                "TotalBottleCountOfPack" : 5
+            },
+            {
+				"Zone" : "Left",  or "Right",
+                "PackID" : "Pack_002",
+                "TotalBottleCountOfPack" : 3
+            },
+            ...
+            {
+				"Zone" : "Left",  or "Right",
+                "PackID" : "Pack_005",
+                "TotalBottleCountOfPack" : 1
+            }
+         ],
+         "error_msg" : "None"
+      }
+
+252. Stocker에서 추출할 적정 Bottle Pack 정보요청
+   1) Topic : Stocker
+   2) Publisher Node : "Dispatcher"
+   3) Subscriber Node : "Stocker" or "DB_Manager"
+   4) 메세지 송수신방식 : sync
+   5) 송신메세지
+      {
+         "Subject" : "ExtractProperBottlePackInfo"
+         "FmNode" : "Dispatcher"
+         "ToNode" : "Stocker" or "DB_Manager"
+		 "Zone" : "Left",  or "Right",
+         "PackID" : "Pack_001"
+      }
+   6) Function : Stocker에서 Bottle을 Pack 단위로 출고한다
+   7) Return Message 길이 : 1K 이내
+   8) 관련 Stored Procedure : spExtractProperBottlePackInfo                    ----- Suitable => Proper
+   9) Return 예제
+      {
+         "status_code" : 200,                   // 정상이면 200, 비정상일때는 sql error code를 입력
+         "sender_controller" : "Stocker" or "DB_Manager"
+         "TotCountOfBottlePack" : 5,
+         "BottleInfo" : [
+            {
+                "BottleID" : "ID_001",
+                "Position_MOMA" : 1,
+                "Position_UI" : "1021"
+            },
+            {
+                "BottleID" : "ID_002",
+                "Position_MOMA" : 3,
+                "Position_UI" : "1022"
+            },
+            ...
+            {
+                "BottleID" : "ID_005",
+                "Position_MOMA" : 5,
+                "Position_UI" : "1025"
+            }
+         ],
+         "error_msg" : "None"
+      }
 
 271. Stocker Door 상태변경시 Event 보고
    1) Topic : Stocker
@@ -1430,7 +1443,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReportChangedDoorStatus"
+         "Subject" : "ReportChangedDoorStatus"
          "LeftDoor" : "Open" or "Close"
             or
          "RightDoor" : "Open" or "Close"
@@ -1452,7 +1465,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestDoorStatusBySync"
+         "Subject" : "RequestDoorStatusBySync"
          "TargetDoor" : "LeftDoor" or "RightDoor"
       }
    6) Function : Stocker Left, Rigth Door 열림, 닫힘 상태를 sync방식으로 문의한다
@@ -1475,7 +1488,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestDoorStatusByAsync"
+         "Subject" : "RequestDoorStatusByAsync"
          "TargetDoor" : "Left" or "Right"
       }
    6) Function : Stocker Left, Rigth Door 열림, 닫힘 상태를 async방식으로 문의한다
@@ -1490,7 +1503,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReplyDoorStatus"
+         "Subject" : "ReplyDoorStatus"
          "LeftDoor" : "Open" or "Close" or "Working"
             or
          "RightDoor" : "Open" or "Close" or "Working"
@@ -1507,7 +1520,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
          "UsedPosition" : "1011, 1021"
          "NotUsedPosition" : "2021"
       }
@@ -1529,7 +1542,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReportChangedEqpStatus"
+         "Subject" : "ReportChangedEqpStatus"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, Run, Idle, Maintenance
@@ -1551,7 +1564,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ChangeEqpStatus"
+         "Subject" : "ChangeEqpStatus"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "Reserve"       // Reserve, Trouble, Maintenance
@@ -1570,11 +1583,11 @@ Normal Sequence Flow
    1) Topic : Analyzer/RequestEqpStatusBySync
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "Analyzer"      --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusBySync"
+         "Subject" : "RequestEqpStatusBySync"
          "EqpGroupID" :3,               // 분석기
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1595,12 +1608,12 @@ Normal Sequence Flow
    1) Topic : Analyzer/RequestEqpStatusByAsync
    2) Publisher Node : "Dispatcher" Or "UI_Manager"
    3) Subscriber Node : "Analyzer"       --> 실시간 상태확인 필요한 경우 (반송을 위해 Dispatcher에서 호출할때)
-						"DB_Manager"    --> UI에서 호출할때 사용
+                        "DB_Manager"    --> UI에서 호출할때 사용
    4) 메세지 송수신방식 : async
       - 응답 메세지 : Yes   
    5) 송신메세지
       {
-		 "Subject" : "RequestEqpStatusByAsync"
+         "Subject" : "RequestEqpStatusByAsync"
          "EqpGroupID" : 3               // 분석기
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1617,7 +1630,7 @@ Normal Sequence Flow
       - 응답 메세지 : No   
    5) 송신메세지
       {
-		 "Subject" : "ReplyEqpStatusByAsync"
+         "Subject" : "ReplyEqpStatusByAsync"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "EqpStatus" : "PowerOn"        // PowerOn, PowerOff, Reserve, Ready, Run, Idle, Pause, Trouble:통신불가, Maintenance, Waiting
@@ -1634,7 +1647,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "LoadReq"
+         "Subject" : "LoadReq"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1656,7 +1669,7 @@ Normal Sequence Flow
       - 응답 메세지 : No   
    5) 송신메세지
       {
-		 "Subject" : "LoadComp"
+         "Subject" : "LoadComp"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1672,7 +1685,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "UnloadReq"
+         "Subject" : "UnloadReq"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1694,7 +1707,7 @@ Normal Sequence Flow
       - 응답 메세지 : No
    5) 송신메세지
       {
-		 "Subject" : "UnloadComp"
+         "Subject" : "UnloadComp"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
@@ -1710,7 +1723,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "LoadComp4Bottle"
+         "Subject" : "LoadComp4Bottle"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
@@ -1733,7 +1746,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "UnloadComp4Bottle"
+         "Subject" : "UnloadComp4Bottle"
          "EqpGroupID" : 3               // FmNode 추정가능. 생략가능
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "BottleID" : "ID_001",
@@ -1756,7 +1769,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "GetBottleCapacity"
+         "Subject" : "GetBottleCapacity"
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
       }
    6) Function : 반출입기 빈병Zone과 실병Zone의 hole 총 수량
@@ -1778,7 +1791,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestNumberOfSpareHole"
+         "Subject" : "RequestNumberOfSpareHole"
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) 총 수량
    7) Return Message 길이 : 1K 이내
@@ -1799,7 +1812,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestInfoOfSpareHoles"
+         "Subject" : "RequestInfoOfSpareHoles"
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 비어있는 hole(bottle 내려놓을수 있는) hole postion 정보요청
    7) Return Message 길이 : 1K 이내
@@ -1819,7 +1832,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestBottleInfoByHole"
+         "Subject" : "RequestBottleInfoByHole"
       }
    6) Function : 반출입기 빈병Zone과 실병Zone에서 hole별 bottle정보요청
    7) Return Message 길이 : 1K 이내
@@ -1848,7 +1861,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "ReportChangedDoorStatus"
+         "Subject" : "ReportChangedDoorStatus"
          "Door" : "Open" or "Close"
       }
    6) Function : 분석기 Door 열림, 닫힐때 event 보고한다
@@ -1868,7 +1881,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "RequestDoorStatusBySync"
+         "Subject" : "RequestDoorStatusBySync"
       }
    6) Function : 분석기 Door 열림, 닫힘 상태를 sync방식으로 문의한다
    7) Return Message 길이 : 1K 이내
@@ -1889,7 +1902,7 @@ Normal Sequence Flow
       - 응답 메세지 : Yes
    5) 송신메세지
       {
-		 "Subject" : "RequestDoorStatusByAsync"
+         "Subject" : "RequestDoorStatusByAsync"
       }
    6) Function : 분석기 Door 열림, 닫힘 상태를 async방식으로 문의한다
    7) Return Message 길이 : 1K 이내
@@ -1904,7 +1917,7 @@ Normal Sequence Flow
       - 응답 메세지 : No
    5) 송신메세지
       {
-		 "Subject" : "ReplyDoorStatus"
+         "Subject" : "ReplyDoorStatus"
          "Door" : "Open" or "Close" or "Working"
       }
    6) Function : 분석기 Door 열림, 닫힘 상태를 async방식으로 응답한다
@@ -1919,7 +1932,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
          "UsedPosition" : "1011, 1021"
          "NotUsedPosition" : "2021"
       }
@@ -1943,7 +1956,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -1970,7 +1983,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -1997,7 +2010,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2062,7 +2075,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2089,7 +2102,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2116,7 +2129,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2179,7 +2192,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2207,7 +2220,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2233,7 +2246,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2258,7 +2271,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2283,7 +2296,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2308,7 +2321,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2337,7 +2350,7 @@ Normal Sequence Flow
    4) 메세지 송수신방식 : sync
    5) 송신메세지
       {
-		 "Subject" : "SetUsageStatus4Hole"
+         "Subject" : "SetUsageStatus4Hole"
 
    3) 송신메세지
       {
@@ -2370,7 +2383,7 @@ Normal Sequence Flow
          "EqpSeqNo" : 1,                // 정의하지 않으면 1로 추정함. 생략가능
          "TargetPosition" : 1,            // 1 - 반출입기, 2 - 스토커, 3 - 분석기, 4 - 폐기, 10 - 대기위치, 11 - 충전위치
       }
-	  -->
+      -->
       {
          "Subject" : "SR_JobReqExportMoveJobOfMOMA     //생략가능
          "EqpGroupID" : 5,              // 
@@ -2378,53 +2391,66 @@ Normal Sequence Flow
          "JobID" : 1,            // 1 - 반출입기, 2 - 스토커, 3 - 분석기, 4 - 폐기, 10 - 대기위치, 11 - 충전위치
       }
 
-   591-1 GetFmToJob Fm위치, To위치의 Job ID를 가져온다
-   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/SR_GetFmToJob" 
+   591-1 MOMA 이동을 위해 To위치, Fm위치의 Job ID를 가져온다
+   702. MOMA 이동을 위해 To위치, Fm위치의 Job ID를 가져온다
+   1) Node간 통신방식(Topic RO/RR, Service, Action): "/Dispatcher/??_GetToFmMoveJob" 
    2) Fm Node(Publisher, Server) : "Dispatcher"
    3) Tm Node(Subscriber, Client) : "DB_Manager",   
    4) 송신메세지
       {
          "Subject" : "SR_GetFmToJob     //생략가능
-         "FmEqpGroupID" : 1,            // 출발지점 Eqp Group
-         "FmEqpSeqNo" : 1,              // 출발지점 설비호기정보
-         "FmPortName" : "U1",           // 출발지점 Port명
-         "ToEqpGroupID" : 2,            // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
-         "ToEqpSeqNo" : 1,              // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
-         "ToPortName" : "Left",         // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "ToEqpGroupID" : 2,            // 목적지 Eqp Group
+         "ToEqpSeqNo" : 1,              // 목적지 설비호기정보
+         "ToPortName" : "Left",         // 목적지 Port명 생략가능
+         "FmEqpGroupID" : 1,            // 생략가능, 생략되었다면 출발지점 목적지 Code(Job ID)는 구하지 않는다
+         "FmEqpSeqNo" : 1,              // 
+         "FmPortName" : "U1",           // 
       }
    5) Function : 
    6) Return Message 길이 : 1K 이내
-   7) 관련 Stored Procedure : 
+   7) 관련 Stored Procedure : spGetFmToMoveJob
    8) 응답메세지
       {
          "status_code" : 200,
-		 "FmJob" : "0x03",
-		 "ToJob" : "0x01",
+         "ToJob" : "0x01",
+         "FmJob" : "0x03",
          "error_msg" : "None"
       }
 
-   591-2 GetFmToSubJob Fm위치, To위치의 SubJob ID를 가져온다
-   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/SR_GetFmToJob" 
+   591-2 MOMA Bottle이동을 위해 Fm Hole정보, To Hole정보에 대한 SubJob ID를 가져온다
+   703. MOMA Bottle이동을 위해 Fm Hole정보, To Hole정보에 대한 SubJob ID를 가져온다
+   1) Node간 통신방식(Topic RO/RR, Service, Action): "/MOMA/??_JobReqExportGetPutJobOfMOMA" 
    2) Fm Node(Publisher, Server) : "Dispatcher"
    3) Tm Node(Subscriber, Client) : "DB_Manager",   
    4) 송신메세지
       {
-         "Subject" : "SR_GetFmToJob     //생략가능
-         "FmEqpGroupID" : 1,            // 출발지점 Eqp Group
-         "FmEqpSeqNo" : 1,              // 출발지점 설비호기정보
-         "FmPortName" : "U1",           // 출발지점 Port명
-         "ToEqpGroupID" : 2,            // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
-         "ToEqpSeqNo" : 1,              // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
-         "ToPortName" : "Left",         // 생략가능, 생략되었다면 도착지점 정보는 구하지 않는다
+         "Subject" : "JobReqExportGetPutJobOfMOMA",     //생략가능
+         "JobType" : "Get",             // Get Or Put
+         "TgtEqpGroupID" : 1,           // 1 - 반출입기, 2 - 스토커, 3 - 분석기, 4 - 폐기
+         "TotalBottleCount" : 5,        // Bottle의 수량
+         "BottleInfo" : 
+         {
+            "No_1" :
+            {
+                "FmHolePosition" : 0,        // Bottle의 Job Start Hole Position
+                "ToHolePosition" : 0        // Bottle의 Job Target Hole Position
+            },
+            ...
+            "No_5" :
+            {
+                "FmHolePosition" : 0,        // Bottle의 Job Start Hole Position
+                "ToHolePosition" : 0        // Bottle의 Job Target Hole Position
+            }           
+         }       
       }
-   5) Function : 
+   5) Function : spGetFmToMoveJob
    6) Return Message 길이 : 1K 이내
-   7) 관련 Stored Procedure : 
+   7) 관련 Stored Procedure : spJobReqExportGetPutJobOfMOMA
    8) 응답메세지
       {
          "status_code" : 200,
-		 "FmJob" : "0x03",
-		 "ToJob" : "0x01",
+         "FmJob" : "0x03",
+         "ToJob" : "0x01",
          "error_msg" : "None"
       }
 
@@ -2524,7 +2550,28 @@ Normal Sequence Flow
       }
 
 
+==========================================
 
+701. 반출입기 출하시 Bottle 순번정보요청
+   1) Node간 통신방식(Topic RO/RR, Service, Action): Service
+      -  Service Server/Client : "/InOutBottle/??_ReqSeqNoOfBottleInfo"
+   2) Fm Node(Publisher, Server) : "Dispatcher"
+   3) Tm Node(Subscriber, Client) : "DB_Manager",   
+   4) 송신메세지
+      {
+         "Subject" : "ReqTgtBottleInfo",     //생략가능
+         "BottleID" : "Bot_001",             // 
+      }
+   5) Function : spGetFmToMoveJob
+   6) Return Message 길이 : 1K 이내
+   7) 관련 Stored Procedure : spReqSeqNoOfBottleInfo
+   8) 응답메세지
+      {
+         "status_code" : 200,
+         "RequestRealCnt" : 5,
+         "RequestSeqNo" : 1,
+         "error_msg" : "None"
+      }
 
 
 901. 입고요청(LoadReq)
