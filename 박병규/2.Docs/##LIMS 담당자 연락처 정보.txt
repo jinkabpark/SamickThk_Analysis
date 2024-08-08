@@ -1,0 +1,41 @@
+LIMS 담당자 연락처 정보
+1. 삼익 THK
+	1) 시스템솔루션팀 / 이재호 과장
+		TEL : 010-3117-5317
+		E-Mail : jaeho.lee@samickthk.co.kr
+
+	2) 솔루션서비스팀 / 권혁준 사원
+		TEL : 010-3389-6921
+		E-Mail : 123060@samickthk.co.kr
+
+2. 삼성전자
+	1) 인프라설비자동화 / 박희제 프로
+		TEL : 010-2021-8411
+		E-Mail : seony84.park@samsung.com
+		담당업무 : 분석실 무인화 전체
+
+	2) 인프라설비자동화 / 양국필 프로
+		TEL : 010-5607-5187
+		E-Mail : gukpil.yang@samsung.com
+		담당업무 : 분석실 무인화 전체
+
+	3) 평택인프라분석그룹 / 김수현 프로
+		TEL : 010-3074-5426
+		E-Mail : sh86.kim@samsung.com
+		담당업무 : 분석실 무인화 전체 / 분석실 실무팀
+ 
+	4) 평택인프라분석그룹 / 정재연 프로
+		TEL : 010-4785-2703
+		E-Mail : jy10.chung@samsung.com
+		담당업무 : 분석실 무인화 전체 / 분석실 실무팀
+
+3. M2I
+	1) 솔루션팀 / 김윤하 프로
+		TEL : 010-9013-3361
+		E-Mail : yhkim@m2i.co.kr
+
+4. 위너스테크
+	1) 시스템제어 / 백재진 부장
+		TEL : 010-9188-1533
+		E-Mail : gobjj@naver.com 
+		담당업무 : 반출입기, Stocker, 폐기 제어담당
