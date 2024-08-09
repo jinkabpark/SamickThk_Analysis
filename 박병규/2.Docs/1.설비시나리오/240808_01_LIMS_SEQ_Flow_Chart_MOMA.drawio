@@ -1,0 +1,1021 @@
+<mxfile host="Electron" modified="2024-08-09T07:13:26.961Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="E2Qr73D_pReg61uUyFjg" version="24.2.5" type="device">
+  <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
+    <mxGraphModel dx="5630" dy="2947" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="aM9ryv3xv72pqoxQDRHE-5" value="DISP" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="480" y="40" width="100" height="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="aM9ryv3xv72pqoxQDRHE-6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="aM9ryv3xv72pqoxQDRHE-5" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-50" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="200" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-55" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="320" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-56" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="440" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-57" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="680" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-58" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="800" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-207" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="1840" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-211" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="2080" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-212" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="aM9ryv3xv72pqoxQDRHE-5">
+          <mxGeometry x="45" y="1960" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-11" value="DB" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="240" y="40" width="100" height="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-12" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="waDdo1ReHaSD5onR8WHH-11" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-54" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-11">
+          <mxGeometry x="45" y="800" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-206" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-11">
+          <mxGeometry x="45" y="1840" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-13" value="UI" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry y="40" width="100" height="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-14" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="waDdo1ReHaSD5onR8WHH-13" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-51" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-13">
+          <mxGeometry x="45" y="320" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-52" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-13">
+          <mxGeometry x="45" y="680" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-53" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-13">
+          <mxGeometry x="45" y="800" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-204" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-13">
+          <mxGeometry x="45" y="1840" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-205" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-13">
+          <mxGeometry x="45" y="2080" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-15" value="MOMA" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="720" y="40" width="100" height="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-16" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="waDdo1ReHaSD5onR8WHH-15" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-59" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="800" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-60" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="680" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-61" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="440" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-62" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="320" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-63" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="199" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-208" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="1840" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-209" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="1960" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-210" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="45" y="2080" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-17" value="ANAL" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="1440" y="40" width="100" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-18" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="waDdo1ReHaSD5onR8WHH-17" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-19" value="STK" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="1200" y="40" width="100" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-20" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="waDdo1ReHaSD5onR8WHH-19" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-21" value="INOUT" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="960" y="40" width="100" height="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-22" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="waDdo1ReHaSD5onR8WHH-21" vertex="1">
+          <mxGeometry x="45" y="80" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-44" value="DISPO" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="1" vertex="1">
+          <mxGeometry x="1680" y="40" width="100" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="waDdo1ReHaSD5onR8WHH-45" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#FF0000;" parent="waDdo1ReHaSD5onR8WHH-44" vertex="1">
+          <mxGeometry x="45" y="77" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-201" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.68" y="9" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="532" y="139.5" as="sourcePoint" />
+            <mxPoint x="1012" y="139.5" as="targetPoint" />
+            <mxPoint y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-202" value="" style="group" parent="1" vertex="1" connectable="0">
+          <mxGeometry x="-518" y="120" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-203" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="4uOTVYRNMx_pxBl42iO4-202" source="4uOTVYRNMx_pxBl42iO4-204" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-204" value="501. SR_ReqEqpStatusMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" parent="4uOTVYRNMx_pxBl42iO4-202" vertex="1">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-205" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-204" vertex="1">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-206" value="Comment :&amp;nbsp;LIMS에서 MOMA의 상태를 요청" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-204" vertex="1">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-207" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1" source="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1011.75" y="180" as="sourcePoint" />
+            <mxPoint x="532.25" y="180" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-263" value="1. Bottle 적재" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-668" y="100" width="2470" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-264" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="957.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="1197.56" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-265" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="722.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="957.56" y="41.710000000000036" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-215" value="" style="group" parent="4uOTVYRNMx_pxBl42iO4-263" vertex="1" connectable="0">
+          <mxGeometry x="150" y="140" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-216" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="4uOTVYRNMx_pxBl42iO4-215" source="4uOTVYRNMx_pxBl42iO4-217" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-217" value="511. SR_JobReqExportMoveJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" parent="4uOTVYRNMx_pxBl42iO4-215" vertex="1">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-218" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-217" vertex="1">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-219" value="Comment : LIMS에서 MOMA에 Job을 하달 / MOMA Move" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-217" vertex="1">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-220" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.7503" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="160" as="sourcePoint" />
+            <mxPoint x="1679.75" y="160" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-221" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1" source="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1679.75" y="200" as="sourcePoint" />
+            <mxPoint x="1200.25" y="200" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-229" value="" style="group" parent="4uOTVYRNMx_pxBl42iO4-263" vertex="1" connectable="0">
+          <mxGeometry x="150" y="260" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-230" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="4uOTVYRNMx_pxBl42iO4-229" source="4uOTVYRNMx_pxBl42iO4-231" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-231" value="513. SR_RptMoveEQPPositionCompMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" parent="4uOTVYRNMx_pxBl42iO4-229" vertex="1">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-232" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-231" vertex="1">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-233" value="Comment :&amp;nbsp;LIMS에 MOMA의 이동완료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-231" vertex="1">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-234" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" parent="4uOTVYRNMx_pxBl42iO4-263" source="waDdo1ReHaSD5onR8WHH-15" edge="1">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1675" y="280" as="sourcePoint" />
+            <mxPoint x="1200.25" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-235" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="320" as="sourcePoint" />
+            <mxPoint x="1679.75" y="320" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-237" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" parent="4uOTVYRNMx_pxBl42iO4-263" edge="1">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="280" as="sourcePoint" />
+            <mxPoint x="720" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-224" value="" style="group" parent="4uOTVYRNMx_pxBl42iO4-263" vertex="1" connectable="0">
+          <mxGeometry x="150" y="500" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-226" value="MOMA의 시료 반송" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" parent="4uOTVYRNMx_pxBl42iO4-224" vertex="1">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-227" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-226" vertex="1">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-228" value="Comment : MOMA의 시료 반송 동작이다" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="4uOTVYRNMx_pxBl42iO4-226" vertex="1">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4uOTVYRNMx_pxBl42iO4-269" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="4uOTVYRNMx_pxBl42iO4-263" source="4uOTVYRNMx_pxBl42iO4-226" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1435" y="538.8235294117649" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="498" y="539" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-8" value="" style="group" vertex="1" connectable="0" parent="4uOTVYRNMx_pxBl42iO4-263">
+          <mxGeometry x="150" y="740" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-9" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-8" source="yzufltlXHyPaT7wCX_2R-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-10" value="514. SR_RptExportJobEndMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-8">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-11" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-10">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-12" value="Comment :&amp;nbsp;LIMS에 MOMA의 Job 종료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-10">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-13" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263" source="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1679.75" y="760" as="sourcePoint" />
+            <mxPoint x="1200.25" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-14" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="800" as="sourcePoint" />
+            <mxPoint x="1679.75" y="800" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-15" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1195" y="760" as="sourcePoint" />
+            <mxPoint x="960" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-16" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="959.75" y="760" as="sourcePoint" />
+            <mxPoint x="720" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-41" value="" style="group" vertex="1" connectable="0" parent="4uOTVYRNMx_pxBl42iO4-263">
+          <mxGeometry x="150" y="620" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-42" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-41" source="yzufltlXHyPaT7wCX_2R-43">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-43" value="515. SR_RptBottleMoveEqpToMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-41">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-44" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-43">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-45" value="Comment :&amp;nbsp;설비에서 MOMA로 bottle 이동 / 개별보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-43">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-46" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263" source="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1675" y="640" as="sourcePoint" />
+            <mxPoint x="1200.25" y="640" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-47" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="680" as="sourcePoint" />
+            <mxPoint x="1679.75" y="680" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-48" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="4uOTVYRNMx_pxBl42iO4-263">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="640" as="sourcePoint" />
+            <mxPoint x="720" y="640" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-1" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="-518" y="480" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-2" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-1" source="yzufltlXHyPaT7wCX_2R-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-3" value="512. SR_JobReqExportGetPutJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-1">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-4" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-3">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-5" value="Comment :&amp;nbsp;LIMS에서 MOMA에 Job을 하달 / Bottle을 Get, Put" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-3">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-6" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.6818" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="532.25" y="500" as="sourcePoint" />
+            <mxPoint x="1011.75" y="500" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-7" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="waDdo1ReHaSD5onR8WHH-15">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1011.75" y="540" as="sourcePoint" />
+            <mxPoint x="532.25" y="540" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-64" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1000" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-65" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1120" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-66" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1240" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-67" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1360" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-68" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1600" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-69" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="1720" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-70" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="285" y="1000" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-71" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="285" y="1720" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-72" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="1000" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-73" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="1240" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-74" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="1600" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-75" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="1720" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-76" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1000" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-77" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1720" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-78" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1600" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-79" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1360" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-80" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1240" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-81" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="1119" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-84" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="1005" y="1000" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-86" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry x="-0.68" y="9" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="532" y="1019.5" as="sourcePoint" />
+            <mxPoint x="770" y="1020" as="targetPoint" />
+            <mxPoint y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-87" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="-518" y="1000" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-88" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-87" source="yzufltlXHyPaT7wCX_2R-89">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-89" value="501. SR_ReqEqpStatusMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-87">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-90" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-89">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-91" value="Comment :&amp;nbsp;LIMS에서 MOMA의 상태를 요청" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-89">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-92" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="770" y="1060" as="sourcePoint" />
+            <mxPoint x="532.25" y="1060" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-93" value="1. Bottle 하적" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-668" y="980" width="2470" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-94" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="957.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="1197.56" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-95" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="722.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="957.56" y="41.710000000000036" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-96" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="150" y="140" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-97" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-96" source="yzufltlXHyPaT7wCX_2R-98">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-98" value="511. SR_JobReqExportMoveJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-96">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-99" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-98">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-100" value="Comment :&amp;nbsp;LIMS에서 MOMA에 Job을 하달 / MOMA Move" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-98">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-101" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.7503" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="160" as="sourcePoint" />
+            <mxPoint x="1679.75" y="160" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-102" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1679.75" y="200" as="sourcePoint" />
+            <mxPoint x="1200.25" y="200" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-103" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="150" y="260" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-104" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-103" source="yzufltlXHyPaT7wCX_2R-105">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-105" value="513. SR_RptMoveEQPPositionCompMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-103">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-106" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-105">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-107" value="Comment :&amp;nbsp;LIMS에 MOMA의 이동완료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-105">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-108" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1675" y="280" as="sourcePoint" />
+            <mxPoint x="1200.25" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-109" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="320" as="sourcePoint" />
+            <mxPoint x="1679.75" y="320" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-110" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="280" as="sourcePoint" />
+            <mxPoint x="720" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-111" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="150" y="500" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-112" value="MOMA의 시료 반송" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-111">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-113" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-112">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-114" value="Comment : MOMA의 시료 반송 동작이다" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-112">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-115" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93" source="yzufltlXHyPaT7wCX_2R-112">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1435" y="538.8235294117649" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="498" y="539" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-116" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="150" y="740" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-117" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-116" source="yzufltlXHyPaT7wCX_2R-118">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-118" value="514. SR_RptExportJobEndMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-116">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-119" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-118">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-120" value="Comment :&amp;nbsp;LIMS에 MOMA의 Job 종료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-118">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-121" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1679.75" y="760" as="sourcePoint" />
+            <mxPoint x="1200.25" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-122" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="800" as="sourcePoint" />
+            <mxPoint x="1679.75" y="800" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-123" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1195" y="760" as="sourcePoint" />
+            <mxPoint x="960" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-124" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="959.75" y="760" as="sourcePoint" />
+            <mxPoint x="720" y="760" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-125" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="150" y="620" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-126" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-125" source="yzufltlXHyPaT7wCX_2R-127">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-127" value="516. SR_RptBottleMoveMOMAToEqp" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-125">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-128" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-127">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-129" value="Comment : MOMA에서 설비로&amp;nbsp;&amp;nbsp;bottle 이동 / 개별보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-127">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-130" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.667" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1675" y="640" as="sourcePoint" />
+            <mxPoint x="1200.25" y="640" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-131" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.6818" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="680" as="sourcePoint" />
+            <mxPoint x="1679.75" y="680" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-132" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-93">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="640" as="sourcePoint" />
+            <mxPoint x="720" y="640" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-133" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="-518" y="1360" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-134" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-133" source="yzufltlXHyPaT7wCX_2R-135">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-135" value="512. SR_JobReqExportGetPutJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-133">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-136" value="S_FLOW NO. :&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-135">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-137" value="Comment :&amp;nbsp;LIMS에서 MOMA에 Job을 하달 / Bottle을 Get, Put" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-135">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-138" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry x="-0.6818" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="532.25" y="1380" as="sourcePoint" />
+            <mxPoint x="770" y="1380" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-139" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry x="-0.667" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="770" y="1420" as="sourcePoint" />
+            <mxPoint x="532.25" y="1420" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-140" value="3. 대기위치" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-668" y="1860" width="2470" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-180" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6808" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200" y="39.5" as="sourcePoint" />
+            <mxPoint x="1438" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-181" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="150" y="20" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-182" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-181" source="yzufltlXHyPaT7wCX_2R-183">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-183" value="501. SR_ReqEqpStatusMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-181">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-184" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-183">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-185" value="Comment : LIMS에서 MOMA의 상태를 요청" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-183">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-186" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6635" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="80" as="sourcePoint" />
+            <mxPoint x="1200.25" y="80" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-187" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="957.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="1197.56" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-188" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="722.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="957.56" y="41.710000000000036" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-189" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="150" y="140" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-190" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-189" source="yzufltlXHyPaT7wCX_2R-191">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-191" value="511. SR_JobReqExportMoveJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-189">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-192" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-191">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-193" value="Comment : LIMS에서 MOMA에 Job을 하달 / MOMA Move" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-191">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-194" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6824" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="160" as="sourcePoint" />
+            <mxPoint x="1438" y="160" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-195" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6635" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="200" as="sourcePoint" />
+            <mxPoint x="1200.25" y="200" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-196" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="150" y="260" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-197" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-196" source="yzufltlXHyPaT7wCX_2R-198">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-198" value="514. SR_RptExportJobEndMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-196">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-199" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-198">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-200" value="Comment :&amp;nbsp;LIMS에 MOMA의 Job 종료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-198">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-201" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6635" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="280" as="sourcePoint" />
+            <mxPoint x="1200.25" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-202" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.6824" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="320" as="sourcePoint" />
+            <mxPoint x="1438" y="320" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-203" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-140">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="280" as="sourcePoint" />
+            <mxPoint x="720" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-213" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="2280" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-214" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="2520" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-215" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="525" y="2400" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-216" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="285" y="2280" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-217" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="2280" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-218" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="45" y="2520" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-219" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="2280" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-220" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="2400" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-221" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="765" y="2520" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-222" value="3. 충전위치" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-668" y="2260" width="2470" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-223" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6808" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200" y="39.5" as="sourcePoint" />
+            <mxPoint x="1438" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-224" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="150" y="20" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-225" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-224" source="yzufltlXHyPaT7wCX_2R-226">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-226" value="501. SR_ReqEqpStatusMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-224">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-227" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-226">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-228" value="Comment : LIMS에서 MOMA의 상태를 요청" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-226">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-229" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6635" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="80" as="sourcePoint" />
+            <mxPoint x="1200.25" y="80" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-230" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="957.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="1197.56" y="40" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-231" value="" style="endArrow=none;html=1;rounded=0;dashed=1;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.5844" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="722.44" y="41.710000000000036" as="sourcePoint" />
+            <mxPoint x="957.56" y="41.710000000000036" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-232" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="150" y="140" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-233" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-232" source="yzufltlXHyPaT7wCX_2R-234">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-234" value="511. SR_JobReqExportMoveJobOfMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-232">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-235" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-234">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-236" value="Comment : LIMS에서 MOMA에 Job을 하달 / MOMA Move" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-234">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-237" value="REQ / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6824" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="160" as="sourcePoint" />
+            <mxPoint x="1438" y="160" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-238" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6635" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="200" as="sourcePoint" />
+            <mxPoint x="1200.25" y="200" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-239" value="" style="group" vertex="1" connectable="0" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="150" y="260" width="480" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-240" value="" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-239" source="yzufltlXHyPaT7wCX_2R-241">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="40" as="targetPoint" />
+            <Array as="points" />
+            <mxPoint x="360" y="53" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-241" value="514. SR_RptExportJobEndMOMA" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-239">
+          <mxGeometry width="348" height="78" as="geometry">
+            <mxRectangle x="-290" y="87" width="60" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-242" value="S_FLOW NO. : -" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-241">
+          <mxGeometry y="26" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-243" value="Comment :&amp;nbsp;LIMS에 MOMA의 Job 종료를 보고" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="yzufltlXHyPaT7wCX_2R-241">
+          <mxGeometry y="52" width="348" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-244" value="RPT / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6635" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1438" y="280" as="sourcePoint" />
+            <mxPoint x="1200.25" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-245" value="RSP / Sync" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.6824" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200.25" y="320" as="sourcePoint" />
+            <mxPoint x="1438" y="320" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yzufltlXHyPaT7wCX_2R-246" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="yzufltlXHyPaT7wCX_2R-222">
+          <mxGeometry x="-0.5848" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1199.4999999999995" y="280" as="sourcePoint" />
+            <mxPoint x="720" y="280" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
